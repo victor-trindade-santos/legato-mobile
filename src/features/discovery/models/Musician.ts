@@ -1,0 +1,13 @@
+export interface Musician {
+  id: number;
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  distance: number;
+  age: number;
+  gender: 'Masculino' | 'Feminino' | 'Outro';
+  skills: string[];
+  musicGenres: string[];
+  bio?: string;
+  location?: string;
+}
