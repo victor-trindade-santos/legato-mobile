@@ -28,6 +28,18 @@ export default function AppNavigator() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        // DEV: bypass de autenticação para visualizar telas sem backend
+        if (Config.DEV_BYPASS_AUTH) {
+          setAuth('dev-token', {
+            id: 1,
+            username: 'dev_user',
+            displayName: 'Dev User',
+            email: 'dev@legato.com',
+            role: 'USER',
+          });
+          return;
+        }
+
         const token = await SecureStore.getItemAsync(Config.TOKEN_KEY);
         if (token && isTokenValid(token)) {
           // Token válido — restaura sessão
