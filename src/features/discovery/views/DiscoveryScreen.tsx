@@ -1,15 +1,12 @@
 /**
  * DiscoveryScreen — View (Descoberta)
  *
- * Tela principal de descoberta de músicos com swipe de cards.
- * Toda a lógica está em useDiscoveryViewModel.
- *
  * Layout via AppTemplate (noPadding=true — cards são full-bleed).
- * Header compartilhado via AppTemplate → AppHeader.
+ * Card centralizado verticalmente com margens superior e inferior.
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -19,6 +16,9 @@ import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
 import { FilterModal } from './FilterModal';
 import { HistoryModal } from './HistoryModal';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const CARD_HEIGHT = SCREEN_HEIGHT * 0.60;
 
 export default function DiscoveryScreen() {
   const {
@@ -39,7 +39,7 @@ export default function DiscoveryScreen() {
   return (
     <AppTemplate noPadding>
 
-      {/* ── Controles rápidos ────────────────────────── */}
+      {/* ── Controles rápidos ─────────────────────────── */}
       <View style={styles.controls}>
         <TouchableOpacity style={styles.controlBtn} onPress={() => setIsFilterModalOpen(true)}>
           <Ionicons name="options-outline" size={14} color={Colors.white} />
@@ -51,50 +51,54 @@ export default function DiscoveryScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* ── Stack de cards ───────────────────────────── */}
-      <View style={styles.cardArea}>
-        {cards.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
-            <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
-              Não há mais músicos disponíveis
-            </LegatoText>
-            <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
-              Tente ajustar os filtros ou volte mais tarde.
-            </LegatoText>
-          </View>
-        ) : (
-          cards.slice(0, 3).reverse().map((musician, index) => (
-            <View
-              key={musician.id}
-              style={[
-                styles.cardWrapper,
-                {
-                  zIndex: index,
-                  transform: [{ scale: 1 - (2 - index) * 0.03 }],
-                  top: (2 - index) * 6,
-                },
-              ]}
-            >
-              <MusicianCard
-                musician={musician}
-                isTop={index === 2}
-                onSwipeLeft={() => handleSwipe(musician, 'dislike')}
-                onSwipeRight={() => handleSwipe(musician, 'like')}
-              />
+      {/* ── Área central (centraliza o card verticalmente) ── */}
+      <View style={styles.centerArea}>
+
+        {/* Stack de cards */}
+        <View style={styles.cardArea}>
+          {cards.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
+              <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
+                Não há mais músicos disponíveis
+              </LegatoText>
+              <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
+                Tente ajustar os filtros ou volte mais tarde.
+              </LegatoText>
             </View>
-          ))
+          ) : (
+            cards.slice(0, 3).reverse().map((musician, index) => (
+              <View
+                key={musician.id}
+                style={[
+                  styles.cardWrapper,
+                  {
+                    zIndex: index,
+                    transform: [{ scale: 1 - (2 - index) * 0.03 }],
+                    top: (2 - index) * 6,
+                  },
+                ]}
+              >
+                <MusicianCard
+                  musician={musician}
+                  isTop={index === 2}
+                  onSwipeLeft={() => handleSwipe(musician, 'dislike')}
+                  onSwipeRight={() => handleSwipe(musician, 'like')}
+                />
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Hint */}
+        {cards.length > 0 && (
+          <LegatoText variant="caption" color={Colors.textMuted} align="center" style={styles.hint}>
+            Arraste o card para a esquerda para ignorar, ou para a direita para conversar
+          </LegatoText>
         )}
       </View>
 
-      {/* ── Hint ─────────────────────────────────────── */}
-      {cards.length > 0 && (
-        <LegatoText variant="caption" color={Colors.textMuted} align="center" style={styles.hint}>
-          Arraste o card para a esquerda para ignorar, ou para a direita para conversar
-        </LegatoText>
-      )}
-
-      {/* ── Modais ───────────────────────────────────── */}
+      {/* ── Modais ────────────────────────────────────── */}
       <FilterModal
         visible={isFilterModalOpen}
         filters={filters}
@@ -111,7 +115,6 @@ export default function DiscoveryScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Controles
   controls: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -134,11 +137,17 @@ const styles = StyleSheet.create({
     fontWeight: Typography.FontWeight.semiBold,
   },
 
-  // Card stack
-  cardArea: {
+  // Container que centraliza verticalmente
+  centerArea: {
     flex: 1,
+    justifyContent: 'center',
+    paddingBottom: Spacing.md,
+  },
+
+  // Card com altura fixa e margens laterais
+  cardArea: {
+    height: CARD_HEIGHT,
     marginHorizontal: Spacing.screenPaddingH,
-    marginBottom: Spacing.sm,
   },
   cardWrapper: {
     position: 'absolute',
@@ -155,10 +164,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
 
-  // Hint
   hint: {
     paddingHorizontal: Spacing.screenPaddingH,
-    paddingBottom: Spacing.md,
+    paddingTop: Spacing.sm,
     textAlign: 'center',
   },
 });

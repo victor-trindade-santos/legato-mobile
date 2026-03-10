@@ -1,8 +1,9 @@
 /**
  * Mock de músicos para desenvolvimento local.
- * Usado pelo discoveryService quando DEV_USE_MOCK=true (ver constants/config.ts).
+ * Usado pelo discoveryService quando DEV_USE_MOCK=true.
  *
- * Fotos: randomuser.me — retratos estáveis, não requerem auth.
+ * Fotos: randomuser.me — retratos estáveis, sem auth.
+ * Cada músico tem até 4 fotos simulando um perfil real.
  */
 
 import type { Musician } from '../models/Musician';
@@ -15,6 +16,11 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 27,
     gender: 'Masculino',
     avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/men/32.jpg',
+      'https://randomuser.me/api/portraits/men/33.jpg',
+      'https://randomuser.me/api/portraits/men/34.jpg',
+    ],
     distance: 3,
     skills: ['Guitarrista', 'Compositor'],
     musicGenres: ['Rock', 'Blues'],
@@ -28,6 +34,12 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 24,
     gender: 'Feminino',
     avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/women/44.jpg',
+      'https://randomuser.me/api/portraits/women/45.jpg',
+      'https://randomuser.me/api/portraits/women/46.jpg',
+      'https://randomuser.me/api/portraits/women/47.jpg',
+    ],
     distance: 7,
     skills: ['Voz / Canto', 'Piano'],
     musicGenres: ['MPB', 'Jazz', 'Bossa Nova'],
@@ -41,6 +53,10 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 22,
     gender: 'Masculino',
     avatarUrl: 'https://randomuser.me/api/portraits/men/55.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/men/55.jpg',
+      'https://randomuser.me/api/portraits/men/56.jpg',
+    ],
     distance: 12,
     skills: ['Produção Musical', 'DJ'],
     musicGenres: ['Eletrônico', 'House', 'Lo-fi'],
@@ -54,6 +70,11 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 26,
     gender: 'Feminino',
     avatarUrl: 'https://randomuser.me/api/portraits/women/68.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/women/68.jpg',
+      'https://randomuser.me/api/portraits/women/69.jpg',
+      'https://randomuser.me/api/portraits/women/70.jpg',
+    ],
     distance: 5,
     skills: ['Baixo', 'Composição'],
     musicGenres: ['Funk', 'R&B / Soul', 'Hip-Hop'],
@@ -67,6 +88,12 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 30,
     gender: 'Masculino',
     avatarUrl: 'https://randomuser.me/api/portraits/men/14.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/men/14.jpg',
+      'https://randomuser.me/api/portraits/men/15.jpg',
+      'https://randomuser.me/api/portraits/men/16.jpg',
+      'https://randomuser.me/api/portraits/men/17.jpg',
+    ],
     distance: 18,
     skills: ['Bateria'],
     musicGenres: ['Metal', 'Rock', 'Punk'],
@@ -80,6 +107,10 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 23,
     gender: 'Feminino',
     avatarUrl: 'https://randomuser.me/api/portraits/women/22.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/women/22.jpg',
+      'https://randomuser.me/api/portraits/women/23.jpg',
+    ],
     distance: 9,
     skills: ['Violino', 'Arranjo'],
     musicGenres: ['Clássico', 'Indie', 'MPB'],
@@ -93,6 +124,11 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 29,
     gender: 'Masculino',
     avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/men/75.jpg',
+      'https://randomuser.me/api/portraits/men/76.jpg',
+      'https://randomuser.me/api/portraits/men/77.jpg',
+    ],
     distance: 2,
     skills: ['Teclado', 'Composição', 'Arranjo'],
     musicGenres: ['Gospel', 'Pop', 'R&B / Soul'],
@@ -106,6 +142,12 @@ export const MOCK_MUSICIANS: Musician[] = [
     age: 21,
     gender: 'Feminino',
     avatarUrl: 'https://randomuser.me/api/portraits/women/90.jpg',
+    photos: [
+      'https://randomuser.me/api/portraits/women/90.jpg',
+      'https://randomuser.me/api/portraits/women/91.jpg',
+      'https://randomuser.me/api/portraits/women/92.jpg',
+      'https://randomuser.me/api/portraits/women/93.jpg',
+    ],
     distance: 15,
     skills: ['Violão', 'Voz / Canto'],
     musicGenres: ['Sertanejo', 'Pop', 'MPB'],

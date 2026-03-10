@@ -1,16 +1,19 @@
 /**
  * MusicianCard — Molecule
- * Card de músico para a tela de Descoberta.
  *
- * Quando isTop=true: ativa PanGesture (swipe) via Gesture Handler v2 + Reanimated v3.
+ * Quando isTop=true: ativa PanGesture (swipe like/dislike) via GH v2 + Reanimated v3.
  * Quando isTop=false: renderiza estático (card de fundo no stack).
  *
- * Exibe: foto, indicadores de carrossel, badge de distância,
- *        nome/idade, tags de skill, CTA, overlays de like/dislike.
+ * Carrossel de fotos:
+ *  - Até 4 fotos (photos[] do model, com fallback para avatarUrl)
+ *  - Toque na metade ESQUERDA → foto anterior
+ *  - Toque na metade DIREITA  → próxima foto
+ *  - Indicadores de barra no topo refletem o índice atual
+ *  - .minDistance(10) no PanGesture evita conflito com os toques de navegação
  */
 
-import React from 'react';
-import { View, StyleSheet, ImageBackground, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ImageBackground, Dimensions, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -30,13 +33,28 @@ import type { MusicianCardProps } from './MusicianCard.types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.35;
+const MAX_PHOTOS = 4;
 
 export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: MusicianCardProps) {
+  // ── Carrossel ─────────────────────────────────────────────────────────
+  const photos = (musician.photos?.slice(0, MAX_PHOTOS) ?? []).filter(Boolean);
+  if (musician.avatarUrl && !photos.includes(musician.avatarUrl)) {
+    photos.unshift(musician.avatarUrl);
+  }
+  const photoList = photos.slice(0, MAX_PHOTOS);
+  const totalPhotos = photoList.length;
+
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const goNext = () => setPhotoIndex(i => Math.min(i + 1, totalPhotos - 1));
+  const goPrev = () => setPhotoIndex(i => Math.max(i - 1, 0));
+
+  // ── Swipe (like / dislike) ────────────────────────────────────────────
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
 
   const gesture = Gesture.Pan()
+    .minDistance(10)
     .onUpdate((e) => {
       translateX.value = e.translationX;
       translateY.value = e.translationY;
@@ -79,12 +97,15 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: Mus
     opacity: interpolate(translateX.value, [-SWIPE_THRESHOLD, 0], [1, 0], Extrapolation.CLAMP),
   }));
 
+  const currentPhoto = photoList[photoIndex];
+
+  // ── Render ────────────────────────────────────────────────────────────
   const cardContent = (
     <View style={styles.card}>
       {/* Foto de fundo */}
-      {musician.avatarUrl ? (
+      {currentPhoto ? (
         <ImageBackground
-          source={{ uri: musician.avatarUrl }}
+          source={{ uri: currentPhoto }}
           style={StyleSheet.absoluteFill}
           imageStyle={{ borderRadius: BorderRadius.xl }}
         />
@@ -94,10 +115,18 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: Mus
         </View>
       )}
 
-      {/* Indicadores de carrossel */}
+      {/* Zonas de toque (navegação de fotos) — só quando há mais de 1 */}
+      {totalPhotos > 1 && (
+        <>
+          <TouchableOpacity style={styles.tapLeft}  activeOpacity={1} onPress={goPrev} />
+          <TouchableOpacity style={styles.tapRight} activeOpacity={1} onPress={goNext} />
+        </>
+      )}
+
+      {/* Indicadores */}
       <View style={styles.indicators}>
-        {[0, 1, 2].map((i) => (
-          <View key={i} style={[styles.indicator, i === 0 && styles.indicatorActive]} />
+        {photoList.map((_, i) => (
+          <View key={i} style={[styles.indicator, i === photoIndex && styles.indicatorActive]} />
         ))}
       </View>
 
@@ -106,10 +135,11 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: Mus
         <LegatoText style={styles.distanceText}>{formatDistance(musician.distance)}</LegatoText>
       </View>
 
-      {/* Gradiente + info (rodapé) */}
+      {/* Gradiente + info */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.90)']}
         style={styles.gradient}
+        pointerEvents="none"
       >
         <LegatoText variant="subtitle" color={Colors.white} style={styles.name}>
           {musician.displayName} - {musician.age}
@@ -124,12 +154,12 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: Mus
         </LegatoText>
       </LinearGradient>
 
-      {/* Overlay MATCH (swipe direita) */}
+      {/* Overlay MATCH */}
       <Animated.View style={[styles.overlayLike, likeOverlayStyle]} pointerEvents="none">
         <LegatoText style={styles.overlayLikeLabel}>MATCH</LegatoText>
       </Animated.View>
 
-      {/* Overlay PASSA (swipe esquerda) */}
+      {/* Overlay PASSA */}
       <Animated.View style={[styles.overlayDislike, dislikeOverlayStyle]} pointerEvents="none">
         <LegatoText style={styles.overlayDislikeLabel}>PASSA</LegatoText>
       </Animated.View>
@@ -162,6 +192,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.xl,
   },
+
+  // Zonas de toque para navegação de foto
+  tapLeft: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '45%',
+    height: '75%',
+    zIndex: 5,
+  },
+  tapRight: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '45%',
+    height: '75%',
+    zIndex: 5,
+  },
+
+  // Indicadores de carrossel
   indicators: {
     position: 'absolute',
     top: Spacing.sm,
@@ -180,6 +230,8 @@ const styles = StyleSheet.create({
   indicatorActive: {
     backgroundColor: Colors.white,
   },
+
+  // Badge de distância
   distanceBadge: {
     position: 'absolute',
     top: Spacing.lg,
@@ -195,6 +247,8 @@ const styles = StyleSheet.create({
     fontSize: Typography.FontSize.xs,
     fontWeight: Typography.FontWeight.semiBold,
   },
+
+  // Gradiente rodapé
   gradient: {
     position: 'absolute',
     left: 0,
@@ -204,10 +258,9 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xxl,
     paddingBottom: Spacing.lg,
     gap: Spacing.xs,
+    zIndex: 6,
   },
-  name: {
-    marginBottom: Spacing.xxs,
-  },
+  name: { marginBottom: Spacing.xxs },
   tags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -219,6 +272,8 @@ const styles = StyleSheet.create({
     fontSize: Typography.FontSize.xxs,
     fontStyle: 'italic',
   },
+
+  // Swipe overlays
   overlayLike: {
     position: 'absolute',
     top: Spacing.xxl,

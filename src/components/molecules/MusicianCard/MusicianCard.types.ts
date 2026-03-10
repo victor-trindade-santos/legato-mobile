@@ -10,6 +10,7 @@ export interface MusicianCardData {
   bio?: string;
   gender?: string;
   location?: string;
+  photos?: string[];   // até 4 fotos; primeira é a principal
 }
 
 export interface MusicianCardProps {
