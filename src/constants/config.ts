@@ -14,4 +14,10 @@ export const Config = {
    * Lembre de voltar para false antes de commitar.
    */
   DEV_BYPASS_AUTH: true,
+
+  /**
+   * DEV: define true para usar dados mock na tela de Descoberta (sem backend).
+   * Lembre de voltar para false antes de commitar.
+   */
+  DEV_USE_MOCK: true,
 } as const;
