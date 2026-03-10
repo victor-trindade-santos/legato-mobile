@@ -4,20 +4,18 @@
  * Tela principal de descoberta de músicos com swipe de cards.
  * Toda a lógica está em useDiscoveryViewModel.
  *
- * Layout:
- *   Header   → logo Legato + ícones (busca, sino, engrenagem)
- *   Controles → botões pill "Filtrar" e "Histórico"
- *   Cards    → stack de MusicianCards com swipe
- *   Hint     → instrução de swipe na base
+ * Layout via AppTemplate (noPadding=true — cards são full-bleed).
+ * Header compartilhado via AppTemplate → AppHeader.
  */
 
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
-import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { MusicianCard } from '@/components/molecules/MusicianCard/MusicianCard';
+import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
 import { FilterModal } from './FilterModal';
 import { HistoryModal } from './HistoryModal';
@@ -39,23 +37,7 @@ export default function DiscoveryScreen() {
   if (isLoading) return <Spinner fullScreen />;
 
   return (
-    <SafeAreaView style={styles.container}>
-
-      {/* ── Header ──────────────────────────────────── */}
-      <View style={styles.header}>
-        <Text style={styles.logo}>Legato</Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Ionicons name="search-outline" size={Spacing.iconLg} color={Colors.white} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Ionicons name="notifications-outline" size={Spacing.iconLg} color={Colors.white} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Ionicons name="settings-outline" size={Spacing.iconLg} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <AppTemplate noPadding>
 
       {/* ── Controles rápidos ────────────────────────── */}
       <View style={styles.controls}>
@@ -124,42 +106,11 @@ export default function DiscoveryScreen() {
         history={history}
         onClose={() => setIsHistoryModalOpen(false)}
       />
-    </SafeAreaView>
+    </AppTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundDark,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.screenPaddingH,
-    paddingVertical: Spacing.sm,
-  },
-  logo: {
-    color: Colors.primaryDark,
-    fontSize: Typography.FontSize.xl,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-  },
-  iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   // Controles
   controls: {
     flexDirection: 'row',
