@@ -1,6 +1,6 @@
 export interface MusicianCardData {
   id: number;
-  name: string;
+  username?: string;
   displayName: string;
   avatarUrl?: string;
   distance: number;        // km
@@ -9,11 +9,12 @@ export interface MusicianCardData {
   musicGenres: string[];
   bio?: string;
   gender?: string;
+  location?: string;
 }
 
 export interface MusicianCardProps {
   musician: MusicianCardData;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
-  isTop?: boolean;         // Card no topo do stack
+  isTop?: boolean;         // Card no topo do stack — ativa gestos de swipe
 }
