@@ -16,7 +16,8 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing } from '@/theme';
 import { AppHeader } from '@/components/molecules/AppHeader/AppHeader';
 import type { AppHeaderProps } from '@/components/molecules/AppHeader/AppHeader.types';

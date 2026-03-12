@@ -4,7 +4,8 @@
  * Referência: frontend/src/app/(main)/colaborations/page.tsx
  */
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
 export default function CollaborationsScreen() {

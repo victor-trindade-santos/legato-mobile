@@ -14,11 +14,11 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
+import { Icon } from '@/components/atoms/Icon/Icon';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
-import { Colors, Spacing, BorderRadius } from '@/theme';
+import { Colors, Spacing } from '@/theme';
 import type { AuthStackParamList } from '@/navigation/types';
 
 type Nav = StackNavigationProp<AuthStackParamList, 'Splash'>;
@@ -30,20 +30,21 @@ export default function SplashScreen() {
     <AuthTemplate variant="splash">
       {/* Logo */}
       <View style={styles.logoContainer}>
-        <View style={styles.logoIcon}>
-          <Ionicons name="musical-note" size={40} color={Colors.white} />
-        </View>
-        <LegatoText variant="title" color={Colors.white} align="center" style={styles.logoText}>
-          Legato
-        </LegatoText>
+        <Icon
+          variant="image"
+          source={require('@/assets/icons/LETATO_ICON_VERTICAL.svg')}
+          width={Spacing.logoMd}
+          aspectRatio={0.6}
+          resizeMode="contain"
+        />
       </View>
 
       {/* Tagline */}
       <View style={styles.tagline}>
-        <LegatoText variant="subtitle" color={Colors.white} align="center" style={styles.headline}>
+        <LegatoText variant="displayTitle" color={Colors.white} align="center" style={styles.headline}>
           Conecte-se com músicos em todos os lugares
         </LegatoText>
-        <LegatoText variant="bodySmall" color={Colors.textSecondaryDark} align="center">
+        <LegatoText variant="bodySmall" color={Colors.white} align="center">
           Descubra talentos, colabore em projetos e faça sua música ressoar no mundo.
         </LegatoText>
       </View>
@@ -78,18 +79,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginBottom: Spacing.xxl,
-  },
-  logoIcon: {
-    width: 70,
-    height: 80,
-    borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  logoText: {
-    letterSpacing: 1,
   },
   tagline: {
     alignItems: 'center',

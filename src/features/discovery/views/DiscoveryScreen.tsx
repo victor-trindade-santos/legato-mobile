@@ -6,13 +6,17 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '@/navigation/types';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
-import { LegatoText } from '@/components/atoms/Text/Text';
+import { Button } from '@/components/atoms/Button/Button';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
+import { LegatoText } from '@/components/atoms/Text/Text';
 import { MusicianCard } from '@/components/molecules/MusicianCard/MusicianCard';
-import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { Colors, Spacing, BorderRadius } from '@/theme';
 import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
 import { FilterModal } from './FilterModal';
 import { HistoryModal } from './HistoryModal';
@@ -20,7 +24,10 @@ import { HistoryModal } from './HistoryModal';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.60;
 
+type DiscoveryNav = StackNavigationProp<RootStackParamList>;
+
 export default function DiscoveryScreen() {
+  const navigation = useNavigation<DiscoveryNav>();
   const {
     cards,
     history,
@@ -41,14 +48,22 @@ export default function DiscoveryScreen() {
 
       {/* ── Controles rápidos ─────────────────────────── */}
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.controlBtn} onPress={() => setIsFilterModalOpen(true)}>
-          <Ionicons name="options-outline" size={14} color={Colors.white} />
-          <LegatoText style={styles.controlLabel}>Filtrar</LegatoText>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.controlBtn} onPress={() => setIsHistoryModalOpen(true)}>
-          <Ionicons name="time-outline" size={14} color={Colors.white} />
-          <LegatoText style={styles.controlLabel}>Histórico</LegatoText>
-        </TouchableOpacity>
+        <Button
+          label="Filtrar"
+          variant="primary"
+          size="sm"
+          style={styles.controlBtn}
+          leftIcon={<Ionicons name="options-outline" size={14} color={Colors.white} />}
+          onPress={() => setIsFilterModalOpen(true)}
+        />
+        <Button
+          label="Histórico"
+          variant="primary"
+          size="sm"
+          style={styles.controlBtn}
+          leftIcon={<Ionicons name="time-outline" size={14} color={Colors.white} />}
+          onPress={() => setIsHistoryModalOpen(true)}
+        />
       </View>
 
       {/* ── Área central (centraliza o card verticalmente) ── */}
@@ -84,6 +99,10 @@ export default function DiscoveryScreen() {
                   isTop={index === 2}
                   onSwipeLeft={() => handleSwipe(musician, 'dislike')}
                   onSwipeRight={() => handleSwipe(musician, 'like')}
+                  onSwipeDown={index === 2 ? () => navigation.navigate('MusicianProfile', {
+                    musicianId: musician.id,
+                    displayName: musician.displayName,
+                  }) : undefined}
                 />
               </View>
             ))
@@ -123,18 +142,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
   },
   controlBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs + 2,
     borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary,
-  },
-  controlLabel: {
-    color: Colors.white,
-    fontSize: Typography.FontSize.xs,
-    fontWeight: Typography.FontWeight.semiBold,
   },
 
   // Container que centraliza verticalmente

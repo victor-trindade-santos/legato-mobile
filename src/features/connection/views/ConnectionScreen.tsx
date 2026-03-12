@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';

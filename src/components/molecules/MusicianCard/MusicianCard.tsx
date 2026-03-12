@@ -10,6 +10,10 @@
  *  - Toque na metade DIREITA  → próxima foto
  *  - Indicadores de barra no topo refletem o índice atual
  *  - .minDistance(10) no PanGesture evita conflito com os toques de navegação
+ *
+ * Swipe para baixo:
+ *  - translationY > SWIPE_DOWN_THRESHOLD E movimento mais vertical que horizontal
+ *  - Anima o card para fora e chama onSwipeDown (navega para MusicianProfile modal)
  */
 
 import React, { useState } from 'react';
@@ -31,11 +35,12 @@ import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { formatDistance } from '@/utils/formatters';
 import type { MusicianCardProps } from './MusicianCard.types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.35;
+const SWIPE_DOWN_THRESHOLD = SCREEN_HEIGHT * 0.18;
 const MAX_PHOTOS = 4;
 
-export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: MusicianCardProps) {
+export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight, onSwipeDown }: MusicianCardProps) {
   // ── Carrossel ─────────────────────────────────────────────────────────
   const photos = (musician.photos?.slice(0, MAX_PHOTOS) ?? []).filter(Boolean);
   if (musician.avatarUrl && !photos.includes(musician.avatarUrl)) {
@@ -66,7 +71,17 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight }: Mus
       );
     })
     .onEnd((e) => {
-      if (e.translationX > SWIPE_THRESHOLD) {
+      const isDown =
+        e.translationY > SWIPE_DOWN_THRESHOLD &&
+        Math.abs(e.translationY) > Math.abs(e.translationX);
+
+      if (isDown) {
+        // Swipe-down é "ver mais", não descartar — reseta o card e navega
+        translateX.value = withSpring(0);
+        translateY.value = withSpring(0);
+        rotate.value = withSpring(0);
+        if (onSwipeDown) runOnJS(onSwipeDown)();
+      } else if (e.translationX > SWIPE_THRESHOLD) {
         translateX.value = withSpring(SCREEN_WIDTH * 1.5, {}, () => {
           if (onSwipeRight) runOnJS(onSwipeRight)();
         });

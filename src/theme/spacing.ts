@@ -42,6 +42,14 @@ export const Spacing = {
   iconMd: 20,
   iconLg: 24,
   iconXl: 32,
+  iconXxl: 48,
+
+  // Logos e assets de marca
+  logoSm: 80,
+  logoMd: 120,
+  logoLg: 160,
+  logoXl: 200,
+  logoXxl:240
 } as const;
 
 export type SpacingKey = keyof typeof Spacing;

@@ -17,5 +17,6 @@ export interface MusicianCardProps {
   musician: MusicianCardData;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
-  isTop?: boolean;         // Card no topo do stack — ativa gestos de swipe
+  onSwipeDown?: () => void;  // Abre perfil completo do músico
+  isTop?: boolean;           // Card no topo do stack — ativa gestos de swipe
 }
