@@ -33,4 +33,5 @@ export type ChatStackParamList = {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  MusicianProfile: { musicianId: number; displayName: string };
 };

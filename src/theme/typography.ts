@@ -25,7 +25,7 @@ export const FontSize = {
   lg: 18,   // Large (subtítulos, destaques)            — web: font-size-lg 20px
   xl: 22,   // Extra large (títulos de seção)           — web: font-size-xl 28px
   xxl: 28,  // Extra extra large (títulos de tela)      — web: font-size-xxl 36px
-  display: 34, // Display (splash, logo)
+  display: 30, // Display (splash, logo)
 } as const;
 
 export const FontWeight = {
@@ -54,8 +54,9 @@ export const TextStyles = {
   // Títulos
   displayTitle: {
     fontSize: FontSize.display,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.normal,
     lineHeight: FontSize.display * LineHeight.tight,
+    LetterSpacing: LetterSpacing.tight,
   },
   title: {
     fontSize: FontSize.xxl,
