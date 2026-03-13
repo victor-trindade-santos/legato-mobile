@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -16,13 +16,18 @@ import { Button } from '@/components/atoms/Button/Button';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { MusicianCard } from '@/components/molecules/MusicianCard/MusicianCard';
-import { Colors, Spacing, BorderRadius } from '@/theme';
+import { Colors, Spacing, BorderRadius, Layout } from '@/theme';
 import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
 import { FilterModal } from './FilterModal';
 import { HistoryModal } from './HistoryModal';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CARD_HEIGHT = SCREEN_HEIGHT * 0.60;
+// Altura e estilo do card vindas do tema — responsivo por dispositivo
+const CARD_HEIGHT = Layout.cardHeight;
+// Phone: ocupa a largura total menos as margens laterais (alignSelf: stretch)
+// Tablet: largura fixa centralizada (alignSelf: center + width explícita)
+const CARD_AREA_STYLE = Layout.isTablet
+  ? { height: CARD_HEIGHT, width: Layout.cardMaxWidth, alignSelf: 'center' as const }
+  : { height: CARD_HEIGHT, marginHorizontal: Spacing.screenPaddingH };
 
 type DiscoveryNav = StackNavigationProp<RootStackParamList>;
 
@@ -70,7 +75,7 @@ export default function DiscoveryScreen() {
       <View style={styles.centerArea}>
 
         {/* Stack de cards */}
-        <View style={styles.cardArea}>
+        <View style={[styles.cardArea, CARD_AREA_STYLE]}>
           {cards.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
@@ -152,10 +157,9 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
   },
 
-  // Card com altura fixa e margens laterais
   cardArea: {
-    height: CARD_HEIGHT,
-    marginHorizontal: Spacing.screenPaddingH,
+    // Dimensões aplicadas via CARD_AREA_STYLE (calculado em tempo de módulo)
+    // para evitar conflito width:'100%' + marginHorizontal no RN
   },
   cardWrapper: {
     position: 'absolute',

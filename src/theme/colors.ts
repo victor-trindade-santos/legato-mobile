@@ -47,6 +47,13 @@ export const Colors = {
   warningLight: 'rgba(217, 119, 6, 0.1)',
   info: '#2563EB',      // Informação (blue-600)
 
+  // ─── Neutrals / Grays ─────────────────────────────────────────────
+  // Úteis para botões secundários, inputs desabilitados ou bordas sólidas
+  grayButton: '#27272A',       // Botão cinza (Zinc 800 - Dark)
+  grayButtonLight: '#E4E4E7',  // Botão cinza (Zinc 200 - Light)
+  grayBorder: '#777784',       // Borda sólida (Zinc 700 - Dark)
+  grayBorderLight: '#D4D4D8',  // Borda sólida (Zinc 300 - Light)
+
   // ─── Swipe Colors ─────────────────────────────────────────────────
   swipeLike: '#16A34A',    // Swipe direita (match)
   swipeDislike: '#E11D48', // Swipe esquerda (ignorar)

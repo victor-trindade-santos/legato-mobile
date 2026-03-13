@@ -61,7 +61,7 @@ export default function SplashScreen() {
         <View style={styles.gap} />
         <Button
           label="Fazer Login"
-          variant="outline"
+          variant="outline_gray"
           size="lg"
           fullWidth
           onPress={() => navigation.navigate('Login')}

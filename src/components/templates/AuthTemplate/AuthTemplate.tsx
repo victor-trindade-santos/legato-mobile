@@ -13,12 +13,16 @@
  */
 
 import React from 'react';
-import { View, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Spacing } from '@/theme';
 
 const bgImage = require('@/assets/images/BACKGROUND_SPLASH.png');
+
+// Dimensions.get('screen') = dimensões físicas do hardware (inclui barra de navegação Android)
+// Necessário para que a imagem cubra toda a tela sem bordas cinzas
+const { width: PHYS_W, height: PHYS_H } = Dimensions.get('screen');
 
 type AuthTemplateVariant = 'splash' | 'form';
 
@@ -30,8 +34,12 @@ interface AuthTemplateProps {
 export function AuthTemplate({ children, variant = 'form' }: AuthTemplateProps) {
   const background = (
     <>
-      <Image source={bgImage} style={StyleSheet.absoluteFill} resizeMode="cover" />
-      <BlurView intensity={55} tint="dark" style={StyleSheet.absoluteFill} />
+      <Image
+        source={bgImage}
+        style={styles.bgImage}
+        resizeMode="cover"
+      />
+      <BlurView intensity={55} tint="dark" style={styles.bgImage} />
     </>
   );
 
@@ -70,6 +78,13 @@ export function AuthTemplate({ children, variant = 'form' }: AuthTemplateProps) 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  bgImage: {
+    position: 'absolute',
+    width: PHYS_W,
+    height: PHYS_H,
+    top: 0,
+    left: 0,
   },
   fill: {
     flex: 1,
