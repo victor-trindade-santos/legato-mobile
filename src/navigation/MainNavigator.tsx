@@ -48,7 +48,7 @@ export default function MainNavigator() {
           fontSize: Typography.FontSize.xxs,
           fontWeight: Typography.FontWeight.medium,
         },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
           if (route.name === 'Discovery') {
@@ -63,7 +63,8 @@ export default function MainNavigator() {
             iconName = focused ? 'person' : 'person-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          // Tamanho fixo — não deixar o React Navigation auto-escalar com tabBarHeight
+          return <Ionicons name={iconName} size={22} color={color} />;
         },
       })}
     >

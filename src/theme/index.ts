@@ -17,3 +17,5 @@ export { BorderRadius } from './borderRadius';
 export type { BorderRadiusKey } from './borderRadius';
 
 export { Shadows } from './shadows';
+
+export { scale, vScale, moderateScale, Screen, Layout, isTablet } from './scale';
