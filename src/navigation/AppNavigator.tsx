@@ -17,6 +17,7 @@ import { Colors } from '@/theme';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
+import MusicianProfileScreen from '@/features/discovery/views/MusicianProfileScreen';
 import type { RootStackParamList } from './types';
 
 const Root = createStackNavigator<RootStackParamList>();
@@ -77,6 +78,11 @@ export default function AppNavigator() {
       ) : (
         <Root.Screen name="Auth" component={AuthNavigator} />
       )}
+      <Root.Screen
+        name="MusicianProfile"
+        component={MusicianProfileScreen}
+        options={{ presentation: 'modal' }}
+      />
     </Root.Navigator>
   );
 }

@@ -1,135 +1,172 @@
 /**
- * DiscoveryScreen — View (Descoberta) — ULISSES
+ * DiscoveryScreen — View (Descoberta)
  *
- * Tela principal de descoberta de músicos com swipe de cards.
- * Toda a lógica está em useDiscoveryViewModel.
+ * Layout via AppTemplate (noPadding=true — cards são full-bleed).
+ * Card centralizado verticalmente com margens superior e inferior.
  */
 
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LegatoText } from '@/components/atoms/Text/Text';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '@/navigation/types';
+import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
+import { Button } from '@/components/atoms/Button/Button';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
-import { Colors, Spacing } from '@/theme';
-import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
+import { LegatoText } from '@/components/atoms/Text/Text';
 import { MusicianCard } from '@/components/molecules/MusicianCard/MusicianCard';
+import { Colors, Spacing, BorderRadius, Layout } from '@/theme';
+import { useDiscoveryViewModel } from '../viewmodels/useDiscoveryViewModel';
+import { FilterModal } from './FilterModal';
+import { HistoryModal } from './HistoryModal';
 
-// TODO: substituir pelos organismos DiscoveryStack e FilterModal quando implementados
+// Altura e estilo do card vindas do tema — responsivo por dispositivo
+const CARD_HEIGHT = Layout.cardHeight;
+// Phone: ocupa a largura total menos as margens laterais (alignSelf: stretch)
+// Tablet: largura fixa centralizada (alignSelf: center + width explícita)
+const CARD_AREA_STYLE = Layout.isTablet
+  ? { height: CARD_HEIGHT, width: Layout.cardMaxWidth, alignSelf: 'center' as const }
+  : { height: CARD_HEIGHT, marginHorizontal: Spacing.screenPaddingH };
+
+type DiscoveryNav = StackNavigationProp<RootStackParamList>;
+
 export default function DiscoveryScreen() {
+  const navigation = useNavigation<DiscoveryNav>();
   const {
     cards,
     history,
     isLoading,
+    filters,
     isFilterModalOpen,
+    isHistoryModalOpen,
     handleSwipe,
-    handleUndo,
+    handleApplyFilters,
     setIsFilterModalOpen,
+    setIsHistoryModalOpen,
   } = useDiscoveryViewModel();
 
   if (isLoading) return <Spinner fullScreen />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <LegatoText variant="subtitle" color={Colors.white}>Encontrar Músicos</LegatoText>
-          <LegatoText variant="caption" color={Colors.textSecondaryDark}>
-            Procure músicos próximos a você!
-          </LegatoText>
-        </View>
-        <View style={styles.headerActions}>
-          {/* Desfazer */}
-          {history.length > 0 && (
-            <TouchableOpacity style={styles.iconBtn} onPress={handleUndo}>
-              <Ionicons name="arrow-undo" size={Spacing.iconLg} color={Colors.primary} />
-            </TouchableOpacity>
-          )}
-          {/* Filtros */}
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setIsFilterModalOpen(true)}>
-            <Ionicons name="options" size={Spacing.iconLg} color={Colors.primary} />
-          </TouchableOpacity>
-        </View>
+    <AppTemplate noPadding>
+
+      {/* ── Controles rápidos ─────────────────────────── */}
+      <View style={styles.controls}>
+        <Button
+          label="Filtrar"
+          variant="primary"
+          size="sm"
+          style={styles.controlBtn}
+          leftIcon={<Ionicons name="options-outline" size={14} color={Colors.white} />}
+          onPress={() => setIsFilterModalOpen(true)}
+        />
+        <Button
+          label="Histórico"
+          variant="primary"
+          size="sm"
+          style={styles.controlBtn}
+          leftIcon={<Ionicons name="time-outline" size={14} color={Colors.white} />}
+          onPress={() => setIsHistoryModalOpen(true)}
+        />
       </View>
 
-      {/* Stack de cards */}
-      <View style={styles.cardArea}>
-        {cards.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
-            <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
-              Não há mais músicos disponíveis
-            </LegatoText>
-            <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
-              Tente ajustar os filtros ou volte mais tarde.
-            </LegatoText>
-          </View>
-        ) : (
-          // Renderiza apenas o card do topo (o resto fica atrás)
-          cards.slice(0, 3).reverse().map((musician, index) => (
-            <View
-              key={musician.id}
-              style={[
-                styles.cardWrapper,
-                { zIndex: index, transform: [{ scale: 1 - (2 - index) * 0.03 }] },
-              ]}
-            >
-              <MusicianCard
-                musician={musician}
-                isTop={index === 2}
-                onSwipeLeft={() => handleSwipe(musician, 'dislike')}
-                onSwipeRight={() => handleSwipe(musician, 'like')}
-              />
+      {/* ── Área central (centraliza o card verticalmente) ── */}
+      <View style={styles.centerArea}>
+
+        {/* Stack de cards */}
+        <View style={[styles.cardArea, CARD_AREA_STYLE]}>
+          {cards.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
+              <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
+                Não há mais músicos disponíveis
+              </LegatoText>
+              <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
+                Tente ajustar os filtros ou volte mais tarde.
+              </LegatoText>
             </View>
-          ))
+          ) : (
+            cards.slice(0, 3).reverse().map((musician, index) => (
+              <View
+                key={musician.id}
+                style={[
+                  styles.cardWrapper,
+                  {
+                    zIndex: index,
+                    transform: [{ scale: 1 - (2 - index) * 0.03 }],
+                    top: (2 - index) * 6,
+                  },
+                ]}
+              >
+                <MusicianCard
+                  musician={musician}
+                  isTop={index === 2}
+                  onSwipeLeft={() => handleSwipe(musician, 'dislike')}
+                  onSwipeRight={() => handleSwipe(musician, 'like')}
+                  onSwipeDown={index === 2 ? () => navigation.navigate('MusicianProfile', {
+                    musicianId: musician.id,
+                    displayName: musician.displayName,
+                  }) : undefined}
+                />
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Hint */}
+        {cards.length > 0 && (
+          <LegatoText variant="caption" color={Colors.textMuted} align="center" style={styles.hint}>
+            Arraste o card para a esquerda para ignorar, ou para a direita para conversar
+          </LegatoText>
         )}
       </View>
 
-      {/* Instrução */}
-      {cards.length > 0 && (
-        <LegatoText variant="caption" color={Colors.textMuted} align="center" style={styles.hint}>
-          Arraste para a esquerda para ignorar, direita para conectar
-        </LegatoText>
-      )}
-    </SafeAreaView>
+      {/* ── Modais ────────────────────────────────────── */}
+      <FilterModal
+        visible={isFilterModalOpen}
+        filters={filters}
+        onApply={handleApplyFilters}
+        onClose={() => setIsFilterModalOpen(false)}
+      />
+      <HistoryModal
+        visible={isHistoryModalOpen}
+        history={history}
+        onClose={() => setIsHistoryModalOpen(false)}
+      />
+    </AppTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundDark,
-  },
-  header: {
+  controls: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.screenPaddingH,
-    paddingVertical: Spacing.md,
-  },
-  headerActions: {
-    flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: Spacing.sm,
+    paddingHorizontal: Spacing.screenPaddingH,
+    paddingBottom: Spacing.sm,
   },
-  iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.surfaceDark,
-    alignItems: 'center',
-    justifyContent: 'center',
+  controlBtn: {
+    borderRadius: BorderRadius.pill,
   },
-  cardArea: {
+
+  // Container que centraliza verticalmente
+  centerArea: {
     flex: 1,
-    marginHorizontal: Spacing.screenPaddingH,
-    marginVertical: Spacing.md,
+    justifyContent: 'center',
+    paddingBottom: Spacing.md,
+  },
+
+  cardArea: {
+    // Dimensões aplicadas via CARD_AREA_STYLE (calculado em tempo de módulo)
+    // para evitar conflito width:'100%' + marginHorizontal no RN
   },
   cardWrapper: {
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    top: 0,
   },
   emptyState: {
     flex: 1,
@@ -138,7 +175,10 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingHorizontal: Spacing.xl,
   },
+
   hint: {
-    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.screenPaddingH,
+    paddingTop: Spacing.sm,
+    textAlign: 'center',
   },
 });

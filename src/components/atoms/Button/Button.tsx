@@ -57,8 +57,8 @@ export function Button({
             color={
               variant === 'primary' || variant === 'danger'
                 ? Colors.white
-                : variant === 'outline' || variant === 'ghost'
-                ? Colors.primary
+                : variant === 'outline' || variant === 'ghost' || variant === 'outline_gray'
+                ? Colors.grayBorder
                 : Colors.textPrimaryDark
             }
           >
@@ -96,6 +96,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.transparent,
     borderWidth: 2,
     borderColor: Colors.primary,
+  },
+  outline_gray: {
+    backgroundColor: Colors.transparent,
+    borderWidth: 2,
+    borderColor: Colors.grayBorder,
   },
   ghost: {
     backgroundColor: Colors.transparent,

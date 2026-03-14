@@ -13,5 +13,11 @@ export const Config = {
    * DEV: define true para pular a autenticação e entrar direto no app.
    * Lembre de voltar para false antes de commitar.
    */
-  DEV_BYPASS_AUTH: true,
+  DEV_BYPASS_AUTH: false,
+
+  /**
+   * DEV: define true para usar dados mock na tela de Descoberta (sem backend).
+   * Lembre de voltar para false antes de commitar.
+   */
+  DEV_USE_MOCK: true,
 } as const;

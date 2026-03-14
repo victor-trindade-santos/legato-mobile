@@ -4,8 +4,13 @@
  * Baseado no projeto web (font-family: Poppins, escalas do globals.css).
  * Em React Native, fontes precisam ser carregadas via expo-font.
  *
+ * FontSize usa moderateScale (fator 0.25) para adaptar a diferentes densidades
+ * sem crescer desproporcionalmente em tablets.
+ *
  * USO: import { Typography } from '@/theme'
  */
+
+import { moderateScale } from './scale';
 
 export const FontFamily = {
   regular: 'Poppins_400Regular',
@@ -18,15 +23,16 @@ export const FontFamily = {
 
 export const FontSize = {
   // Equivalentes web → mobile (base 16px no mobile)
-  xxs: 10,  // Extra extra small (badges, labels muito pequenos)
-  xs: 12,   // Extra small (timestamps, captions)      — web: font-size-esm 14px
-  sm: 14,   // Small (labels de input, textos auxiliares) — web: font-size-sm 16px
-  md: 16,   // Base / body                              — web: font-size-base 18px
-  lg: 18,   // Large (subtítulos, destaques)            — web: font-size-lg 20px
-  xl: 22,   // Extra large (títulos de seção)           — web: font-size-xl 28px
-  xxl: 28,  // Extra extra large (títulos de tela)      — web: font-size-xxl 36px
-  display: 34, // Display (splash, logo)
-} as const;
+  // moderateScale(n, 0.25): escala 25% da diferença — confortável em tablets
+  xxs: moderateScale(10, 0.25),  // badges, labels muito pequenos
+  xs:  moderateScale(12, 0.25),  // timestamps, captions
+  sm:  moderateScale(14, 0.25),  // labels de input, textos auxiliares
+  md:  moderateScale(16, 0.25),  // base / body
+  lg:  moderateScale(18, 0.25),  // subtítulos, destaques
+  xl:  moderateScale(22, 0.25),  // títulos de seção
+  xxl: moderateScale(28, 0.25),  // títulos de tela
+  display: moderateScale(30, 0.25), // splash, logo
+};
 
 export const FontWeight = {
   normal: '400' as const,
@@ -54,8 +60,9 @@ export const TextStyles = {
   // Títulos
   displayTitle: {
     fontSize: FontSize.display,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.normal,
     lineHeight: FontSize.display * LineHeight.tight,
+    LetterSpacing: LetterSpacing.tight,
   },
   title: {
     fontSize: FontSize.xxl,

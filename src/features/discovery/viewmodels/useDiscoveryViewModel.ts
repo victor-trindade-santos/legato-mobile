@@ -7,7 +7,7 @@
  * - Expor handlers de like/dislike para o DiscoveryStack
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchMusicians, sendSwipe } from '../services/discoveryService';
 import type { Musician } from '../models/Musician';
@@ -21,20 +21,24 @@ export function useDiscoveryViewModel() {
   const [cards, setCards] = useState<Musician[]>([]);
   const [history, setHistory] = useState<SwipeHistoryEntry[]>([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [matchedMusician, setMatchedMusician] = useState<Musician | null>(null);
 
-  // Busca músicos da API
-  const { isLoading, refetch } = useQuery({
+  // TanStack Query v5: onSuccess removido de useQuery — usar useEffect
+  const { isLoading, data, refetch } = useQuery({
     queryKey: ['musicians', filters],
     queryFn: () => fetchMusicians(filters),
-    onSuccess: (data: Musician[]) => setCards(data),
-  } as any);
+  });
 
-  // Mutation de swipe
+  useEffect(() => {
+    if (data) setCards(data);
+  }, [data]);
+
+  // Mutation de swipe (onSuccess ainda disponível em useMutation no v5)
   const swipeMutation = useMutation({
     mutationFn: ({ musicianId, direction }: { musicianId: number; direction: 'like' | 'dislike' }) =>
       sendSwipe(musicianId, direction),
-    onSuccess: (data: any, variables: any) => {
+    onSuccess: (data, variables) => {
       if (data.match) {
         const musician = cards.find(c => c.id === variables.musicianId);
         if (musician) setMatchedMusician(musician);
@@ -70,12 +74,14 @@ export function useDiscoveryViewModel() {
     isLoading,
     filters,
     isFilterModalOpen,
+    isHistoryModalOpen,
     matchedMusician,
     handleSwipe,
     handleUndo,
     handleApplyFilters,
     handleResetFilters,
     setIsFilterModalOpen,
+    setIsHistoryModalOpen,
     setMatchedMusician,
     refetch,
   };

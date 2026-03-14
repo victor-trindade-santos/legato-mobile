@@ -2,16 +2,27 @@
  * AuthTemplate — Template
  *
  * Layout base para telas de autenticação.
- * Dark background no topo (como TELA_1) com card branco para formulários (como TELA_2).
  *
  * Props:
  *  - variant "splash": fundo escuro + logo centralizado (TELA_1)
  *  - variant "form": header roxo/degradê + card branco (TELA_2)
+ *
+ * Background:
+ *  - Image com absoluteFill cobre todo o espaço físico (inclusive barra Android).
+ *  - BlurView (expo-blur) sobre a imagem: sem artefato de borda e tint="dark" escurece.
  */
 
 import React from 'react';
-import { View, ScrollView, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Colors, Spacing, BorderRadius } from '@/theme';
+import { View, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { Spacing } from '@/theme';
+
+const bgImage = require('@/assets/images/BACKGROUND_SPLASH.png');
+
+// Dimensions.get('screen') = dimensões físicas do hardware (inclui barra de navegação Android)
+// Necessário para que a imagem cubra toda a tela sem bordas cinzas
+const { width: PHYS_W, height: PHYS_H } = Dimensions.get('screen');
 
 type AuthTemplateVariant = 'splash' | 'form';
 
@@ -21,49 +32,68 @@ interface AuthTemplateProps {
 }
 
 export function AuthTemplate({ children, variant = 'form' }: AuthTemplateProps) {
+  const background = (
+    <>
+      <Image
+        source={bgImage}
+        style={styles.bgImage}
+        resizeMode="cover"
+      />
+      <BlurView intensity={55} tint="dark" style={styles.bgImage} />
+    </>
+  );
+
   if (variant === 'splash') {
     return (
-      <SafeAreaView style={styles.splashContainer}>
-        <View style={styles.splashContent}>{children}</View>
-      </SafeAreaView>
+      <View style={styles.root}>
+        {background}
+        <SafeAreaView style={styles.fill}>
+          <View style={styles.splashContent}>{children}</View>
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.formContainer}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+    <View style={styles.root}>
+      {background}
+      <SafeAreaView style={styles.fill}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.fill}
         >
-          {children}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Splash: fundo escuro puro
-  splashContainer: {
+  root: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
+  },
+  bgImage: {
+    position: 'absolute',
+    width: PHYS_W,
+    height: PHYS_H,
+    top: 0,
+    left: 0,
+  },
+  fill: {
+    flex: 1,
   },
   splashContent: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'stretch',
     justifyContent: 'center',
     paddingHorizontal: Spacing.screenPaddingH,
-  },
-
-  // Form: tela com header roxo + card branco embaixo
-  formContainer: {
-    flex: 1,
-    backgroundColor: Colors.primaryLight, // Roxo suave no topo (como TELA_2)
   },
   scrollContent: {
     flexGrow: 1,
