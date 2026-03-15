@@ -33,6 +33,15 @@ export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promi
   return res.data;
 }
 
+export async function fetchMusicianById(musicianId: number): Promise<Musician | null> {
+  if (Config.DEV_USE_MOCK) {
+    return MOCK_MUSICIANS.find((musician) => musician.id === musicianId) ?? null;
+  }
+
+  const res = await api.get<Musician>(`${Endpoints.discovery.musicians}/${musicianId}`);
+  return res.data;
+}
+
 export async function sendSwipe(musicianId: number, direction: 'like' | 'dislike'): Promise<{ match: boolean }> {
   if (Config.DEV_USE_MOCK) {
     // Simula match aleatório com 30% de chance no like

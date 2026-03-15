@@ -30,8 +30,13 @@ export type ChatStackParamList = {
   ChatConversation: { conversationId: number; userName: string };
 };
 
+export type MusicianProfileRouteParams = {
+  musicianId: number;
+  displayName?: string;
+};
+
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
-  MusicianProfile: { musicianId: number; displayName: string };
+  MusicianProfile: MusicianProfileRouteParams;
 };
