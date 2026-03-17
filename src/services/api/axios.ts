@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import { Config } from '@/constants/config';
 
 const api = axios.create({
@@ -22,7 +22,7 @@ const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/reset-password'];
 api.interceptors.request.use(async (config) => {
   const isPublic = PUBLIC_ROUTES.some(route => config.url?.includes(route));
   if (!isPublic) {
-    const token = await SecureStore.getItemAsync(Config.TOKEN_KEY);
+    const token = await storage.getItem(Config.TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,7 +37,7 @@ api.interceptors.response.use(
     const status = error.response?.status;
     if (status === 401 || status === 403) {
       // Token expirado — limpa sessão (authStore vai redirecionar)
-      await SecureStore.deleteItemAsync(Config.TOKEN_KEY);
+      await storage.deleteItem(Config.TOKEN_KEY);
     }
     return Promise.reject(error);
   }
