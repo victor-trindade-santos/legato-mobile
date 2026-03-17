@@ -17,7 +17,7 @@ import { Colors } from '@/theme';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
-import MusicianProfileScreen from '@/features/discovery/views/MusicianProfileScreen';
+import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
 import type { RootStackParamList } from './types';
 
 const Root = createStackNavigator<RootStackParamList>();
