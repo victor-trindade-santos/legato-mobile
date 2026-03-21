@@ -63,6 +63,12 @@ export const Endpoints = {
     messages: (conversationId: number) => `/chat/conversations/${conversationId}/messages`,
   },
 
+  // Perfis de músicos (tela de perfil completo — diferente do card de discovery)
+  musicians: {
+    getById: (id: number) => `/musicians/${id}`,
+    favoriteArtists: (id: number) => `/musicians/${id}/favorite-artists`,
+  },
+
   // Busca
   search: {
     query: '/search',

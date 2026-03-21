@@ -1,7 +1,10 @@
 /**
  * MusicianProfileScreen — View (perfil público)
- * Feature compartilhada para abrir o perfil público de um músico em qualquer fluxo.
+ *
+ * Responsabilidade exclusiva: renderizar o que o ViewModel expõe.
+ * Sem estados locais, sem lógica de dados, sem cálculos de layout.
  */
+
 import React from 'react';
 import {
   View,
@@ -11,7 +14,6 @@ import {
   ImageBackground,
   Modal,
   Pressable,
-  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -39,11 +41,9 @@ const TAB_PLACEHOLDER_TEXT: Record<Exclude<ProfileTab, 'overview'>, string> = {
 };
 
 export default function MusicianProfileScreen() {
-  const { width: screenWidth } = useWindowDimensions();
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
   const { displayName, musicianId } = route.params;
-  const [isFavoritesPanelOpen, setIsFavoritesPanelOpen] = React.useState(false);
 
   const {
     profile,
@@ -51,8 +51,12 @@ export default function MusicianProfileScreen() {
     activeTab,
     tabs,
     isConnected,
+    isFavoritesPanelOpen,
+    visibleFavoriteArtists,
     setActiveTab,
     toggleConnection,
+    openFavoritesPanel,
+    closeFavoritesPanel,
   } = useMusicianProfileViewModel(musicianId);
 
   if (isLoading) return <Spinner fullScreen />;
@@ -77,21 +81,11 @@ export default function MusicianProfileScreen() {
     );
   }
 
-  const availableFavoriteRowWidth =
-    screenWidth -
-    (Spacing.screenPaddingH * 2) -
-    (Spacing.cardPadding * 2);
-
-  const favoriteItemMinWidth = Spacing.avatarMd + Spacing.lg;
-  const canFitFour = availableFavoriteRowWidth >= (favoriteItemMinWidth * 4) + (Spacing.sm * 3);
-  const canFitThree = availableFavoriteRowWidth >= (favoriteItemMinWidth * 3) + (Spacing.sm * 2);
-
-  const visibleFavoriteCount = canFitFour ? 4 : canFitThree ? 3 : 2;
-  const visibleFavoriteArtists = profile.favoriteArtists.slice(0, visibleFavoriteCount);
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+        {/* ── Hero (capa + avatar) ───────────────────────── */}
         <View style={styles.heroArea}>
           <ImageBackground source={coverImage} resizeMode="cover" style={styles.cover}>
             <View style={styles.coverOverlay} />
@@ -106,15 +100,13 @@ export default function MusicianProfileScreen() {
           </ImageBackground>
 
           <View style={[styles.avatarFrame, Shadows.md]}>
-            <Avatar
-              uri={profile.avatarUrl}
-              size="xl"
-              fallbackInitials={profile.displayName}
-            />
+            <Avatar uri={profile.avatarUrl} size="xl" fallbackInitials={profile.displayName} />
           </View>
         </View>
 
         <View style={styles.mainSection}>
+
+          {/* ── Identidade ────────────────────────────────── */}
           <View style={styles.identityBlock}>
             <LegatoText variant="subtitle" color={Colors.white} align="center">
               {profile.displayName}
@@ -130,6 +122,7 @@ export default function MusicianProfileScreen() {
             </View>
           </View>
 
+          {/* ── Ações (conectar / mensagem) ────────────────── */}
           <View style={styles.actionsRow}>
             <Button
               label={isConnected ? 'Conectado' : 'Conectar'}
@@ -145,12 +138,12 @@ export default function MusicianProfileScreen() {
               }
               style={styles.connectButton}
             />
-
             <TouchableOpacity style={styles.messageButton}>
               <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
             </TouchableOpacity>
           </View>
 
+          {/* ── Stats ─────────────────────────────────────── */}
           <View style={styles.statsCard}>
             <View style={styles.statItem}>
               <LegatoText variant="sectionTitle" color={Colors.white}>{profile.stats.connections}</LegatoText>
@@ -168,6 +161,7 @@ export default function MusicianProfileScreen() {
             </View>
           </View>
 
+          {/* ── Abas ──────────────────────────────────────── */}
           <View style={styles.tabsRow}>
             {tabs.map((tab) => (
               <TouchableOpacity
@@ -185,14 +179,15 @@ export default function MusicianProfileScreen() {
             ))}
           </View>
 
+          {/* ── Conteúdo da aba ───────────────────────────── */}
           {activeTab === 'overview' ? (
             <>
+              {/* Bio + Objetivo */}
               <View style={styles.card}>
                 <LegatoText variant="sectionTitle" color={Colors.white}>Bio</LegatoText>
                 <LegatoText variant="bodySmall" color={Colors.textSecondaryDark}>
                   {profile.bio}
                 </LegatoText>
-
                 <LegatoText variant="label" color={Colors.white}>Objetivo</LegatoText>
                 <View style={styles.goalBox}>
                   <Ionicons name="flag-outline" size={Spacing.iconSm} color={Colors.success} />
@@ -202,6 +197,7 @@ export default function MusicianProfileScreen() {
                 </View>
               </View>
 
+              {/* Habilidades e gêneros */}
               <View style={styles.card}>
                 <LegatoText variant="label" color={Colors.white}>HABILIDADES</LegatoText>
                 <View style={styles.tagGrid}>
@@ -209,7 +205,6 @@ export default function MusicianProfileScreen() {
                     <Tag key={skill} label={skill} />
                   ))}
                 </View>
-
                 <LegatoText variant="label" color={Colors.white}>GÊNEROS FAVORITOS</LegatoText>
                 <View style={styles.tagGrid}>
                   {profile.musicGenres.map((genre) => (
@@ -218,14 +213,14 @@ export default function MusicianProfileScreen() {
                 </View>
               </View>
 
+              {/* Artistas favoritos */}
               <View style={styles.card}>
                 <View style={styles.sectionHeaderRow}>
                   <LegatoText variant="sectionTitle" color={Colors.white}>Artistas Favoritos</LegatoText>
-                  <TouchableOpacity onPress={() => setIsFavoritesPanelOpen(true)}>
+                  <TouchableOpacity onPress={openFavoritesPanel}>
                     <LegatoText variant="caption" color={Colors.primary}>Ver tudo</LegatoText>
                   </TouchableOpacity>
                 </View>
-
                 <View style={styles.favoriteRow}>
                   {visibleFavoriteArtists.map((artist) => (
                     <View key={artist.id} style={styles.favoriteItem}>
@@ -251,36 +246,28 @@ export default function MusicianProfileScreen() {
         </View>
       </ScrollView>
 
+      {/* ── Painel de todos os artistas favoritos ─────────── */}
       <Modal
         visible={isFavoritesPanelOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setIsFavoritesPanelOpen(false)}
+        onRequestClose={closeFavoritesPanel}
       >
-        <Pressable style={styles.panelBackdrop} onPress={() => setIsFavoritesPanelOpen(false)}>
-          <Pressable style={styles.panel} onPress={() => { }}>
+        <Pressable style={styles.panelBackdrop} onPress={closeFavoritesPanel}>
+          <Pressable style={styles.panel} onPress={() => {}}>
             <View style={styles.panelHeader}>
               <LegatoText variant="sectionTitle" color={Colors.white}>Artistas Favoritos</LegatoText>
-              <TouchableOpacity
-                style={styles.panelCloseBtn}
-                onPress={() => setIsFavoritesPanelOpen(false)}
-              >
+              <TouchableOpacity style={styles.panelCloseBtn} onPress={closeFavoritesPanel}>
                 <Ionicons name="close" size={Spacing.iconMd} color={Colors.white} />
               </TouchableOpacity>
             </View>
-
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.panelListContent}>
               {profile.favoriteArtists.map((artist) => (
                 <View key={artist.id} style={styles.panelListItem}>
                   <Avatar uri={artist.avatarUrl} size="md" fallbackInitials={artist.displayName} />
-
                   <View style={styles.panelListTextBlock}>
-                    <LegatoText variant="bodyMedium" color={Colors.white}>
-                      {artist.displayName}
-                    </LegatoText>
-                    <LegatoText variant="caption" color={Colors.textMuted}>
-                      @{artist.username}
-                    </LegatoText>
+                    <LegatoText variant="bodyMedium" color={Colors.white}>{artist.displayName}</LegatoText>
+                    <LegatoText variant="caption" color={Colors.textMuted}>@{artist.username}</LegatoText>
                   </View>
                 </View>
               ))}
