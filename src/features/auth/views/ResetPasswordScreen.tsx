@@ -66,8 +66,12 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   header: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
   card: {
-    backgroundColor: Colors.surfaceLight, borderTopLeftRadius: BorderRadius.xxl,
-    borderTopRightRadius: BorderRadius.xxl, padding: Spacing.xl, paddingBottom: Spacing.xxxl,
+    backgroundColor: Colors.surfaceLight,
+    borderRadius: BorderRadius.xxl,
+    marginHorizontal: Spacing.screenPaddingH,
+    marginBottom: Spacing.xl,
+    padding: Spacing.xl,
+    paddingBottom: Spacing.xxxl,
   },
   back: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
   successContainer: { alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.xxl },

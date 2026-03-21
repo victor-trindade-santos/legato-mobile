@@ -25,6 +25,9 @@ const signupSchema = z.object({
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: 'Aceite os termos para continuar',
   }),
+  ageConfirmed: z.boolean().refine((val) => val === true, {
+    message: 'Você deve ter 18 anos ou mais para se cadastrar',
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'As senhas não coincidem',
   path: ['confirmPassword'],
@@ -47,6 +50,7 @@ export function useSignupViewModel() {
       password: '',
       confirmPassword: '',
       acceptTerms: false,
+      ageConfirmed: false,
     },
   });
 

@@ -26,6 +26,7 @@ export default function SignupScreen() {
   const { form, handleSignup, isLoading, errorMessage } = useSignupViewModel();
   const { control, formState: { errors }, watch, setValue } = form;
   const acceptTerms = watch('acceptTerms');
+  const ageConfirmed = watch('ageConfirmed');
 
   return (
     <AuthTemplate variant="form">
@@ -95,6 +96,22 @@ export default function SignupScreen() {
           <LegatoText variant="caption" color={Colors.error}>{errors.acceptTerms.message}</LegatoText>
         )}
 
+        {/* Confirmação de idade */}
+        <TouchableOpacity
+          style={styles.termsRow}
+          onPress={() => setValue('ageConfirmed', !ageConfirmed)}
+        >
+          <View style={[styles.checkbox, ageConfirmed ? styles.checkboxChecked : null]}>
+            {ageConfirmed && <Ionicons name="checkmark" size={14} color={Colors.white} />}
+          </View>
+          <LegatoText variant="caption" color={Colors.textSecondaryLight} style={styles.termsText}>
+            Confirmo que tenho 18 anos ou mais (autodeclarado)
+          </LegatoText>
+        </TouchableOpacity>
+        {errors.ageConfirmed && (
+          <LegatoText variant="caption" color={Colors.error}>{errors.ageConfirmed.message}</LegatoText>
+        )}
+
         {errorMessage && (
           <LegatoText variant="caption" color={Colors.error} style={styles.errorMsg}>{errorMessage}</LegatoText>
         )}
@@ -125,8 +142,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: Colors.surfaceLight,
-    borderTopLeftRadius: BorderRadius.xxl, borderTopRightRadius: BorderRadius.xxl,
-    padding: Spacing.xl, paddingBottom: Spacing.xxxl,
+    borderRadius: BorderRadius.xxl,
+    marginHorizontal: Spacing.screenPaddingH,
+    marginBottom: Spacing.xl,
+    padding: Spacing.xl,
+    paddingBottom: Spacing.xxxl,
   },
   cardTitle: { marginBottom: Spacing.lg },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm, marginBottom: Spacing.md },

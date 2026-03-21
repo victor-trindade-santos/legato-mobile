@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   actions: {
-    width: '100%',
     marginBottom: Spacing.xl,
   },
   gap: {
