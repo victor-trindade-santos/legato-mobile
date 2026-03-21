@@ -1,5 +1,8 @@
 /** Todas as URLs da API centralizadas — nunca escreva strings de rota espalhadas */
 
+import { ChatListItem } from "@/components/molecules/ChatListItem/ChatListItem";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
 export const Endpoints = {
   // Auth
   auth: {
@@ -61,6 +64,12 @@ export const Endpoints = {
   chat: {
     conversations: '/chat/conversations',
     messages: (conversationId: number) => `/chat/conversations/${conversationId}/messages`,
+  },
+
+  //Chat List
+  chatListItem:{
+    list: '/chat-list',
+    getById: (id: number) => `/chat/conversations/${id}`,
   },
 
   // Busca

@@ -14,6 +14,7 @@ export type MainTabParamList = {
   Discovery: undefined;
   Feed: undefined;
   Collaborations: undefined;
+  Chat: undefined;
   Notifications: undefined;
   Profile: { username?: string };
 };

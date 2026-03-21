@@ -26,6 +26,7 @@ export function Button({
   leftIcon,
   rightIcon,
   style,
+  containerStyle,
   ...rest
 }: ButtonProps) {
   const isDisabled = disabled || isLoading;
@@ -50,7 +51,7 @@ export function Button({
           color={variant === 'primary' || variant === 'danger' ? Colors.white : Colors.primary}
         />
       ) : (
-        <View style={styles.content}>
+        <View style={[styles.content, containerStyle]}>
           {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
           <LegatoText
             variant={size === 'sm' ? 'buttonSm' : size === 'lg' ? 'buttonLg' : 'buttonMd'}

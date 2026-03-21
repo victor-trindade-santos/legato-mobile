@@ -18,6 +18,8 @@ export function Input({
   hasError = false,
   isPassword = false,
   style,
+  containerStyle,
+  inputStyle,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -27,12 +29,13 @@ export function Input({
     <View
       style={[
         styles.container,
+        containerStyle,
         isFocused && styles.focused,
         hasError && styles.error,
       ]}
     >
       <TextInput
-        style={[styles.input, style]}
+        style={[styles.input, inputStyle, style]}
         placeholderTextColor={Colors.textMuted}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
