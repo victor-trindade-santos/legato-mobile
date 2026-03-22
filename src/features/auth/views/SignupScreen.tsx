@@ -1,7 +1,6 @@
 /**
  * SignupScreen — View (Auth)
  * Campos: username, displayName, email, senha, confirmar senha, aceitar termos.
- * Layout conforme TELA_2_CADASTRO.png.
  */
 
 import React from 'react';
@@ -11,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
+import { AuthHeader } from '@/components/molecules/AuthHeader/AuthHeader';
 import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -21,6 +21,8 @@ import type { AuthStackParamList } from '@/navigation/types';
 
 type Nav = StackNavigationProp<AuthStackParamList, 'Signup'>;
 
+const fieldStyle = { marginBottom: Spacing.sm };
+
 export default function SignupScreen() {
   const navigation = useNavigation<Nav>();
   const { form, handleSignup, isLoading, errorMessage } = useSignupViewModel();
@@ -29,49 +31,40 @@ export default function SignupScreen() {
   const ageConfirmed = watch('ageConfirmed');
 
   return (
-    <AuthTemplate variant="form">
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.logoRow}>
-          <View style={styles.logoIcon}>
-            <Ionicons name="musical-note" size={20} color={Colors.white} />
-          </View>
-          <LegatoText variant="subtitle" color={Colors.white}> Legato</LegatoText>
-        </View>
-        <LegatoText variant="bodySmall" color={Colors.white} align="center">
-          Crie sua conta para começar
-        </LegatoText>
-      </View>
-
+    <AuthTemplate variant="form" 
+    header={<AuthHeader subtitle="Crie sua conta para começar" />}>
       {/* Card */}
       <View style={styles.card}>
-        <LegatoText variant="subtitle" color={Colors.textPrimaryLight} style={styles.cardTitle}>
-          Cadastro
-        </LegatoText>
+        <View style={styles.titleRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+            <Ionicons name="arrow-back" size={Spacing.iconXl} color={Colors.primary} />
+          </TouchableOpacity>
+          <LegatoText variant="subtitle" color={Colors.textPrimaryLight}>Cadastro</LegatoText>
+        </View>
 
         <Controller control={control} name="username" render={({ field: { onChange, value } }) => (
           <FormField label="Username" placeholder="Seu @username único" autoCapitalize="none"
-            value={value} onChangeText={onChange} errorMessage={errors.username?.message} />
+            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.username?.message} />
         )} />
 
         <Controller control={control} name="displayName" render={({ field: { onChange, value } }) => (
           <FormField label="Display Name" placeholder="Como você quer aparecer?"
-            value={value} onChangeText={onChange} errorMessage={errors.displayName?.message} />
+            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.displayName?.message} />
         )} />
 
         <Controller control={control} name="email" render={({ field: { onChange, value } }) => (
           <FormField label="Email" placeholder="Digite seu e-mail" keyboardType="email-address"
-            autoCapitalize="none" value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
+            autoCapitalize="none" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
         )} />
 
         <Controller control={control} name="password" render={({ field: { onChange, value } }) => (
           <FormField label="Senha" placeholder="Digite sua senha" isPassword
-            value={value} onChangeText={onChange} errorMessage={errors.password?.message} />
+            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.password?.message} />
         )} />
 
         <Controller control={control} name="confirmPassword" render={({ field: { onChange, value } }) => (
           <FormField label="Confirmar Senha" placeholder="Confirme sua senha" isPassword
-            value={value} onChangeText={onChange} errorMessage={errors.confirmPassword?.message} />
+            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.confirmPassword?.message} />
         )} />
 
         {/* Termos */}
@@ -79,10 +72,7 @@ export default function SignupScreen() {
           style={styles.termsRow}
           onPress={() => setValue('acceptTerms', acceptTerms ? undefined as any : true)}
         >
-          <View style={[
-            styles.checkbox, 
-            acceptTerms ? styles.checkboxChecked : null
-            ]}>
+          <View style={[styles.checkbox, acceptTerms ? styles.checkboxChecked : null]}>
             {acceptTerms && <Ionicons name="checkmark" size={14} color={Colors.white} />}
           </View>
           <LegatoText variant="caption" color={Colors.textSecondaryLight} style={styles.termsText}>
@@ -116,7 +106,7 @@ export default function SignupScreen() {
           <LegatoText variant="caption" color={Colors.error} style={styles.errorMsg}>{errorMessage}</LegatoText>
         )}
 
-        <Button label="Inscreve-se" variant="primary" size="lg" fullWidth
+        <Button label="Inscrever-se" variant="primary" size="md" fullWidth
           isLoading={isLoading} onPress={handleSignup} style={styles.submitBtn} />
 
         <LegatoText variant="bodySmall" color={Colors.textSecondaryLight} align="center">
@@ -134,22 +124,27 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
-  logoRow: { flexDirection: 'row', alignItems: 'center' },
-  logoIcon: {
-    width: 32, height: 32, borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center',
-  },
   card: {
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.xxl,
     marginHorizontal: Spacing.screenPaddingH,
     marginBottom: Spacing.xl,
-    padding: Spacing.xl,
-    paddingBottom: Spacing.xxxl,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xxl,
   },
-  cardTitle: { marginBottom: Spacing.lg },
-  termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm, marginBottom: Spacing.md },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  termsRow: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-start', 
+    gap: Spacing.md, 
+    marginBottom: Spacing.sm ,
+    marginTop: Spacing.sm,
+  },
   checkbox: {
     width: 20, height: 20, borderRadius: BorderRadius.xs,
     borderWidth: 2, borderColor: Colors.borderLight,
@@ -157,6 +152,6 @@ const styles = StyleSheet.create({
   },
   checkboxChecked: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   termsText: { flex: 1 },
-  errorMsg: { marginBottom: Spacing.sm },
+  errorMsg: { marginBottom: Spacing.xs },
   submitBtn: { marginTop: Spacing.sm, marginBottom: Spacing.md },
 });

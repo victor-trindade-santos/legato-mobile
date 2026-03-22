@@ -9,6 +9,7 @@ import { Controller } from 'react-hook-form';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
+import { AuthHeader } from '@/components/molecules/AuthHeader/AuthHeader';
 import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -21,19 +22,16 @@ export default function ResetPasswordScreen() {
   const { control, formState: { errors } } = form;
 
   return (
-    <AuthTemplate variant="form">
-      <View style={styles.header}>
-        <LegatoText variant="subtitle" color={Colors.white} align="center">Recuperar Senha</LegatoText>
-        <LegatoText variant="bodySmall" color={Colors.white} align="center">
-          Enviaremos um link para redefinir sua senha
-        </LegatoText>
-      </View>
+    <AuthTemplate variant="form" 
+    header={<AuthHeader subtitle="Recuperar senha" />}>
 
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Ionicons name="arrow-back" size={20} color={Colors.primary} />
-          <LegatoText variant="bodySmall" color={Colors.primary}>  Voltar</LegatoText>
-        </TouchableOpacity>
+        <View style={styles.titleRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+            <Ionicons name="arrow-back" size={Spacing.iconXl} color={Colors.primary} />
+          </TouchableOpacity>
+          <LegatoText variant="subtitle" color={Colors.textPrimaryLight}>Recuperar Senha</LegatoText>
+        </View>
 
         {sent ? (
           <View style={styles.successContainer}>
@@ -47,6 +45,9 @@ export default function ResetPasswordScreen() {
           </View>
         ) : (
           <>
+            <LegatoText variant="bodySmall" color={Colors.textSecondaryLight} style={styles.hint}>
+              Enviaremos um link para redefinir sua senha.
+            </LegatoText>
             <Controller control={control} name="email" render={({ field: { onChange, value } }) => (
               <FormField label="E-mail" placeholder="Digite seu e-mail" keyboardType="email-address"
                 autoCapitalize="none" value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
@@ -54,7 +55,7 @@ export default function ResetPasswordScreen() {
             {errorMessage && (
               <LegatoText variant="caption" color={Colors.error} style={styles.errorMsg}>{errorMessage}</LegatoText>
             )}
-            <Button label="Enviar link" variant="primary" size="lg" fullWidth
+            <Button label="Enviar link" variant="primary" size="md" fullWidth
               isLoading={isLoading} onPress={handleReset} style={styles.btn} />
           </>
         )}
@@ -64,7 +65,6 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
   card: {
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.xxl,
@@ -73,7 +73,15 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl,
   },
-  back: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  hint: {
+    marginBottom: Spacing.lg,
+  },
   successContainer: { alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.xxl },
   successTitle: { marginTop: Spacing.md },
   errorMsg: { marginBottom: Spacing.sm },

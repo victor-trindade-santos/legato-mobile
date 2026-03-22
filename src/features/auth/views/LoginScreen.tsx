@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
+import { AuthHeader } from '@/components/molecules/AuthHeader/AuthHeader';
 import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -26,25 +27,18 @@ export default function LoginScreen() {
   const { control, formState: { errors } } = form;
 
   return (
-    <AuthTemplate variant="form">
-      {/* Header roxa (fundo do template) */}
-      <View style={styles.header}>
-        <View style={styles.logoRow}>
-          <View style={styles.logoIcon}>
-            <Ionicons name="musical-note" size={20} color={Colors.white} />
-          </View>
-          <LegatoText variant="subtitle" color={Colors.white}> Legato</LegatoText>
-        </View>
-        <LegatoText variant="bodySmall" color={Colors.white} align="center">
-          Entre na sua conta
-        </LegatoText>
-      </View>
-
+    <AuthTemplate
+      variant="form"
+      header={<AuthHeader subtitle="Sua música em qualquer lugar" />}
+    >
       {/* Card branco */}
       <View style={styles.card}>
-        <LegatoText variant="subtitle" color={Colors.textPrimaryLight} style={styles.cardTitle}>
-          Login
-        </LegatoText>
+        <View style={styles.titleRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+            <Ionicons name="arrow-back" size={Spacing.iconXl} color={Colors.primary} />
+          </TouchableOpacity>
+          <LegatoText variant="subtitle" color={Colors.textPrimaryLight}>Login</LegatoText>
+        </View>
 
         <Controller
           control={control}
@@ -92,7 +86,7 @@ export default function LoginScreen() {
         <Button
           label="Entrar"
           variant="primary"
-          size="lg"
+          size="md"
           fullWidth
           isLoading={isLoading}
           onPress={handleLogin}
@@ -118,23 +112,6 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xxl,
-    gap: Spacing.sm,
-  },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   card: {
     backgroundColor: Colors.surfaceLight,
     borderRadius: BorderRadius.xxl,
@@ -143,7 +120,10 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl,
   },
-  cardTitle: {
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
     marginBottom: Spacing.lg,
   },
   forgotPassword: {

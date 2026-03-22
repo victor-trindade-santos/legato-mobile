@@ -18,12 +18,13 @@ import { Colors } from '@/theme';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
+import ProfileEditScreen from '@/features/profile-edit/views/ProfileEditScreen';
 import type { RootStackParamList } from './types';
 
 const Root = createStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const { isAuthenticated, setAuth } = useAuthStore();
+  const { isAuthenticated, needsOnboarding, setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -73,7 +74,9 @@ export default function AppNavigator() {
 
   return (
     <Root.Navigator screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
+      {isAuthenticated && needsOnboarding ? (
+        <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
+      ) : isAuthenticated ? (
         <Root.Screen name="Main" component={MainNavigator} />
       ) : (
         <Root.Screen name="Auth" component={AuthNavigator} />

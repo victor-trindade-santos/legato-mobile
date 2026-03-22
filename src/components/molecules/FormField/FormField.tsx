@@ -14,13 +14,15 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, Typography } from '@/theme';
 import type { FormFieldProps } from './FormField.types';
 
-export function FormField({ label, errorMessage, isRequired, style, ...inputProps }: FormFieldProps) {
+export function FormField({ label, errorMessage, isRequired, style, containerStyle, variant = 'light', ...inputProps }: FormFieldProps) {
+  const labelColor = variant === 'dark' ? Colors.textSecondaryDark : Colors.textSecondaryLight;
+
   return (
-    <View style={styles.container}>
-      <LegatoText variant="label" color={Colors.textSecondaryLight} style={styles.label}>
+    <View style={[styles.container, containerStyle]}>
+      <LegatoText variant="label" color={labelColor} style={styles.label}>
         {label}{isRequired && ' *'}
       </LegatoText>
-      <Input hasError={!!errorMessage} style={style} {...inputProps} />
+      <Input hasError={!!errorMessage} variant={variant} style={style} {...inputProps} />
       {errorMessage && (
         <LegatoText style={styles.error}>{errorMessage}</LegatoText>
       )}

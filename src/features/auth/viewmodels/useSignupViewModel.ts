@@ -36,7 +36,7 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export function useSignupViewModel() {
-  const { setAuth } = useAuthStore();
+  const { setAuth, setNeedsOnboarding } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -66,8 +66,8 @@ export function useSignupViewModel() {
         role: 'USER',
       });
       await storage.setItem(Config.TOKEN_KEY, response.token);
+      setNeedsOnboarding(true);
       setAuth(response.token, response.user);
-      setSuccessMessage('Conta criada com sucesso!');
     } catch (error: any) {
       const msg = error?.response?.data?.message;
       setErrorMessage(msg ?? 'Erro ao criar conta. Este e-mail já pode estar em uso.');

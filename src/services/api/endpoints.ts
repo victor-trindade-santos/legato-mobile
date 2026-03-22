@@ -67,6 +67,7 @@ export const Endpoints = {
   musicians: {
     getById: (id: number) => `/musicians/${id}`,
     favoriteArtists: (id: number) => `/musicians/${id}/favorite-artists`,
+    updateProfile: '/musicians/me',
   },
 
   // Busca
