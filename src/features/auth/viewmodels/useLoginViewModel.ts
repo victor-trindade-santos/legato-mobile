@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import { loginUser } from '../services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { Config } from '@/constants/config';
@@ -36,7 +36,7 @@ export function useLoginViewModel() {
     setErrorMessage(null);
     try {
       const response = await loginUser(data);
-      await SecureStore.setItemAsync(Config.TOKEN_KEY, response.token);
+      await storage.setItem(Config.TOKEN_KEY, response.token);
       setAuth(response.token, response.user);
     } catch {
       setErrorMessage('Usuário ou senha inválidos.');

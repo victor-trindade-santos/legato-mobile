@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import { View, ActivityIndicator } from 'react-native';
 
 import { Config } from '@/constants/config';
@@ -17,7 +17,7 @@ import { Colors } from '@/theme';
 
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
-import MusicianProfileScreen from '@/features/discovery/views/MusicianProfileScreen';
+import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
 import type { RootStackParamList } from './types';
 
 const Root = createStackNavigator<RootStackParamList>();
@@ -41,7 +41,7 @@ export default function AppNavigator() {
           return;
         }
 
-        const token = await SecureStore.getItemAsync(Config.TOKEN_KEY);
+        const token = await storage.getItem(Config.TOKEN_KEY);
         if (token && isTokenValid(token)) {
           // Token válido — restaura sessão
           // user será carregado pelo useQuery('me') na primeira tela

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import { registerUser } from '../services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { Config } from '@/constants/config';
@@ -61,7 +61,7 @@ export function useSignupViewModel() {
         displayName: data.displayName,
         role: 'USER',
       });
-      await SecureStore.setItemAsync(Config.TOKEN_KEY, response.token);
+      await storage.setItem(Config.TOKEN_KEY, response.token);
       setAuth(response.token, response.user);
       setSuccessMessage('Conta criada com sucesso!');
     } catch (error: any) {
