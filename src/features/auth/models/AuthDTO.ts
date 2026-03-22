@@ -10,7 +10,11 @@ export interface RegisterDTO {
   password: string;
   username: string;
   displayName: string;
+  /** Formato ISO: YYYY-MM-DD */
+  birthDate: string;
   role: 'USER';
+  /** Enviado como string vazia quando reCAPTCHA está desativado no backend */
+  recaptchaToken: string;
 }
 
 export interface ResetPasswordDTO {

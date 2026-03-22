@@ -8,10 +8,12 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ModalTemplate } from '@/components/templates/ModalTemplate/ModalTemplate';
+import { TagSelectorModal } from '@/components/molecules/TagSelectorModal/TagSelectorModal';
+import { TagSection } from '@/components/molecules/TagSection/TagSection';
+import { RangeSlider } from '@/components/molecules/RangeSlider/RangeSlider';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
-import { Tag } from '@/components/atoms/Tag/Tag';
-import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { Colors, Spacing } from '@/theme';
 import { SKILLS } from '@/constants/skills';
 import { MUSIC_GENRES } from '@/constants/genres';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
@@ -28,171 +30,120 @@ const GENDERS = ['Todos', 'Masculino', 'Feminino', 'Outro'] as const;
 
 export function FilterModal({ visible, filters, onApply, onClose }: FilterModalProps) {
   const [local, setLocal] = useState<DiscoveryFilters>(filters);
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [showGenresModal, setShowGenresModal] = useState(false);
 
-  const toggleSkill = (skill: string) => {
-    setLocal(prev => ({
-      ...prev,
-      skills: prev.skills.includes(skill)
-        ? prev.skills.filter(s => s !== skill)
-        : [...prev.skills, skill],
-    }));
-  };
+  const removeSkill = (skill: string) =>
+    setLocal(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
 
-  const toggleGenre = (genre: string) => {
-    setLocal(prev => ({
-      ...prev,
-      musicGenres: prev.musicGenres.includes(genre)
-        ? prev.musicGenres.filter(g => g !== genre)
-        : [...prev.musicGenres, genre],
-    }));
-  };
+  const removeGenre = (genre: string) =>
+    setLocal(prev => ({ ...prev, musicGenres: prev.musicGenres.filter(g => g !== genre) }));
+
+  const confirmSkills = (items: string[]) =>
+    setLocal(prev => ({ ...prev, skills: items }));
+
+  const confirmGenres = (items: string[]) =>
+    setLocal(prev => ({ ...prev, musicGenres: items }));
 
   const handleReset = () => setLocal(DEFAULT_FILTERS);
-
   const handleApply = () => onApply(local);
 
   return (
-    <ModalTemplate visible={visible} onClose={onClose}>
-      {/* Cabeçalho */}
-      <View style={styles.header}>
-        <LegatoText variant="sectionTitle" color={Colors.white}>Filtrar Músicos</LegatoText>
-        <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-
-        {/* Skills */}
-        <LegatoText style={styles.label}>Skills</LegatoText>
-        <View style={styles.tagRow}>
-          {SKILLS.map((skill) => {
-            const selected = local.skills.includes(skill);
-            return (
-              <TouchableOpacity key={skill} onPress={() => toggleSkill(skill)}>
-                <Tag
-                  label={skill}
-                  variant={selected ? 'filled' : 'outline'}
-                  color={selected ? Colors.primary : Colors.textSecondaryDark}
-                />
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Gênero */}
-        <LegatoText style={styles.label}>Gênero</LegatoText>
-        <View style={styles.genderRow}>
-          {GENDERS.map((g) => (
-            <TouchableOpacity
-              key={g}
-              style={[styles.genderBtn, local.gender === g && styles.genderBtnActive]}
-              onPress={() => setLocal(prev => ({ ...prev, gender: g }))}
-            >
-              <LegatoText style={[styles.genderLabel, local.gender === g && styles.genderLabelActive]}>
-                {g}
-              </LegatoText>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Faixa etária */}
-        <LegatoText style={styles.label}>Idade: {local.ageMin} — {local.ageMax} anos</LegatoText>
-        <View style={styles.rangeRow}>
-          <View style={styles.rangeControl}>
-            <LegatoText style={styles.rangeCaption}>Mín</LegatoText>
-            <View style={styles.stepper}>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() => setLocal(p => ({ ...p, ageMin: Math.max(16, p.ageMin - 1) }))}
-              >
-                <Ionicons name="remove" size={16} color={Colors.white} />
-              </TouchableOpacity>
-              <LegatoText style={styles.stepValue}>{local.ageMin}</LegatoText>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() => setLocal(p => ({ ...p, ageMin: Math.min(p.ageMax - 1, p.ageMin + 1) }))}
-              >
-                <Ionicons name="add" size={16} color={Colors.white} />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.rangeControl}>
-            <LegatoText style={styles.rangeCaption}>Máx</LegatoText>
-            <View style={styles.stepper}>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() => setLocal(p => ({ ...p, ageMax: Math.max(p.ageMin + 1, p.ageMax - 1) }))}
-              >
-                <Ionicons name="remove" size={16} color={Colors.white} />
-              </TouchableOpacity>
-              <LegatoText style={styles.stepValue}>{local.ageMax}</LegatoText>
-              <TouchableOpacity
-                style={styles.stepBtn}
-                onPress={() => setLocal(p => ({ ...p, ageMax: Math.min(99, p.ageMax + 1) }))}
-              >
-                <Ionicons name="add" size={16} color={Colors.white} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Gêneros musicais */}
-        <LegatoText style={styles.label}>Gênero Musical</LegatoText>
-        <View style={styles.tagRow}>
-          {MUSIC_GENRES.map((genre) => {
-            const selected = local.musicGenres.includes(genre);
-            return (
-              <TouchableOpacity key={genre} onPress={() => toggleGenre(genre)}>
-                <Tag
-                  label={genre}
-                  variant={selected ? 'filled' : 'outline'}
-                  color={selected ? Colors.primary : Colors.textSecondaryDark}
-                />
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Distância */}
-        <LegatoText style={styles.label}>Distância máxima: {local.distanceMax} km</LegatoText>
-        <View style={styles.stepper}>
-          <TouchableOpacity
-            style={styles.stepBtn}
-            onPress={() => setLocal(p => ({ ...p, distanceMax: Math.max(5, p.distanceMax - 5) }))}
-          >
-            <Ionicons name="remove" size={16} color={Colors.white} />
-          </TouchableOpacity>
-          <LegatoText style={styles.stepValue}>{local.distanceMax} km</LegatoText>
-          <TouchableOpacity
-            style={styles.stepBtn}
-            onPress={() => setLocal(p => ({ ...p, distanceMax: Math.min(100, p.distanceMax + 5) }))}
-          >
-            <Ionicons name="add" size={16} color={Colors.white} />
+    <>
+      <ModalTemplate visible={visible} onClose={onClose}>
+        {/* Cabeçalho */}
+        <View style={styles.header}>
+          <LegatoText variant="sectionTitle" color={Colors.white}>Filtrar Músicos</LegatoText>
+          <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.spacer} />
-      </ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
 
-      {/* Ações */}
-      <View style={styles.actions}>
-        <Button
-          label="Resetar"
-          variant="outline"
-          size="md"
-          style={styles.actionBtn}
-          onPress={handleReset}
-        />
-        <Button
-          label="Aplicar Filtros"
-          variant="primary"
-          size="md"
-          style={styles.actionBtn}
-          onPress={handleApply}
-        />
-      </View>
-    </ModalTemplate>
+          {/* Skills */}
+          <TagSection
+            label="Habilidades"
+            selected={local.skills}
+            onRemove={removeSkill}
+            onAdd={() => setShowSkillsModal(true)}
+            tagVariant="filled"
+            tagColor={Colors.primary}
+            emptyMessage="Nenhuma habilidade selecionada"
+          />
+
+          {/* Gêneros musicais */}
+          <TagSection
+            label="Gêneros Musicais"
+            selected={local.musicGenres}
+            onRemove={removeGenre}
+            onAdd={() => setShowGenresModal(true)}
+            tagVariant="outline"
+            tagColor={Colors.primaryLight}
+            emptyMessage="Nenhum gênero selecionado"
+          />
+
+          {/* Gênero */}
+          <LegatoText style={styles.sectionLabel}>Gênero</LegatoText>
+          <View style={styles.genderRow}>
+            {GENDERS.map((g) => (
+              <Button
+                key={g}
+                label={g}
+                variant={local.gender === g ? 'primary' : 'secondary'}
+                size="sm"
+                style={styles.genderBtn}
+                onPress={() => setLocal(prev => ({ ...prev, gender: g }))}
+              />
+            ))}
+          </View>
+
+          {/* Faixa etária */}
+          <RangeSlider
+            label="Idade"
+            unit="anos"
+            min={16}
+            max={99}
+            minValue={local.ageMin}
+            maxValue={local.ageMax}
+            onMinChange={v => setLocal(p => ({ ...p, ageMin: v }))}
+            onMaxChange={v => setLocal(p => ({ ...p, ageMax: v }))}
+          />
+
+          {/* Distância */}
+          <RangeSlider
+            label="Distância"
+            unit="km"
+            min={0}
+            max={100}
+            step={5}
+            minValue={local.distanceMin}
+            maxValue={local.distanceMax}
+            onMinChange={v => setLocal(p => ({ ...p, distanceMin: v }))}
+            onMaxChange={v => setLocal(p => ({ ...p, distanceMax: v }))}
+          />
+
+          <View style={styles.spacer} />
+        </ScrollView>
+
+        {/* Ações */}
+        <View style={styles.actions}>
+          <Button label="Resetar" variant="outline" size="md" style={styles.actionBtn} onPress={handleReset} />
+          <Button label="Aplicar Filtros" variant="primary" size="md" style={styles.actionBtn} onPress={handleApply} />
+        </View>
+      </ModalTemplate>
+
+      <TagSelectorModal
+        visible={showSkillsModal} title="Habilidades"
+        items={SKILLS} selected={local.skills}
+        onConfirm={confirmSkills} onClose={() => setShowSkillsModal(false)}
+      />
+      <TagSelectorModal
+        visible={showGenresModal} title="Gêneros Musicais"
+        items={MUSIC_GENRES} selected={local.musicGenres}
+        onConfirm={confirmGenres} onClose={() => setShowGenresModal(false)}
+      />
+    </>
   );
 }
 
@@ -204,83 +155,24 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   scroll: {
-    maxHeight: 420,
+    maxHeight: 440,
   },
-  label: {
+  sectionLabel: {
     color: Colors.textSecondaryDark,
-    fontSize: Typography.FontSize.xs,
-    fontWeight: Typography.FontWeight.semiBold,
+    fontSize: 11,
+    fontWeight: '600',
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: Spacing.sm,
-    marginTop: Spacing.md,
-  },
-  tagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
-    marginBottom: Spacing.xs,
+    marginTop: Spacing.xs,
   },
   genderRow: {
     flexDirection: 'row',
     gap: Spacing.xs,
+    marginBottom: Spacing.md,
   },
   genderBtn: {
     flex: 1,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  genderBtnActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  genderLabel: {
-    color: Colors.textSecondaryDark,
-    fontSize: Typography.FontSize.xs,
-    fontWeight: Typography.FontWeight.medium,
-  },
-  genderLabelActive: {
-    color: Colors.white,
-  },
-  rangeRow: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  rangeControl: {
-    flex: 1,
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  rangeCaption: {
-    color: Colors.textMuted,
-    fontSize: Typography.FontSize.xxs,
-  },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-  },
-  stepBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceDark,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepValue: {
-    color: Colors.white,
-    fontSize: Typography.FontSize.sm,
-    fontWeight: Typography.FontWeight.semiBold,
-    minWidth: 48,
-    textAlign: 'center',
   },
   spacer: {
     height: Spacing.md,

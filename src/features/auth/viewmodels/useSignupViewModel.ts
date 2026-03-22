@@ -25,6 +25,24 @@ const signupSchema = z.object({
   acceptTerms: z.boolean().refine((val) => val === true, {
     message: 'Aceite os termos para continuar',
   }),
+  birthDate: z
+    .string()
+    .min(10, 'Informe sua data de nascimento')
+    .refine((val) => {
+      const [mm, dd, yyyy] = val.split('/');
+      if (!mm || !dd || !yyyy || yyyy.length !== 4) return false;
+      const date = new Date(`${yyyy}-${mm}-${dd}`);
+      return !isNaN(date.getTime());
+    }, 'Data inválida')
+    .refine((val) => {
+      const [mm, dd, yyyy] = val.split('/');
+      const birth = new Date(`${yyyy}-${mm}-${dd}`);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      return age >= 18;
+    }, 'Você deve ter 18 anos ou mais para se cadastrar'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'As senhas não coincidem',
   path: ['confirmPassword'],
@@ -33,7 +51,7 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export function useSignupViewModel() {
-  const { setAuth } = useAuthStore();
+  const { setAuth, setNeedsOnboarding } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -47,6 +65,7 @@ export function useSignupViewModel() {
       password: '',
       confirmPassword: '',
       acceptTerms: false,
+      birthDate: '',
     },
   });
 
@@ -54,16 +73,22 @@ export function useSignupViewModel() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
+      // Converte MM/DD/YYYY (input do usuário) → YYYY-MM-DD (formato esperado pelo backend)
+      const [mm, dd, yyyy] = data.birthDate.split('/');
+      const isoDate = `${yyyy}-${mm}-${dd}`;
+
       const response = await registerUser({
         email: data.email,
         password: data.password,
         username: data.username,
         displayName: data.displayName,
+        birthDate: isoDate,
         role: 'USER',
+        recaptchaToken: '',
       });
       await storage.setItem(Config.TOKEN_KEY, response.token);
+      setNeedsOnboarding(true);
       setAuth(response.token, response.user);
-      setSuccessMessage('Conta criada com sucesso!');
     } catch (error: any) {
       const msg = error?.response?.data?.message;
       setErrorMessage(msg ?? 'Erro ao criar conta. Este e-mail já pode estar em uso.');

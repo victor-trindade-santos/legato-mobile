@@ -23,9 +23,11 @@ interface AuthState {
   token: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
+  needsOnboarding: boolean;
 
   setAuth: (token: string, user: AuthUser) => void;
   setUser: (user: AuthUser) => void;
+  setNeedsOnboarding: (value: boolean) => void;
   logout: () => void;
 }
 
@@ -33,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   user: null,
   isAuthenticated: false,
+  needsOnboarding: false,
 
   setAuth: (token, user) =>
     set({ token, user, isAuthenticated: true }),
@@ -40,6 +43,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) =>
     set({ user }),
 
+  setNeedsOnboarding: (value) =>
+    set({ needsOnboarding: value }),
+
   logout: () =>
-    set({ token: null, user: null, isAuthenticated: false }),
+    set({ token: null, user: null, isAuthenticated: false, needsOnboarding: false }),
 }));
