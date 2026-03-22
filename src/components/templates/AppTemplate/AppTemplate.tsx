@@ -48,10 +48,13 @@ export function AppTemplate({
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
+    minHeight: 0,
     backgroundColor: Colors.backgroundDark,
   },
   content: {
     flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
     paddingHorizontal: Spacing.screenPaddingH,
   },
   contentNoPadding: {

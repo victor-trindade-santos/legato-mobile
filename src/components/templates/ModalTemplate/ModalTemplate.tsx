@@ -1,6 +1,13 @@
 /**
  * ModalTemplate — Template
  * Bottom sheet / modal overlay genérico.
+ *
+ * Estrutura interna:
+ *   Modal → overlay (TouchableOpacity) + KeyboardAvoidingView (sheet)
+ *     → handle (drag indicator)
+ *     → content View  ← padding horizontal aplicado aqui (mais confiável no web
+ *                        do que no próprio KeyboardAvoidingView)
+ *       → {children}
  */
 
 import React from 'react';
@@ -19,7 +26,9 @@ export function ModalTemplate({ visible, onClose, children }: ModalTemplateProps
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.sheet}>
         <View style={styles.handle} />
-        {children}
+        <View style={styles.content}>
+          {children}
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -32,9 +41,11 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: Colors.surfaceDark,
-    borderTopLeftRadius: BorderRadius.xxl,
-    borderTopRightRadius: BorderRadius.xxl,
-    padding: Spacing.lg,
+    //borderRadius: BorderRadius.xxl,
+    borderBottomEndRadius: BorderRadius.xxl,
+    marginHorizontal: Spacing.screenPaddingH,
+    marginBottom: Spacing.md,
+    paddingTop: Spacing.md,
     paddingBottom: Spacing.xxl,
   },
   handle: {
@@ -44,5 +55,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textMuted,
     alignSelf: 'center',
     marginBottom: Spacing.md,
+  },
+  content: {
+    paddingHorizontal: Spacing.md,
   },
 });

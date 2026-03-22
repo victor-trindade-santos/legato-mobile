@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
 import { AuthHeader } from '@/components/molecules/AuthHeader/AuthHeader';
 import { FormField } from '@/components/molecules/FormField/FormField';
+import { DateInput } from '@/components/molecules/DateInput/DateInput';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Divider } from '@/components/atoms/Divider/Divider';
@@ -28,7 +29,6 @@ export default function SignupScreen() {
   const { form, handleSignup, isLoading, errorMessage } = useSignupViewModel();
   const { control, formState: { errors }, watch, setValue } = form;
   const acceptTerms = watch('acceptTerms');
-  const ageConfirmed = watch('ageConfirmed');
 
   return (
     <AuthTemplate variant="form" 
@@ -86,21 +86,16 @@ export default function SignupScreen() {
           <LegatoText variant="caption" color={Colors.error}>{errors.acceptTerms.message}</LegatoText>
         )}
 
-        {/* Confirmação de idade */}
-        <TouchableOpacity
-          style={styles.termsRow}
-          onPress={() => setValue('ageConfirmed', !ageConfirmed)}
-        >
-          <View style={[styles.checkbox, ageConfirmed ? styles.checkboxChecked : null]}>
-            {ageConfirmed && <Ionicons name="checkmark" size={14} color={Colors.white} />}
-          </View>
-          <LegatoText variant="caption" color={Colors.textSecondaryLight} style={styles.termsText}>
-            Confirmo que tenho 18 anos ou mais (autodeclarado)
-          </LegatoText>
-        </TouchableOpacity>
-        {errors.ageConfirmed && (
-          <LegatoText variant="caption" color={Colors.error}>{errors.ageConfirmed.message}</LegatoText>
-        )}
+        {/* Data de nascimento */}
+        <Controller control={control} name="birthDate" render={({ field: { onChange, value } }) => (
+          <DateInput
+            label="Data de Nascimento"
+            value={value}
+            onChange={onChange}
+            errorMessage={errors.birthDate?.message}
+            containerStyle={fieldStyle}
+          />
+        )} />
 
         {errorMessage && (
           <LegatoText variant="caption" color={Colors.error} style={styles.errorMsg}>{errorMessage}</LegatoText>

@@ -81,9 +81,11 @@ const styles = StyleSheet.create({
   bannerWrapper: {
     width: '100%',
     height: BANNER_HEIGHT,
+    overflow: 'hidden',
   },
   banner: {
-    flex: 1,
+    width: '100%',
+    height: BANNER_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
