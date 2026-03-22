@@ -15,6 +15,7 @@ export function SearchInput({
     isRequired,
     style,
     onSearchPress,
+    onChangeText,
     placeholder,
     value,
     ...inputProps }: SearchInputProps) {
@@ -24,7 +25,7 @@ export function SearchInput({
 
     return (
         <View style={styles.mainContainer}>
-            <Input containerStyle={styles.searchContainer} inputStyle={styles.searchInput} placeholder={placeholder} placeholderTextColor={Colors.textMuted} value={value} {...inputProps} />
+            <Input containerStyle={styles.searchContainer} inputStyle={styles.searchInput} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={Colors.textMuted} value={value} {...inputProps} />
             <Button label="" rightIcon={<Ionicons name="search" size={Spacing.md} color={Colors.textSecondaryDark} />}  style={styles.searchButton} containerStyle={styles.searchButton} onPress={handleSearch} />
         </View>
     );

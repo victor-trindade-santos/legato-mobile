@@ -25,7 +25,10 @@ export default function ChatListScreen() {
     const {
         chatItems,
         isLoading,
-        error
+        error,
+        searchQuery,
+        setSearchQuery,
+        handleSearch
     } = useChatListViewModel();
 
     if (isLoading) return <Spinner fullScreen />;
@@ -34,7 +37,12 @@ export default function ChatListScreen() {
         <AppTemplate noPadding>
             {/* ── Controles rápidos ─────────────────────────── */}
             <View style={styles.searchContainer}>
-                <SearchInput placeholder="Buscar contatos"/>
+                <SearchInput 
+                    placeholder="Buscar contatos"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    onSearchPress={handleSearch}
+                />
             </View>
 
             {/* Lista de chats */}

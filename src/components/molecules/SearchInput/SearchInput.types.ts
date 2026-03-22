@@ -14,4 +14,6 @@ export interface SearchInputProps {
     placeholder?: string;
     /** Valor do campo de busca */
     value?: string;
+    /** Callback para mudança de texto */
+    onChangeText?: (text: string) => void;
 }
