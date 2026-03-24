@@ -43,7 +43,7 @@ export function useChatListViewModel() {
 
         const term = searchQuery.toLowerCase();
         const result = chatItems.filter(item =>
-            item.name.toLowerCase().includes(term)
+            item.otherUserName.toLowerCase().includes(term)
         )
 
         return setFilteredChatItems(result)

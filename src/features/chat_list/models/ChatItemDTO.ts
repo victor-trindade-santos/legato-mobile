@@ -1,7 +1,8 @@
 export interface ChatItemDTO {
     id: string;
-    name: string;
-    lastMessage: string;
-    timeStamp: string;
-    avatarUrl?: string;
+    otherUserId: number;
+    otherUserName: string;
+    otherUserProfilePictureUrl?: string;
+    lastMessageContent: string;
+    lastMessageTimestamp: string;
 }

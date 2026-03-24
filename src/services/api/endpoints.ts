@@ -68,9 +68,10 @@ export const Endpoints = {
 
   //Chat List
   chatListItem:{
-    list: '/chat-list',
-    getById: (id: number) => `/chat/conversations/${id}`,
+    list: '/chats',
+    getById: (id: number) => `/chat/${id}/messages`,
   },
+  
   // Perfis de músicos (tela de perfil completo — diferente do card de discovery)
   musicians: {
     getById: (id: number) => `/musicians/${id}`,

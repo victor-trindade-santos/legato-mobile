@@ -57,15 +57,15 @@ export default function ChatListScreen() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <ChatListItem
-                                userAvatar={item.avatarUrl || ''}
-                                userName={item.name}
-                                lastMessage={item.lastMessage}
-                                timeStamp={item.timeStamp}
+                                userAvatar={item.otherUserProfilePictureUrl || ''}
+                                userName={item.otherUserName}
+                                lastMessage={item.lastMessageContent}
+                                timeStamp={item.lastMessageTimestamp}
                                 onPress={() => {
                                     // TODO: Navegar para ChatConversation
                                     // navigation.navigate('ChatConversation', {
                                     //   conversationId: item.id,
-                                    //   userName: item.name,
+                                    //   userName: item.otherUserName,
                                     // });
                                 }}
                             />
