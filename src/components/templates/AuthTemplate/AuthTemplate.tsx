@@ -29,9 +29,11 @@ type AuthTemplateVariant = 'splash' | 'form';
 interface AuthTemplateProps {
   children: React.ReactNode;
   variant?: AuthTemplateVariant;
+  /** Conteúdo fixo acima do ScrollView — use para o logo/header das telas de form */
+  header?: React.ReactNode;
 }
 
-export function AuthTemplate({ children, variant = 'form' }: AuthTemplateProps) {
+export function AuthTemplate({ children, variant = 'form', header }: AuthTemplateProps) {
   const background = (
     <>
       <Image
@@ -58,6 +60,7 @@ export function AuthTemplate({ children, variant = 'form' }: AuthTemplateProps) 
     <View style={styles.root}>
       {background}
       <SafeAreaView style={styles.fill}>
+        {header && <View>{header}</View>}
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.fill}

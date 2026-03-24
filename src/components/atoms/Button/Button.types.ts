@@ -12,4 +12,5 @@ export interface ButtonProps extends TouchableOpacityProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   containerStyle?:  StyleProp<ViewStyle>;
+  borderRadius?: number;
 }

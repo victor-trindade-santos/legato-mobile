@@ -25,6 +25,7 @@ export function Button({
   disabled,
   leftIcon,
   rightIcon,
+  borderRadius = BorderRadius.lg,
   style,
   containerStyle,
   ...rest
@@ -37,6 +38,7 @@ export function Button({
       disabled={isDisabled}
       style={[
         styles.base,
+        { borderRadius },
         styles[variant],
         styles[size],
         fullWidth && styles.fullWidth,
@@ -74,7 +76,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',

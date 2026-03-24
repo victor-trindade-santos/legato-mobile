@@ -23,6 +23,9 @@ export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promi
     if (filters?.musicGenres?.length) {
       result = result.filter(m => m.musicGenres.some(g => filters.musicGenres!.includes(g)));
     }
+    if (filters?.distanceMin !== undefined) {
+      result = result.filter(m => m.distance >= filters.distanceMin!);
+    }
     if (filters?.distanceMax !== undefined) {
       result = result.filter(m => m.distance <= filters.distanceMax!);
     }

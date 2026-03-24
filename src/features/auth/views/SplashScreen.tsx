@@ -32,7 +32,7 @@ export default function SplashScreen() {
       <View style={styles.logoContainer}>
         <Icon
           variant="image"
-          source={require('@/assets/icons/LETATO_ICON_VERTICAL.svg')}
+          source={require('@/assets/icons/LEGATO_ICON_VERTICAL.svg')}
           width={Spacing.logoMd}
           aspectRatio={0.6}
           resizeMode="contain"
@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   actions: {
-    width: '100%',
     marginBottom: Spacing.xl,
   },
   gap: {

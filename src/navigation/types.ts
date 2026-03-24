@@ -39,5 +39,6 @@ export type MusicianProfileRouteParams = {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  ProfileEdit: undefined;
   MusicianProfile: MusicianProfileRouteParams;
 };
