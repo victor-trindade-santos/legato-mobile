@@ -19,5 +19,5 @@ export const Config = {
    * DEV: define true para usar dados mock na tela de Descoberta (sem backend).
    * Lembre de voltar para false antes de commitar.
    */
-  DEV_USE_MOCK: true,
+  DEV_USE_MOCK: false,
 } as const;
