@@ -44,7 +44,6 @@ export function Input({
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [dynamicHeight, setDynamicHeight] = useState<number | undefined>(undefined);
 
   const theme = THEME[variant];
 
@@ -64,21 +63,17 @@ export function Input({
           styles.input,
           { color: theme.text },
           multiline && styles.inputMultiline,
-          multiline && dynamicHeight ? { height: dynamicHeight } : undefined,
           { outline: 'none' } as any,
           style,
         ]}
         multiline={multiline}
         numberOfLines={numberOfLines}
+        scrollEnabled={multiline ? false : undefined}
         textAlignVertical={multiline ? 'top' : 'center'}
         placeholderTextColor={Colors.textMuted}
         underlineColorAndroid="transparent"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        onContentSizeChange={multiline
-          ? (e) => setDynamicHeight(Math.max(styles.inputMultiline.minHeight, e.nativeEvent.contentSize.height))
-          : undefined
-        }
         secureTextEntry={isPassword && !showPassword}
         autoCapitalize={isPassword ? 'none' : rest.autoCapitalize}
         {...rest}
