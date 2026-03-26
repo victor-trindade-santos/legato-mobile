@@ -29,7 +29,7 @@ import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
 
-const coverImage = require('@/assets/images/BACKGROUND_SPLASH.png');
+const fallbackCover = require('@/assets/images/BACKGROUND_SPLASH.png');
 
 type MusicianProfileRoute = RouteProp<RootStackParamList, 'MusicianProfile'>;
 type MusicianProfileNav = StackNavigationProp<RootStackParamList, 'MusicianProfile'>;
@@ -87,7 +87,17 @@ export default function MusicianProfileScreen() {
 
         {/* ── Hero (capa + avatar) ───────────────────────── */}
         <View style={styles.heroArea}>
-          <ImageBackground source={coverImage} resizeMode="cover" style={styles.cover}>
+          <ImageBackground
+            source={
+              profile.bannerUrl
+                ? { uri: profile.bannerUrl }
+                : profile.photos[0]
+                ? { uri: profile.photos[0] }
+                : fallbackCover
+            }
+            resizeMode="cover"
+            style={styles.cover}
+          >
             <View style={styles.coverOverlay} />
             <View style={styles.heroHeader}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>

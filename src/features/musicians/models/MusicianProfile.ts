@@ -14,7 +14,9 @@ export interface MusicianProfileDTO {
   username: string;
   displayName: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   bio?: string;
+  objective?: string;
   location?: string;
   skills: string[];
   musicGenres: string[];
@@ -45,11 +47,13 @@ export interface PublicMusicianProfile {
   username: string;
   displayName: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   bio: string;
   location?: string;
   skills: string[];
   musicGenres: string[];
   objective: string;
+  photos: string[];
   stats: ProfileStats;
   favoriteArtists: FavoriteArtist[];
 }

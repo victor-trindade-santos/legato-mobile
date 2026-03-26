@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/store/authStore';
 import { saveProfile } from '../services/profileEditService';
+import { mediaUpload } from '@/utils/mediaUpload';
 import type { TabItem } from '@/components/molecules/TabBar/TabBar.types';
 
 const schema = z.object({
@@ -23,6 +24,7 @@ const schema = z.object({
     .min(3, 'Username deve ter pelo menos 3 caracteres')
     .regex(/^[a-zA-Z0-9_]+$/, 'Apenas letras, números e _'),
   bio: z.string().max(300, 'Máximo 300 caracteres').optional(),
+  objective: z.string().max(200, 'Máximo 200 caracteres').optional(),
   skills: z.array(z.string()),
   musicGenres: z.array(z.string()),
   instagram: z.string().optional(),
@@ -48,9 +50,15 @@ export function useProfileEditViewModel() {
   const [activeTab, setActiveTab] = useState('tudo');
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showGenresModal, setShowGenresModal] = useState(false);
+  const [showBioObjectiveModal, setShowBioObjectiveModal] = useState(false);
   const [scrollAreaHeight, setScrollAreaHeight] = useState(0);
   const onScrollAreaLayout = (e: LayoutChangeEvent) =>
     setScrollAreaHeight(e.nativeEvent.layout.height);
+
+  // Mídia — URIs locais antes do upload real ao backend
+  const [localAvatarUri, setLocalAvatarUri] = useState<string | undefined>(undefined);
+  const [bannerUri, setBannerUri] = useState<string | undefined>(undefined);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const form = useForm<ProfileEditFormData>({
     resolver: zodResolver(schema),
@@ -58,6 +66,7 @@ export function useProfileEditViewModel() {
       displayName: user?.displayName ?? '',
       username: user?.username ?? '',
       bio: '',
+      objective: '',
       skills: [],
       musicGenres: [],
       instagram: '',
@@ -71,6 +80,8 @@ export function useProfileEditViewModel() {
   const { watch, setValue } = form;
   const selectedSkills = watch('skills');
   const selectedGenres = watch('musicGenres');
+  const bioValue = watch('bio');
+  const objectiveValue = watch('objective');
 
   const removeSkill = (skill: string) =>
     setValue('skills', selectedSkills.filter((s) => s !== skill), { shouldValidate: true });
@@ -84,6 +95,27 @@ export function useProfileEditViewModel() {
   const confirmGenres = (items: string[]) =>
     setValue('musicGenres', items, { shouldValidate: true });
 
+  // ── Handlers de mídia ─────────────────────────────────────────────────
+
+  const handlePickAvatar = async () => {
+    const uri = await mediaUpload.pickImage([1, 1]);
+    if (uri) setLocalAvatarUri(uri);
+  };
+
+  const handlePickBanner = async () => {
+    const uri = await mediaUpload.pickImage([16, 9]);
+    if (uri) setBannerUri(uri);
+  };
+
+  const handlePickPhoto = async () => {
+    if (photos.length >= 4) return;
+    const uri = await mediaUpload.pickImage([1, 1]);
+    if (uri) setPhotos((prev) => [...prev, uri]);
+  };
+
+  const removePhoto = (index: number) =>
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+
   const handleSave = form.handleSubmit(async (data) => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -92,6 +124,9 @@ export function useProfileEditViewModel() {
         displayName: data.displayName,
         username: data.username,
         bio: data.bio || undefined,
+        objective: data.objective || undefined,
+        bannerUrl: bannerUri,
+        photos: photos.length > 0 ? photos : undefined,
         skills: data.skills,
         musicGenres: data.musicGenres,
         socialLinks: {
@@ -122,7 +157,9 @@ export function useProfileEditViewModel() {
     errorMessage,
     isOnboarding: needsOnboarding,
     displayName: user?.displayName ?? '',
-    avatarUri: user?.avatarUrl,
+    avatarUri: localAvatarUri ?? user?.avatarUrl,
+    bioValue,
+    objectiveValue,
     // tabs
     tabs: PROFILE_EDIT_TABS,
     activeTab,
@@ -134,6 +171,9 @@ export function useProfileEditViewModel() {
     showGenresModal,
     openGenresModal: () => setShowGenresModal(true),
     closeGenresModal: () => setShowGenresModal(false),
+    showBioObjectiveModal,
+    openBioObjectiveModal: () => setShowBioObjectiveModal(true),
+    closeBioObjectiveModal: () => setShowBioObjectiveModal(false),
     // tags
     selectedSkills,
     selectedGenres,
@@ -141,6 +181,13 @@ export function useProfileEditViewModel() {
     removeGenre,
     confirmSkills,
     confirmGenres,
+    // mídia
+    bannerUri,
+    photos,
+    handlePickAvatar,
+    handlePickBanner,
+    handlePickPhoto,
+    removePhoto,
     // layout
     scrollAreaHeight,
     onScrollAreaLayout,

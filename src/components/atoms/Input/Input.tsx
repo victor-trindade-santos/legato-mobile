@@ -50,6 +50,7 @@ export function Input({
   return (
     <View
       style={[
+
         styles.container,
         { backgroundColor: theme.background, borderColor: theme.border },
         multiline && styles.containerMultiline,
@@ -75,6 +76,7 @@ export function Input({
         secureTextEntry={isPassword && !showPassword}
         autoCapitalize={isPassword ? 'none' : rest.autoCapitalize}
         {...rest}
+        
       />
       {isPassword && (
         <TouchableOpacity

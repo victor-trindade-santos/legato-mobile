@@ -60,17 +60,20 @@ export function useMusicianProfileViewModel(musicianId: number) {
   const profile = useMemo<PublicMusicianProfile | null>(() => {
     if (!musician) return null;
     const bio = musician.bio ?? 'Sem bio disponível.';
+    // Fallback de objetivo: usa primeira frase da bio se campo não veio do backend
     const firstSentence = musician.bio?.split('.')[0]?.trim();
     return {
       id: musician.id,
       username: musician.username,
       displayName: musician.displayName,
       avatarUrl: musician.avatarUrl,
+      bannerUrl: musician.bannerUrl,
       bio,
       location: musician.location,
       skills: musician.skills,
       musicGenres: musician.musicGenres,
-      objective: firstSentence ? `${firstSentence}.` : 'Sem objetivo definido.',
+      objective: musician.objective ?? (firstSentence ? `${firstSentence}.` : 'Sem objetivo definido.'),
+      photos: musician.photos ?? [],
       stats: { connections: 0, followers: 0, posts: 0 },
       favoriteArtists: favoriteArtistsData,
     };

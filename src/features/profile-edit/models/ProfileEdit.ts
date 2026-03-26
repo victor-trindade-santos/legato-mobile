@@ -15,6 +15,9 @@ export interface ProfileEditPayload {
   displayName: string;
   username: string;
   bio?: string;
+  objective?: string;
+  bannerUrl?: string;
+  photos?: string[];
   skills: string[];
   musicGenres: string[];
   socialLinks: SocialLinks;
