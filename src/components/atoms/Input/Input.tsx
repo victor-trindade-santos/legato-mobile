@@ -40,6 +40,8 @@ export function Input({
   multiline = false,
   numberOfLines,
   style,
+  containerStyle,
+  inputStyle,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -51,6 +53,7 @@ export function Input({
     <View
       style={[
         styles.container,
+        containerStyle,
         { backgroundColor: theme.background, borderColor: theme.border },
         multiline && styles.containerMultiline,
         isFocused && styles.focused,
