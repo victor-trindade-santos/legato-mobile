@@ -42,6 +42,11 @@ export default function ChatListScreen() {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onSearchPress={handleSearch}
+                    inputThemeOverride={{
+                        background: styles.searchContainer.backgroundColor,
+                        text: styles.searchContainer.color,
+                        border: styles.searchContainer.borderColor,
+                    }}
                 />
             </View>
 
@@ -79,9 +84,11 @@ export default function ChatListScreen() {
 
 const styles = StyleSheet.create({
     searchContainer: {
-
         marginTop: Spacing.sm,
         marginBottom: Spacing.md,
+        backgroundColor: Colors.transparent,
+        borderColor: Colors.transparent,
+        color: Colors.textPrimaryDark,  
     },
     chatListContainer: {
         flexDirection: 'column',

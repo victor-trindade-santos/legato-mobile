@@ -16,4 +16,10 @@ export interface SearchInputProps {
     value?: string;
     /** Callback para mudança de texto */
     onChangeText?: (text: string) => void;
+    /** Permite customizar as cores do Input interno */
+    inputThemeOverride?: {
+        background?: string;
+        border?: string;
+        text?: string;
+    }
 }
