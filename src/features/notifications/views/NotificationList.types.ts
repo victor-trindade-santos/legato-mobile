@@ -1,15 +1,13 @@
-import type { NotificationData } from '@/components/molecules/NotificationItem/NotificationItem.types';
+import type { Notification } from '../models/Notification';
+import type { NotificationConfig, NotificationAction } from '../config/notificationRegistry';
+
+export interface EnrichedNotification {
+  notification: Notification;
+  config: NotificationConfig;
+}
 
 export interface NotificationListProps {
-  /** Lista de notificações recebida do ViewModel via View */
-  notifications: NotificationData[];
-
-  /** Callback chamado ao tocar em qualquer item (marca como lida) */
-  onMarkRead: (id: number) => void;
-
-  /** Callback para notificações de tipo 'connection' — aceitar pedido */
-  onAccept?: (id: number) => void;
-
-  /** Callback para notificações de tipo 'connection' — recusar pedido */
-  onDecline?: (id: number) => void;
+  items: EnrichedNotification[];
+  onPress: (notification: Notification) => void;
+  onAction: (notification: Notification, action: NotificationAction) => void;
 }

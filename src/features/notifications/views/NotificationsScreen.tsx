@@ -1,46 +1,12 @@
 /**
  * NotificationsScreen — View (Notificações)
- * ══════════════════════════════════════════════════
- * CAMADA: View (MVVM) — Responsabilidade de ULISSES
  *
- * Responsabilidade desta camada:
- * - Conectar o ViewModel aos componentes visuais
- * - Definir o layout de tela (SafeAreaView, header)
- * - Delegar a renderização de listas ao Organism
- * - NÃO contém lógica de negócio nem chamadas de API
+ * Conecta o ViewModel aos componentes visuais.
+ * Sem lógica de negócio — apenas layout e repasse de dados.
  *
- * ──────────────────────────────────────────────────
- * FLUXO DE DADOS (para referência):
- *
- *   API (Spring Boot)
- *     ↓
- *   notificationService.ts       ← Service
- *     ↓
- *   useNotificationsViewModel    ← ViewModel (TanStack Query + Zustand)
- *     ↓
- *   NotificationsScreen          ← View (este arquivo)
- *     ↓
- *   NotificationList             ← Organism
- *     ↓
- *   NotificationItem             ← Molecule
- *     ↓
- *   Avatar / LegatoText / Button ← Atoms
- *
- * ──────────────────────────────────────────────────
- * BADGE DA TAB BAR:
- * O badge de notificações NÃO é gerenciado aqui.
- * O useNotificationsViewModel atualiza o Zustand (notificationStore)
- * e o MainNavigator lê o unreadCount diretamente do store.
- *
- * ──────────────────────────────────────────────────
- * PARA CRIAR UMA NOVA FEATURE, SIGA ESTA ORDEM:
- *   1. models/   → interface TypeScript
- *   2. services/ → chamadas Axios
- *   3. viewmodels/ → TanStack Query + mutations + Zustand
- *   4. views/    → componentes visuais da feature (lista, card) + tela final
- *   6. Registrar rota em MainNavigator.tsx
- *   7. Adicionar tipo de rota em navigation/types.ts
- * ──────────────────────────────────────────────────
+ * Fluxo:
+ *   API → notificationService → useNotificationsViewModel
+ *     → NotificationsScreen → NotificationList → NotificationItem
  */
 
 import React from 'react';
@@ -54,16 +20,15 @@ import { Colors, Spacing } from '@/theme';
 import { useNotificationsViewModel } from '../viewmodels/useNotificationsViewModel';
 
 export default function NotificationsScreen() {
-  // ViewModel expõe dados e ações — a View não sabe como são obtidos
   const {
-    notifications,
+    enrichedNotifications,
     isLoading,
     hasUnread,
-    markAsRead,
+    handlePress,
+    handleAction,
     markAllAsRead,
   } = useNotificationsViewModel();
 
-  // Estado de carregamento: Spinner fullscreen enquanto a query não resolve
   if (isLoading) return <Spinner fullScreen />;
 
   return (
@@ -74,11 +39,6 @@ export default function NotificationsScreen() {
         <LegatoText variant="subtitle" color={Colors.white}>
           Notificações
         </LegatoText>
-
-        {/*
-         * Botão "Marcar todas como lidas"
-         * Só renderiza quando há notificações não lidas (hasUnread do ViewModel)
-         */}
         {hasUnread && (
           <TouchableOpacity onPress={markAllAsRead} style={styles.markAllBtn}>
             <Ionicons name="checkmark-done" size={18} color={Colors.primary} />
@@ -88,18 +48,10 @@ export default function NotificationsScreen() {
       </View>
 
       {/* ── Lista ──────────────────────────────────────────── */}
-      {/*
-       * NotificationList é o Organism que sabe renderizar a lista.
-       * A View apenas repassa os dados e callbacks recebidos do ViewModel.
-       *
-       * onAccept / onDecline: hoje apenas marcam como lida.
-       * Futuramente: integrar com connectionService.accept(id) / .decline(id)
-       */}
       <NotificationList
-        notifications={notifications}
-        onMarkRead={markAsRead}
-        onAccept={(id) => markAsRead(id)}
-        onDecline={(id) => markAsRead(id)}
+        items={enrichedNotifications}
+        onPress={handlePress}
+        onAction={handleAction}
       />
 
     </SafeAreaView>
