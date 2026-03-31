@@ -23,6 +23,8 @@ import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Divider } from '@/components/atoms/Divider/Divider';
+import { SelectField } from '@/components/molecules/SelectField/SelectField';
+import { ModalTriggerField } from '@/components/molecules/ModalTriggerField/ModalTriggerField';
 import { Colors, Spacing, BorderRadius } from '@/theme';
 import { SKILLS } from '@/constants/skills';
 import { MUSIC_GENRES } from '@/constants/genres';
@@ -31,6 +33,13 @@ import { BioObjectiveModal } from './BioObjectiveModal';
 
 const MAX_PHOTOS = 4;
 const PHOTO_SIZE = 72;
+
+const SEX_OPTIONS = [
+  { label: 'Masculino', value: 'MALE' },
+  { label: 'Feminino', value: 'FEMALE' },
+  { label: 'Outro', value: 'OTHER' },
+  { label: 'Prefiro não dizer', value: 'PREFER_NOT_TO_SAY' },
+];
 
 export default function ProfileEditScreen() {
   const {
@@ -62,6 +71,7 @@ export default function ProfileEditScreen() {
     removeGenre,
     confirmSkills,
     confirmGenres,
+    selectedSex,
     bannerUri,
     photos,
     handlePickAvatar,
@@ -123,27 +133,67 @@ export default function ProfileEditScreen() {
               )}
             />
 
-            {/* Bio & Objetivo — abre modal ao tocar */}
-            <TouchableOpacity style={styles.bioCard} onPress={openBioObjectiveModal} activeOpacity={0.75}>
-              <View style={styles.bioCardHeader}>
-                <LegatoText variant="label" color={Colors.textSecondaryDark}>
-                  BIO &amp; OBJETIVO
-                </LegatoText>
-                <Ionicons name="pencil-outline" size={Spacing.iconSm} color={Colors.primaryLight} />
-              </View>
-              <LegatoText variant="bodySmall" color={Colors.textSecondaryDark} numberOfLines={2}>
-                {bioValue || 'Toque para adicionar sua bio...'}
-              </LegatoText>
-              {objectiveValue ? (
-                <View style={styles.objectiveRow}>
-                  <Ionicons name="flag-outline" size={Spacing.iconSm} color={Colors.success} />
-                  <LegatoText variant="caption" color={Colors.textMuted} style={styles.objectiveText} numberOfLines={1}>
-                    {objectiveValue}
-                  </LegatoText>
-                </View>
-              ) : null}
-            </TouchableOpacity>
+            <Controller
+              control={control}
+              name="sex"
+              render={({ field: { onChange, value } }) => (
+                <SelectField
+                  label="Gênero"
+                  options={SEX_OPTIONS}
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Selecione seu gênero..."
+                  variant="dark"
+                />
+              )}
+            />
 
+            {/* Bio & Objetivo — abre modal ao tocar */}
+            <ModalTriggerField
+              label="Bio & Objetivo"
+              value={bioValue || objectiveValue ? `${bioValue ?? ''}${objectiveValue ? ` · ${objectiveValue}` : ''}` : undefined}
+              placeholder="Toque para adicionar sua bio..."
+              onPress={openBioObjectiveModal}
+              variant="dark"
+            />
+
+            <Divider marginV={Spacing.md} color={Colors.border} />
+
+            {/* ── Localização ─────────────────────────────────── */}
+            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+              LOCALIZAÇÃO
+            </LegatoText>
+
+            <Controller
+              control={control}
+              name="city"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="Cidade"
+                  placeholder="Ex: São Paulo"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="state"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="Estado"
+                  placeholder="Ex: SP"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="country"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="País"
+                  placeholder="Ex: Brasil"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+            
             <Divider marginV={Spacing.md} color={Colors.border} />
 
             {/* ── Fotos do Perfil ─────────────────────────────── */}
@@ -200,6 +250,8 @@ export default function ProfileEditScreen() {
               tagColor={Colors.primaryLight}
               emptyMessage="Nenhum gênero selecionado"
             />
+
+            
 
             <Divider marginV={Spacing.md} color={Colors.border} />
 
@@ -307,31 +359,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     marginTop: Spacing.sm,
     letterSpacing: 0.8,
-  },
-
-  // Card de bio (touchable)
-  bioCard: {
-    backgroundColor: Colors.surfaceDark,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.sm,
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
-  },
-  bioCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  objectiveRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginTop: Spacing.xs,
-  },
-  objectiveText: {
-    flex: 1,
   },
 
   // Grade de fotos

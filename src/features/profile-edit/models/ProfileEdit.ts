@@ -1,6 +1,8 @@
 /**
- * ProfileEdit — Model
- * Tipos para o formulário de edição do próprio perfil.
+ * ProfileEdit — Model interno
+ *
+ * Tipos usados pelo formulário e ViewModel.
+ * O contrato com o backend está em ProfileEditDTO.ts.
  */
 
 export interface SocialLinks {
@@ -9,16 +11,4 @@ export interface SocialLinks {
   youtube?: string;
   soundcloud?: string;
   website?: string;
-}
-
-export interface ProfileEditPayload {
-  displayName: string;
-  username: string;
-  bio?: string;
-  objective?: string;
-  bannerUrl?: string;
-  photos?: string[];
-  skills: string[];
-  musicGenres: string[];
-  socialLinks: SocialLinks;
 }

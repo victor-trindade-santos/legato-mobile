@@ -68,7 +68,6 @@ export function Input({
         ]}
         multiline={multiline}
         numberOfLines={numberOfLines}
-        scrollEnabled={multiline ? false : undefined}
         textAlignVertical={multiline ? 'top' : 'center'}
         placeholderTextColor={Colors.textMuted}
         underlineColorAndroid="transparent"
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
     height: Spacing.buttonHeightMd,
   },
   containerMultiline: {
-    height: undefined,
+    height: 'auto',
     alignItems: 'flex-start',
     paddingVertical: Spacing.sm,
   },
@@ -114,7 +113,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
   },
   inputMultiline: {
-    minHeight: 96,
+    height: undefined,
+    textAlignVertical: 'top',
     paddingVertical: 0,
   },
   focused: {

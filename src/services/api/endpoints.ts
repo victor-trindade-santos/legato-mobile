@@ -12,7 +12,9 @@ export const Endpoints = {
   // Usuários
   users: {
     getByUsername: (username: string) => `/users/${username}`,
-    update: '/users/me',
+    update: '/users',
+    uploadImage: '/users/upload-image',
+    cardFile: '/users/card-file',
     follow: (id: number) => `/users/${id}/follow`,
     unfollow: (id: number) => `/users/${id}/unfollow`,
     suggested: '/users/suggested',
