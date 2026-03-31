@@ -16,6 +16,7 @@ import { useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Spacing } from '@/theme';
+import { useAuthStore } from '@/store/authStore';
 import { getMusicianById, getFavoriteArtists } from '../services/musicianProfileService';
 import type { PublicMusicianProfile, ProfileTab } from '../models/MusicianProfile';
 
@@ -30,6 +31,7 @@ const PROFILE_TABS: Array<{ key: ProfileTab; label: string }> = [
 
 export function useMusicianProfileViewModel(musicianId: number) {
   const { width: screenWidth } = useWindowDimensions();
+  const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<ProfileTab>('overview');
   const [isConnected, setIsConnected] = useState(false);
   const [isFavoritesPanelOpen, setIsFavoritesPanelOpen] = useState(false);
@@ -57,27 +59,45 @@ export function useMusicianProfileViewModel(musicianId: number) {
   }, [favoriteArtistsData, screenWidth]);
 
   // Compõe o perfil público a partir do DTO bruto
+  // Fallback: quando a API falha para o próprio perfil, usa dados do authStore
   const profile = useMemo<PublicMusicianProfile | null>(() => {
-    if (!musician) return null;
-    const bio = musician.bio ?? 'Sem bio disponível.';
+    const source = musician ?? (
+      musicianId === user?.id && user
+        ? {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            avatarUrl: user.avatarUrl,
+            bannerUrl: undefined,
+            bio: undefined,
+            location: undefined,
+            skills: [] as string[],
+            musicGenres: [] as string[],
+            photos: [] as string[],
+            objective: undefined,
+          }
+        : null
+    );
+    if (!source) return null;
+    const bio = source.bio ?? 'Sem bio disponível.';
     // Fallback de objetivo: usa primeira frase da bio se campo não veio do backend
-    const firstSentence = musician.bio?.split('.')[0]?.trim();
+    const firstSentence = source.bio?.split('.')[0]?.trim();
     return {
-      id: musician.id,
-      username: musician.username,
-      displayName: musician.displayName,
-      avatarUrl: musician.avatarUrl,
-      bannerUrl: musician.bannerUrl,
+      id: source.id,
+      username: source.username,
+      displayName: source.displayName,
+      avatarUrl: source.avatarUrl,
+      bannerUrl: source.bannerUrl,
       bio,
-      location: musician.location,
-      skills: musician.skills,
-      musicGenres: musician.musicGenres,
-      objective: musician.objective ?? (firstSentence ? `${firstSentence}.` : 'Sem objetivo definido.'),
-      photos: musician.photos ?? [],
+      location: source.location,
+      skills: source.skills ?? [],
+      musicGenres: source.musicGenres ?? [],
+      objective: source.objective ?? (firstSentence ? `${firstSentence}.` : 'Sem objetivo definido.'),
+      photos: source.photos ?? [],
       stats: { connections: 0, followers: 0, posts: 0 },
       favoriteArtists: favoriteArtistsData,
     };
-  }, [musician, favoriteArtistsData]);
+  }, [musician, favoriteArtistsData, user, musicianId]);
 
   return {
     profile,

@@ -15,7 +15,7 @@ export type MainTabParamList = {
   Feed: undefined;
   Collaborations: undefined;
   Notifications: undefined;
-  Profile: { username?: string };
+  Profile: { musicianId?: number; displayName?: string };
 };
 
 export type ProfileStackParamList = {

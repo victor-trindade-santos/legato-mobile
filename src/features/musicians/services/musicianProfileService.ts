@@ -14,11 +14,19 @@ import { Config } from '@/constants/config';
 import { MOCK_MUSICIANS } from '@/features/discovery/mocks/musicians.mock';
 import type { MusicianProfileDTO, FavoriteArtist } from '../models/MusicianProfile';
 
+/** Envelope padrão do backend */
+interface BackendEnvelope<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
+
 export async function getMusicianById(musicianId: number): Promise<MusicianProfileDTO | null> {
   if (Config.DEV_USE_MOCK) {
-    const mock = MOCK_MUSICIANS.find((m) => m.id === musicianId) ?? null;
+    // Fallback para o primeiro mock quando o ID não existe nos dados locais
+    // (ex: ID real do backend não bate com os IDs fixos do mock)
+    const mock = MOCK_MUSICIANS.find((m) => m.id === musicianId) ?? MOCK_MUSICIANS[0];
     if (!mock) return null;
-    // Mapeia apenas os campos do perfil (sem os campos específicos de discovery: distance, age, gender)
     return {
       id: mock.id,
       username: mock.username,
@@ -33,8 +41,10 @@ export async function getMusicianById(musicianId: number): Promise<MusicianProfi
   }
 
   try {
-    const res = await api.get<MusicianProfileDTO>(Endpoints.musicians.getById(musicianId));
-    return res.data;
+    const res = await api.get<BackendEnvelope<MusicianProfileDTO>>(
+      Endpoints.musicians.getById(musicianId),
+    );
+    return res.data.data ?? null;
   } catch {
     return null;
   }

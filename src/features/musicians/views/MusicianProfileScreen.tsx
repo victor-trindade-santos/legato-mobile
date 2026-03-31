@@ -27,6 +27,8 @@ import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
+import { useAuthStore } from '@/store/authStore';
+import { AppHeader } from '@/components/molecules/AppHeader/AppHeader';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
 
 const fallbackCover = require('@/assets/images/BACKGROUND_SPLASH.png');
@@ -43,7 +45,9 @@ const TAB_PLACEHOLDER_TEXT: Record<Exclude<ProfileTab, 'overview'>, string> = {
 export default function MusicianProfileScreen() {
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
+  const { user } = useAuthStore();
   const { displayName, musicianId } = route.params;
+  const isOwnProfile = musicianId === user?.id;
 
   const {
     profile,
@@ -64,11 +68,13 @@ export default function MusicianProfileScreen() {
   if (!profile) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.fallbackHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-            <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
+        {!isOwnProfile && (
+          <View style={styles.fallbackHeader}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+              <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.fallbackContent}>
           <LegatoText variant="subtitle" color={Colors.white} align="center">
             {displayName ?? 'Perfil do músico'}
@@ -83,6 +89,7 @@ export default function MusicianProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isOwnProfile && <AppHeader hideSearch />}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         {/* ── Hero (capa + avatar) ───────────────────────── */}
@@ -100,9 +107,13 @@ export default function MusicianProfileScreen() {
           >
             <View style={styles.coverOverlay} />
             <View style={styles.heroHeader}>
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-                <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-              </TouchableOpacity>
+              {isOwnProfile ? (
+                <View style={styles.iconBtn} />
+              ) : (
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+                  <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity style={styles.iconBtn}>
                 <Ionicons name="ellipsis-horizontal" size={Spacing.iconLg} color={Colors.white} />
               </TouchableOpacity>
@@ -132,25 +143,40 @@ export default function MusicianProfileScreen() {
             </View>
           </View>
 
-          {/* ── Ações (conectar / mensagem) ────────────────── */}
+          {/* ── Ações ─────────────────────────────────────── */}
           <View style={styles.actionsRow}>
-            <Button
-              label={isConnected ? 'Conectado' : 'Conectar'}
-              variant={isConnected ? 'primary' : 'outline'}
-              size="md"
-              onPress={toggleConnection}
-              leftIcon={
-                <Ionicons
-                  name={isConnected ? 'person' : 'person-add'}
-                  size={Spacing.iconSm}
-                  color={Colors.white}
+            {isOwnProfile ? (
+              <Button
+                label="Editar Perfil"
+                variant="outline"
+                size="md"
+                onPress={() => navigation.navigate('ProfileEdit')}
+                leftIcon={
+                  <Ionicons name="pencil-outline" size={Spacing.iconSm} color={Colors.white} />
+                }
+                style={styles.connectButton}
+              />
+            ) : (
+              <>
+                <Button
+                  label={isConnected ? 'Conectado' : 'Conectar'}
+                  variant={isConnected ? 'primary' : 'outline'}
+                  size="md"
+                  onPress={toggleConnection}
+                  leftIcon={
+                    <Ionicons
+                      name={isConnected ? 'person' : 'person-add'}
+                      size={Spacing.iconSm}
+                      color={Colors.white}
+                    />
+                  }
+                  style={styles.connectButton}
                 />
-              }
-              style={styles.connectButton}
-            />
-            <TouchableOpacity style={styles.messageButton}>
-              <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.messageButton}>
+                  <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* ── Stats ─────────────────────────────────────── */}

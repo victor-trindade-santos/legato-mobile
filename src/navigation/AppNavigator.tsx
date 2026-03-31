@@ -74,21 +74,18 @@ export default function AppNavigator() {
 
   return (
     <Root.Navigator screenOptions={{ headerShown: false }}>
-      {!isAuthenticated ? (
-        // Não autenticado → fluxo de auth
-        <Root.Screen name="Auth" component={AuthNavigator} />
-      ) : needsOnboarding ? (
-        // Onboarding: ProfileEdit na frente (sem abas visíveis), Main atrás no stack
+      {isAuthenticated && needsOnboarding ? (
+        // Onboarding: ProfileEdit é o único screen — quando needsOnboarding
+        // vira false, o bloco troca INTEIRO e ProfileEdit some do stack.
+        // React Navigation não tem outra opção senão mostrar Main.
+        <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
+      ) : isAuthenticated ? (
         <>
-          <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
           <Root.Screen name="Main" component={MainNavigator} />
+          <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
         </>
       ) : (
-        // App normal: Main na frente (com abas), ProfileEdit acessível por navigation.navigate
-        <>
-          <Root.Screen name="Main" component={MainNavigator} />
-          <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
-        </>
+        <Root.Screen name="Auth" component={AuthNavigator} />
       )}
       <Root.Screen
         name="MusicianProfile"
