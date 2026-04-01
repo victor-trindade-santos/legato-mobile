@@ -1,0 +1,84 @@
+/**
+ * ChatListItem - Molecule
+ * 
+ * Estrutura -
+ * - Avatar do contato - Atoms/Avatar
+ * - Nome do contato - Atoms/Text
+ * - Última mensagem - Atoms/Text
+ * - Data da última mensagem - Atoms/Text
+ * 
+ * Usado em ChatListScreen:
+ *  <ChatListItem key={chatItem.id} chat={chatItem} onPress={() => navigation.navigate('ChatDetail', { chatId: chatItem.id })} />
+ */
+
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Avatar } from '@/components/atoms/Avatar/Avatar';
+import { LegatoText } from '@/components/atoms/Text/Text';
+import { BorderRadius, Colors, FontFamily, FontSize, Spacing } from '@/theme';
+import type { ChatListItemProps } from './ChatListItem.types';
+
+export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, onPress }: ChatListItemProps) {
+    return (
+        <TouchableOpacity style={styles.chatItemContainer} onPress={onPress}>
+            <View style={styles.avatarContainer}>
+                <Avatar size="sm" uri={userAvatar} fallbackInitials={userName} />
+            </View>
+            <View style={styles.textContainer}>
+                <View style={styles.nameRow}>  
+                    <LegatoText style={styles.contactName}>
+                        {userName}
+                    </LegatoText>
+                </View>
+                <View style={styles.messageRow}>
+                    <LegatoText style={styles.lastMessage}>
+                        {lastMessage}
+                    </LegatoText>
+                </View>
+            </View>
+            <View style={styles.timeStampContainer}>
+            <LegatoText style={styles.timeStamp}>
+                {timeStamp}
+            </LegatoText>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+const styles = StyleSheet.create({
+    chatItemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: Spacing.md
+    },
+    avatarContainer: {
+        marginRight: Spacing.md,
+        borderRadius: BorderRadius.lg,
+    },
+    textContainer: {
+        flex: 1,
+    },
+    nameRow: {
+        marginBottom: Spacing.sm,
+    },
+    messageRow: {
+        marginBottom: Spacing.sm,
+    },
+    timeStampContainer: {
+        marginLeft: Spacing.md,
+
+    },
+    contactName: {
+        color: Colors.primary,
+        fontFamily: FontFamily.semiBold,
+        fontSize: FontSize.sm,
+    },
+    lastMessage: {
+        fontSize: FontSize.xs,
+        color: Colors.textSecondaryDark,
+    },
+    timeStamp: {
+        fontSize: FontSize.xs,
+        color: Colors.textSecondaryDark,
+    },
+});

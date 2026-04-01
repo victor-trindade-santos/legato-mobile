@@ -19,6 +19,7 @@ import { TextInput, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing, Typography } from '@/theme';
 import type { InputProps } from './Input.types';
+import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
 const THEME = {
   light: {
@@ -33,25 +34,41 @@ const THEME = {
   },
 };
 
+type InputThemeOverride = {
+  background?: string;
+  border?: string;
+  text?: string;
+}
+
 export function Input({
   hasError = false,
   isPassword = false,
   variant = 'light',
   multiline = false,
+  themeOverride,
   numberOfLines,
   style,
+  containerStyle,
+  inputStyle,
   ...rest
-}: InputProps) {
+}: InputProps & { themeOverride?: InputThemeOverride }) {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const theme = THEME[variant];
+  const baseTheme = THEME[variant];
+
+  const theme = {
+    background: themeOverride?.background || baseTheme.background,
+    border: themeOverride?.border || baseTheme.border,
+    text: themeOverride?.text || baseTheme.text,
+  };
 
   return (
     <View
       style={[
 
         styles.container,
+        containerStyle,
         { backgroundColor: theme.background, borderColor: theme.border },
         multiline && styles.containerMultiline,
         isFocused && styles.focused,

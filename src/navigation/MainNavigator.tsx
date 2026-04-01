@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/authStore';
 import DiscoveryScreen from '@/features/discovery/views/DiscoveryScreen';
 import ConnectionScreen from '@/features/connection/views/ConnectionScreen';
 import NotificationsScreen from '@/features/notifications/views/NotificationsScreen';
+import ChatNavigator from './ChatNavigator';
 
 // Placeholders para as features dos outros devs
 import FeedScreen from '@/features/feed/views/FeedScreen';
@@ -59,6 +60,8 @@ export default function MainNavigator() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Collaborations') {
             iconName = focused ? 'musical-notes' : 'musical-notes-outline';
+          } else if (route.name === 'Chat') {
+            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           } else if (route.name === 'Notifications') {
             iconName = focused ? 'notifications' : 'notifications-outline';
           } else if (route.name === 'Profile') {
@@ -84,6 +87,11 @@ export default function MainNavigator() {
         name="Collaborations"
         component={ConnectionScreen}
         options={{ tabBarLabel: 'Conexões' }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={ChatNavigator}
+        options={{ tabBarLabel: 'Chats' }}
       />
       <Tab.Screen
         name="Notifications"
