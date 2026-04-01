@@ -16,7 +16,7 @@ import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import type { ProfileEditFormData } from '../viewmodels/useProfileEditViewModel';
-import type { UpdateProfileDTO, UploadImageResponse } from '../models/ProfileEditDTO';
+import type { UpdateProfileDTO, UploadImageResponse, BackendEnvelope, UploadedUserData } from '../models/ProfileEditDTO';
 
 /** URIs locais de mídia selecionadas pelo usuário (ainda não enviadas ao servidor) */
 export interface ProfileMediaInput {
@@ -93,11 +93,30 @@ async function uploadCardPhoto(uri: string, index: number): Promise<string> {
 
 // ─── export ───────────────────────────────────────────────────────────────────
 
+/** Dados de perfil retornados após salvar — usados para atualizar o authStore */
+export interface SavedProfileData {
+  avatarUrl?: string;
+  bannerUrl?: string;
+  bio?: string;
+  skills: string[];
+  musicGenres: string[];
+  location?: string;
+  photos: string[];
+}
+
 export async function saveProfile(
   data: ProfileEditFormData,
   media: ProfileMediaInput,
-): Promise<void> {
-  if (Config.DEV_USE_MOCK) return;
+): Promise<SavedProfileData> {
+  if (Config.DEV_USE_MOCK) {
+    return {
+      bio: data.bio,
+      skills: data.skills,
+      musicGenres: data.musicGenres,
+      location: data.city ? `${data.city}${data.state ? `, ${data.state}` : ''}` : undefined,
+      photos: media.photoUris,
+    };
+  }
 
   // 1-3. Upload de imagens (só se forem URIs locais)
   const profilePicture =
@@ -145,5 +164,20 @@ export async function saveProfile(
     ...(data.sex ? { sex: data.sex } : {}),
   };
 
-  await api.put(Endpoints.users.update, dto);
+  const res = await api.put<BackendEnvelope<UploadedUserData>>(Endpoints.users.update, dto);
+  const saved = res.data.data;
+
+  const location = data.city
+    ? `${data.city}${data.state ? `, ${data.state}` : ''}`
+    : undefined;
+
+  return {
+    avatarUrl: saved?.profilePicture ?? profilePicture ?? undefined,
+    bannerUrl: saved?.profileBanner ?? profileBanner ?? undefined,
+    bio: data.bio,
+    skills: data.skills,
+    musicGenres: data.musicGenres,
+    location,
+    photos: saved?.photosCard ?? photosCard,
+  };
 }

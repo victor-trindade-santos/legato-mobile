@@ -51,7 +51,7 @@ export const PROFILE_EDIT_TABS: TabItem[] = [
 
 export function useProfileEditViewModel() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { user, needsOnboarding, setNeedsOnboarding } = useAuthStore();
+  const { user, needsOnboarding, setNeedsOnboarding, setUser } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -133,15 +133,28 @@ export function useProfileEditViewModel() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      await saveProfile(data, {
+      const saved = await saveProfile(data, {
         avatarUri: localAvatarUri,
         bannerUri,
         photoUris: photos,
       });
+      // Persiste os dados do perfil no authStore para o perfil público usar como fallback
+      if (user) {
+        setUser({
+          ...user,
+          avatarUrl: saved.avatarUrl ?? user.avatarUrl,
+          bannerUrl: saved.bannerUrl,
+          bio: saved.bio,
+          skills: saved.skills,
+          musicGenres: saved.musicGenres,
+          location: saved.location,
+          photos: saved.photos,
+        });
+      }
       if (needsOnboarding) {
-        setNeedsOnboarding(false); // AppNavigator troca para Main automaticamente
+        setNeedsOnboarding(false);
       } else {
-        navigation.goBack(); // veio do Profile tab — volta para a tela anterior
+        navigation.goBack();
       }
     } catch {
       setErrorMessage('Erro ao salvar perfil. Tente novamente.');

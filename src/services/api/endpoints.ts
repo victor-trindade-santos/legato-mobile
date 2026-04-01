@@ -11,6 +11,7 @@ export const Endpoints = {
 
   // Usuários
   users: {
+    me: '/users/me',
     getByUsername: (username: string) => `/users/${username}`,
     update: '/users',
     uploadImage: '/users/upload-image',
