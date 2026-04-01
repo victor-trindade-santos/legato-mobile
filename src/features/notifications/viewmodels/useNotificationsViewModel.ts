@@ -1,50 +1,37 @@
 /**
  * useNotificationsViewModel — ViewModel (Notificações)
- * ══════════════════════════════════════════════════
- * CAMADA: ViewModel (MVVM)
  *
- * Responsabilidade:
- * - Buscar dados do servidor via TanStack Query
- * - Expor ações (markAsRead, markAllAsRead) via mutations
- * - Sincronizar estado derivado com o Zustand (badge da tab bar)
- * - Retornar uma interface limpa para a View consumir
- * - SEM JSX, SEM StyleSheet — apenas lógica pura
- *
- * ──────────────────────────────────────────────────
- * CONVENÇÃO DO PROJETO:
- *
- * useQuery → para leitura de dados (GET)
- *   - queryKey: identificador único do cache ['notifications']
- *   - queryFn: função do Service
- *   - onSuccess: efeito colateral após sucesso (ex: atualizar Zustand)
- *
- * useMutation → para escrita de dados (POST/PATCH/DELETE)
- *   - mutationFn: função do Service
- *   - onSuccess: invalida o cache para forçar refetch automático
- *
- * useQueryClient → para controle manual do cache TanStack Query
- *   - invalidateQueries: marca o cache como stale → refetch na próxima leitura
- *
- * useNotificationStore → Zustand store global
- *   - setUnreadCount: atualiza o badge da tab bar em MainNavigator
- * ──────────────────────────────────────────────────
+ * - Busca e expõe notificações enriquecidas com config do registry
+ * - handlePress: marca como lida + navega para a tela certa
+ * - handleAction: aceita/recusa conexão/colaboração
+ * - Sincroniza badge da tab bar via Zustand
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
 } from '../services/notificationService';
 import { useNotificationStore } from '@/store/notificationStore';
+import { NOTIFICATION_REGISTRY } from '../config/notificationRegistry';
+import type { NotificationAction } from '../config/notificationRegistry';
 import type { Notification } from '../models/Notification';
+import type { RootStackParamList } from '@/navigation/types';
+import api from '@/services/api/axios';
+import { Endpoints } from '@/services/api/endpoints';
+
+type RootNav = StackNavigationProp<RootStackParamList>;
 
 export function useNotificationsViewModel() {
+  const navigation = useNavigation<RootNav>();
   const queryClient = useQueryClient();
   const { setUnreadCount } = useNotificationStore();
 
-  // ── Query: busca notificações ──────────────────────────────
+  // ── Query ──────────────────────────────────────────────────
   const {
     data: notifications = [] as Notification[],
     isLoading,
@@ -52,43 +39,73 @@ export function useNotificationsViewModel() {
   } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: getNotifications,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  // onSuccess foi removido no TanStack Query v5 — sincroniza badge via useEffect
   useEffect(() => {
-    const unread = notifications.filter(n => !n.read).length;
-    setUnreadCount(unread);
+    setUnreadCount(notifications.filter((n) => !n.read).length);
   }, [notifications]);
 
-  // ── Mutation: marcar uma notificação como lida ─────────────
+  // ── Mutations ──────────────────────────────────────────────
   const markReadMutation = useMutation({
     mutationFn: markNotificationRead,
-    onSuccess: () => {
-      // Invalida o cache → TanStack Query faz refetch automático
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
-  // ── Mutation: marcar todas como lidas ─────────────────────
   const markAllReadMutation = useMutation({
     mutationFn: markAllNotificationsRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      // Zera o badge imediatamente (sem esperar o refetch)
       setUnreadCount(0);
     },
   });
 
-  // ── Dado derivado ──────────────────────────────────────────
-  // Calculado aqui para que a View não precise saber da estrutura do dado
-  const hasUnread = notifications.some((n: Notification) => !n.read);
+  // ── Handlers ───────────────────────────────────────────────
 
-  // ── Interface exposta para a View ──────────────────────────
+  /** Toca numa notificação: marca como lida e navega conforme o registry */
+  const handlePress = (notification: Notification) => {
+    if (!notification.read) markReadMutation.mutate(notification.id);
+
+    const config = NOTIFICATION_REGISTRY[notification.type];
+    const target = config?.getNavTarget?.(notification);
+    if (target) {
+      navigation.navigate(target.screen as keyof RootStackParamList, target.params as any);
+    }
+  };
+
+  /** Ação inline (aceitar / recusar) em CONNECTION_REQUEST ou COLLABORATION_INVITE */
+  const handleAction = (notification: Notification, action: NotificationAction) => {
+    markReadMutation.mutate(notification.id);
+
+    if (notification.type === 'CONNECTION_REQUEST') {
+      const endpoint =
+        action === 'accept'
+          ? Endpoints.connections.accept(notification.targetId)
+          : Endpoints.connections.decline(notification.targetId);
+      api.post(endpoint).then(() =>
+        queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+      );
+    }
+    // COLLABORATION_INVITE: adicionar aqui quando o endpoint existir
+  };
+
+  // ── Enriquece cada notificação com a config do registry ────
+  const enrichedNotifications = notifications.map((n) => ({
+    notification: n,
+    config: NOTIFICATION_REGISTRY[n.type] ?? {
+      icon: 'notifications-outline',
+      iconColor: '#888',
+      actions: [],
+    },
+  }));
+
   return {
-    notifications,
+    enrichedNotifications,
     isLoading,
-    hasUnread,
-    markAsRead: (id: number) => markReadMutation.mutate(id),
+    hasUnread: notifications.some((n) => !n.read),
+    handlePress,
+    handleAction,
     markAllAsRead: () => markAllReadMutation.mutate(),
     refetch,
   };

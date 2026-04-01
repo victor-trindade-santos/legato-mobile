@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -47,7 +47,11 @@ export function AppHeader({
       {title ? (
         <Text style={styles.title}>{title}</Text>
       ) : (
-        <Text style={styles.logo}>Legato</Text>
+        <Image
+          source={require('@/assets/icons/legato_logo_horizontal_dark_version.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       )}
 
       {/* Ações */}
@@ -94,6 +98,10 @@ const styles = StyleSheet.create({
     fontSize: Typography.FontSize.xl,
     fontWeight: '700',
     letterSpacing: -0.5,
+  },
+  logoImage: {
+    height: 48,
+    width: 120,
   },
   title: {
     color: Colors.white,

@@ -11,6 +11,7 @@ import type { MainTabParamList } from './types';
 import { Colors, Spacing, Typography } from '@/theme';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useUIStore } from '@/store/uiStore';
+import { useAuthStore } from '@/store/authStore';
 
 // Screens
 import DiscoveryScreen from '@/features/discovery/views/DiscoveryScreen';
@@ -20,13 +21,14 @@ import ChatNavigator from './ChatNavigator';
 
 // Placeholders para as features dos outros devs
 import FeedScreen from '@/features/feed/views/FeedScreen';
-import ProfileScreen from '@/features/profile/views/ProfileScreen';
+import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainNavigator() {
   const { unreadCount } = useNotificationStore();
   const { theme } = useUIStore();
+  const { user } = useAuthStore();
 
   const isDark = theme === 'dark';
   const bgColor = isDark ? Colors.surfaceDark : Colors.surfaceLight;
@@ -102,7 +104,8 @@ export default function MainNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={MusicianProfileScreen}
+        initialParams={{ musicianId: user?.id ?? 0, displayName: user?.displayName, username: user?.username }}
         options={{ tabBarLabel: 'Perfil' }}
       />
     </Tab.Navigator>

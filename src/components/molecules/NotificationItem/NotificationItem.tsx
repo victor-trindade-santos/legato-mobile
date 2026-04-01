@@ -1,11 +1,14 @@
 /**
  * NotificationItem — Molecule
- * Item individual de notificação com avatar, texto, tempo e ações.
- * Fundo levemente roxo para notificações não lidas (igual ao web).
+ *
+ * Renderiza um item de notificação com ícone, texto, tempo e ações inline.
+ * Agnóstico ao tipo de notificação — recebe icon/color/actions como props
+ * compostos pelo ViewModel via notificationRegistry.
  */
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
@@ -14,51 +17,62 @@ import type { NotificationItemProps } from './NotificationItem.types';
 
 export function NotificationItem({
   notification,
-  onMarkRead,
-  onAccept,
-  onDecline,
+  icon,
+  iconColor,
+  actions,
   onPress,
+  onAction,
 }: NotificationItemProps) {
-  const { id, type, userAvatar, userName, text, time, read } = notification;
-  const isConnection = type === 'connection';
+  const { read, senderName, message, timeAgo } = notification;
 
   return (
     <TouchableOpacity
       style={[styles.container, !read && styles.unread]}
-      onPress={() => {
-        onMarkRead(id);
-        onPress?.(notification);
-      }}
+      onPress={() => onPress(notification)}
       activeOpacity={0.85}
     >
-      <Avatar uri={userAvatar} size="md" fallbackInitials={userName} />
+      {/* Avatar com ícone do tipo sobreposto */}
+      <View style={styles.avatarWrapper}>
+        <Avatar size="md" fallbackInitials={senderName} />
+        <View style={[styles.iconBadge, { backgroundColor: iconColor }]}>
+          <Ionicons name={icon as any} size={10} color={Colors.white} />
+        </View>
+      </View>
+
       <View style={styles.content}>
         <LegatoText variant="bodySmall" color={Colors.textPrimaryDark}>
-          <LegatoText variant="bodyMedium" color={Colors.white}>{userName} </LegatoText>
-          {text}
+          <LegatoText variant="bodyMedium" color={Colors.white}>{senderName} </LegatoText>
+          {message}
         </LegatoText>
+
         <LegatoText variant="caption" color={Colors.textMuted} style={styles.time}>
-          {time}
+          {timeAgo}
         </LegatoText>
-        {isConnection && !read && (
+
+        {actions.length > 0 && !read && (
           <View style={styles.actions}>
-            <Button
-              label="Aceitar"
-              variant="primary"
-              size="sm"
-              onPress={() => { onAccept?.(id); onMarkRead(id); }}
-              style={styles.actionBtn}
-            />
-            <Button
-              label="Recusar"
-              variant="outline"
-              size="sm"
-              onPress={() => { onDecline?.(id); onMarkRead(id); }}
-              style={styles.actionBtn}
-            />
+            {actions.includes('accept') && (
+              <Button
+                label="Aceitar"
+                variant="primary"
+                size="sm"
+                onPress={() => onAction(notification, 'accept')}
+                style={styles.actionBtn}
+              />
+            )}
+            {actions.includes('decline') && (
+              <Button
+                label="Recusar"
+                variant="outline"
+                size="sm"
+                onPress={() => onAction(notification, 'decline')}
+                style={styles.actionBtn}
+              />
+            )}
           </View>
         )}
       </View>
+
       {!read && <View style={styles.dot} />}
     </TouchableOpacity>
   );
@@ -74,6 +88,21 @@ const styles = StyleSheet.create({
   },
   unread: {
     backgroundColor: Colors.primaryMuted,
+  },
+  avatarWrapper: {
+    position: 'relative',
+  },
+  iconBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: BorderRadius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.backgroundDark,
   },
   content: {
     flex: 1,

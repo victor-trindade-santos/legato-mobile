@@ -4,25 +4,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { NotificationItem } from '@/components/molecules/NotificationItem/NotificationItem';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
-import type { NotificationListProps } from './NotificationList.types';
-import type { NotificationData } from '@/components/molecules/NotificationItem/NotificationItem.types';
+import type { NotificationListProps, EnrichedNotification } from './NotificationList.types';
 
-export function NotificationList({
-  notifications,
-  onMarkRead,
-  onAccept,
-  onDecline,
-}: NotificationListProps) {
+export function NotificationList({ items, onPress, onAction }: NotificationListProps) {
   return (
     <FlatList
-      data={notifications}
-      keyExtractor={(item: NotificationData) => String(item.id)}
+      data={items}
+      keyExtractor={(item: EnrichedNotification) => String(item.notification.id)}
       renderItem={({ item }) => (
         <NotificationItem
-          notification={item}
-          onMarkRead={onMarkRead}
-          onAccept={onAccept}
-          onDecline={onDecline}
+          notification={item.notification}
+          icon={item.config.icon}
+          iconColor={item.config.iconColor}
+          actions={item.config.actions}
+          onPress={onPress}
+          onAction={onAction}
         />
       )}
       contentContainerStyle={styles.list}

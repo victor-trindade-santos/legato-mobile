@@ -15,7 +15,6 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -27,9 +26,11 @@ import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
+import { useAuthStore } from '@/store/authStore';
+import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
 
-const coverImage = require('@/assets/images/BACKGROUND_SPLASH.png');
+const fallbackCover = require('@/assets/images/BACKGROUND_SPLASH.png');
 
 type MusicianProfileRoute = RouteProp<RootStackParamList, 'MusicianProfile'>;
 type MusicianProfileNav = StackNavigationProp<RootStackParamList, 'MusicianProfile'>;
@@ -43,7 +44,9 @@ const TAB_PLACEHOLDER_TEXT: Record<Exclude<ProfileTab, 'overview'>, string> = {
 export default function MusicianProfileScreen() {
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
-  const { displayName, musicianId } = route.params;
+  const { user } = useAuthStore();
+  const { displayName, musicianId, username } = route.params;
+  const isOwnProfile = musicianId === user?.id;
 
   const {
     profile,
@@ -57,18 +60,20 @@ export default function MusicianProfileScreen() {
     toggleConnection,
     openFavoritesPanel,
     closeFavoritesPanel,
-  } = useMusicianProfileViewModel(musicianId);
+  } = useMusicianProfileViewModel(musicianId, username);
 
   if (isLoading) return <Spinner fullScreen />;
 
   if (!profile) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.fallbackHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-            <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-          </TouchableOpacity>
-        </View>
+      <AppTemplate showHeader={false} noPadding>
+        {!isOwnProfile && (
+          <View style={styles.fallbackHeader}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+              <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.fallbackContent}>
           <LegatoText variant="subtitle" color={Colors.white} align="center">
             {displayName ?? 'Perfil do músico'}
@@ -77,22 +82,36 @@ export default function MusicianProfileScreen() {
             Perfil indisponível no momento.
           </LegatoText>
         </View>
-      </SafeAreaView>
+      </AppTemplate>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppTemplate showHeader={isOwnProfile} noPadding>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         {/* ── Hero (capa + avatar) ───────────────────────── */}
         <View style={styles.heroArea}>
-          <ImageBackground source={coverImage} resizeMode="cover" style={styles.cover}>
+          <ImageBackground
+            source={
+              profile.bannerUrl
+                ? { uri: profile.bannerUrl }
+                : profile.photos[0]
+                ? { uri: profile.photos[0] }
+                : fallbackCover
+            }
+            resizeMode="cover"
+            style={styles.cover}
+          >
             <View style={styles.coverOverlay} />
             <View style={styles.heroHeader}>
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-                <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-              </TouchableOpacity>
+              {isOwnProfile ? (
+                <View style={styles.iconBtn} />
+              ) : (
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
+                  <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
+                </TouchableOpacity>
+              )}
               <TouchableOpacity style={styles.iconBtn}>
                 <Ionicons name="ellipsis-horizontal" size={Spacing.iconLg} color={Colors.white} />
               </TouchableOpacity>
@@ -122,25 +141,40 @@ export default function MusicianProfileScreen() {
             </View>
           </View>
 
-          {/* ── Ações (conectar / mensagem) ────────────────── */}
+          {/* ── Ações ─────────────────────────────────────── */}
           <View style={styles.actionsRow}>
-            <Button
-              label={isConnected ? 'Conectado' : 'Conectar'}
-              variant={isConnected ? 'primary' : 'outline'}
-              size="md"
-              onPress={toggleConnection}
-              leftIcon={
-                <Ionicons
-                  name={isConnected ? 'person' : 'person-add'}
-                  size={Spacing.iconSm}
-                  color={Colors.white}
+            {isOwnProfile ? (
+              <Button
+                label="Editar Perfil"
+                variant="outline"
+                size="md"
+                onPress={() => navigation.navigate('ProfileEdit')}
+                leftIcon={
+                  <Ionicons name="pencil-outline" size={Spacing.iconSm} color={Colors.white} />
+                }
+                style={styles.connectButton}
+              />
+            ) : (
+              <>
+                <Button
+                  label={isConnected ? 'Conectado' : 'Conectar'}
+                  variant={isConnected ? 'primary' : 'outline'}
+                  size="md"
+                  onPress={toggleConnection}
+                  leftIcon={
+                    <Ionicons
+                      name={isConnected ? 'person' : 'person-add'}
+                      size={Spacing.iconSm}
+                      color={Colors.white}
+                    />
+                  }
+                  style={styles.connectButton}
                 />
-              }
-              style={styles.connectButton}
-            />
-            <TouchableOpacity style={styles.messageButton}>
-              <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.messageButton}>
+                  <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* ── Stats ─────────────────────────────────────── */}
@@ -275,15 +309,11 @@ export default function MusicianProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </AppTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundDark,
-  },
   scrollContent: {
     paddingBottom: Spacing.xxl,
   },

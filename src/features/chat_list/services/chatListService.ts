@@ -10,6 +10,6 @@ export async function fetchChatItemsList(): Promise<ChatItemDTO[]> {
         return mockChatItems;
     }
     
-    const res = await api.get<ChatItemDTO[]>(Endpoints.chatListItem.list);
+    const res = await api.get<ChatItemDTO[]>(Endpoints.chat.list);
     return res.data;
 }

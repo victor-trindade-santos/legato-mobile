@@ -14,7 +14,14 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, Typography } from '@/theme';
 import type { FormFieldProps } from './FormField.types';
 
-export function FormField({ label, errorMessage, isRequired, style, containerStyle, variant = 'light', ...inputProps }: FormFieldProps) {
+export function FormField({ 
+  label, 
+  errorMessage, 
+  isRequired, 
+  style, 
+  containerStyle, 
+  variant = 'light', 
+  ...inputProps }: FormFieldProps) {
   const labelColor = variant === 'dark' ? Colors.textSecondaryDark : Colors.textSecondaryLight;
 
   return (

@@ -16,7 +16,14 @@ export interface AuthUser {
   displayName: string;
   email: string;
   avatarUrl?: string;
+  bannerUrl?: string;
   role: 'USER' | 'ADMIN';
+  // Campos de perfil — populados após o onboarding/edição
+  bio?: string;
+  skills?: string[];
+  musicGenres?: string[];
+  location?: string;
+  photos?: string[];
 }
 
 interface AuthState {

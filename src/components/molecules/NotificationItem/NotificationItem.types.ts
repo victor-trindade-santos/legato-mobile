@@ -1,20 +1,13 @@
-export type NotificationType = 'follow' | 'comment' | 'connection' | 'like' | 'mention';
-
-export interface NotificationData {
-  id: number;
-  type: NotificationType;
-  userName: string;
-  userAvatar?: string;
-  text: string;
-  link?: string;
-  read: boolean;
-  time: string;
-}
+import type { Notification } from '@/features/notifications/models/Notification';
+import type { NotificationAction } from '@/features/notifications/config/notificationRegistry';
 
 export interface NotificationItemProps {
-  notification: NotificationData;
-  onMarkRead: (id: number) => void;
-  onAccept?: (id: number) => void;
-  onDecline?: (id: number) => void;
-  onPress?: (notification: NotificationData) => void;
+  notification: Notification;
+  /** Ícone Ionicons — fornecido pelo registry via ViewModel */
+  icon: string;
+  iconColor: string;
+  /** Ações inline disponíveis para este tipo (ex: ['accept', 'decline']) */
+  actions: NotificationAction[];
+  onPress: (notification: Notification) => void;
+  onAction: (notification: Notification, action: NotificationAction) => void;
 }
