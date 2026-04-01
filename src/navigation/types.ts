@@ -15,7 +15,7 @@ export type MainTabParamList = {
   Feed: undefined;
   Collaborations: undefined;
   Notifications: undefined;
-  Profile: { musicianId?: number; displayName?: string };
+  Profile: { musicianId?: number; displayName?: string; username?: string };
 };
 
 export type ProfileStackParamList = {
@@ -33,11 +33,13 @@ export type ChatStackParamList = {
 export type MusicianProfileRouteParams = {
   musicianId: number;
   displayName?: string;
+  username?: string;
 };
 
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  OnboardingEdit: undefined;
   ProfileEdit: undefined;
   MusicianProfile: MusicianProfileRouteParams;
 };

@@ -97,7 +97,7 @@ export default function MainNavigator() {
       <Tab.Screen
         name="Profile"
         component={MusicianProfileScreen}
-        initialParams={{ musicianId: user?.id ?? 0, displayName: user?.displayName }}
+        initialParams={{ musicianId: user?.id ?? 0, displayName: user?.displayName, username: user?.username }}
         options={{ tabBarLabel: 'Perfil' }}
       />
     </Tab.Navigator>
