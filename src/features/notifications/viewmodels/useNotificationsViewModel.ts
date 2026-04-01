@@ -39,6 +39,8 @@ export function useNotificationsViewModel() {
   } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: getNotifications,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

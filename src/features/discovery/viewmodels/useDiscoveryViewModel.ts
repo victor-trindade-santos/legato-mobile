@@ -28,6 +28,10 @@ export function useDiscoveryViewModel() {
   const { isLoading, data, refetch } = useQuery({
     queryKey: ['musicians', filters],
     queryFn: () => fetchMusicians(filters),
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   useEffect(() => {

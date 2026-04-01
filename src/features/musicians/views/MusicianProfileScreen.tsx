@@ -15,7 +15,6 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -28,7 +27,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import { useAuthStore } from '@/store/authStore';
-import { AppHeader } from '@/components/molecules/AppHeader/AppHeader';
+import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
 
 const fallbackCover = require('@/assets/images/BACKGROUND_SPLASH.png');
@@ -46,7 +45,7 @@ export default function MusicianProfileScreen() {
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
   const { user } = useAuthStore();
-  const { displayName, musicianId } = route.params;
+  const { displayName, musicianId, username } = route.params;
   const isOwnProfile = musicianId === user?.id;
 
   const {
@@ -61,13 +60,13 @@ export default function MusicianProfileScreen() {
     toggleConnection,
     openFavoritesPanel,
     closeFavoritesPanel,
-  } = useMusicianProfileViewModel(musicianId);
+  } = useMusicianProfileViewModel(musicianId, username);
 
   if (isLoading) return <Spinner fullScreen />;
 
   if (!profile) {
     return (
-      <SafeAreaView style={styles.container}>
+      <AppTemplate showHeader={false} noPadding>
         {!isOwnProfile && (
           <View style={styles.fallbackHeader}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
@@ -83,13 +82,12 @@ export default function MusicianProfileScreen() {
             Perfil indisponível no momento.
           </LegatoText>
         </View>
-      </SafeAreaView>
+      </AppTemplate>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {isOwnProfile && <AppHeader hideSearch />}
+    <AppTemplate showHeader={isOwnProfile} noPadding>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         {/* ── Hero (capa + avatar) ───────────────────────── */}
@@ -311,15 +309,11 @@ export default function MusicianProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </SafeAreaView>
+    </AppTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundDark,
-  },
   scrollContent: {
     paddingBottom: Spacing.xxl,
   },

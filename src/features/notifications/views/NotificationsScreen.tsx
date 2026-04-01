@@ -11,11 +11,11 @@
 
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { NotificationList } from './NotificationList';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
+import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { Colors, Spacing } from '@/theme';
 import { useNotificationsViewModel } from '../viewmodels/useNotificationsViewModel';
 
@@ -29,49 +29,61 @@ export default function NotificationsScreen() {
     markAllAsRead,
   } = useNotificationsViewModel();
 
-  if (isLoading) return <Spinner fullScreen />;
+  const isEmpty = !isLoading && enrichedNotifications.length === 0;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppTemplate noPadding>
 
-      {/* ── Header ─────────────────────────────────────────── */}
-      <View style={styles.header}>
-        <LegatoText variant="subtitle" color={Colors.white}>
-          Notificações
-        </LegatoText>
-        {hasUnread && (
-          <TouchableOpacity onPress={markAllAsRead} style={styles.markAllBtn}>
-            <Ionicons name="checkmark-done" size={18} color={Colors.primary} />
-            <LegatoText variant="caption" color={Colors.primary}> Marcar todas</LegatoText>
-          </TouchableOpacity>
-        )}
-      </View>
+      {isLoading ? (
+        <Spinner fullScreen />
+      ) : (
+        <>
+          {/* ── Ação "Marcar todas" ───────────────────────────── */}
+          {hasUnread && (
+            <TouchableOpacity onPress={markAllAsRead} style={styles.markAllBtn}>
+              <Ionicons name="checkmark-done" size={18} color={Colors.primary} />
+              <LegatoText variant="caption" color={Colors.primary}> Marcar todas</LegatoText>
+            </TouchableOpacity>
+          )}
 
-      {/* ── Lista ──────────────────────────────────────────── */}
-      <NotificationList
-        items={enrichedNotifications}
-        onPress={handlePress}
-        onAction={handleAction}
-      />
+          {/* ── Empty state ───────────────────────────────────── */}
+          {isEmpty ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="notifications-off-outline" size={Spacing.iconXxl} color={Colors.textMuted} />
+              <LegatoText variant="subtitle" color={Colors.white} align="center">
+                Sem notificações
+              </LegatoText>
+              <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
+                Quando você interagir com outros músicos, as notificações aparecerão aqui.
+              </LegatoText>
+            </View>
+          ) : (
+            <NotificationList
+              items={enrichedNotifications}
+              onPress={handlePress}
+              onAction={handleAction}
+            />
+          )}
+        </>
+      )}
 
-    </SafeAreaView>
+    </AppTemplate>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.backgroundDark,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.screenPaddingH,
-    paddingVertical: Spacing.md,
-  },
   markAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-end',
+    paddingVertical: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
   },
 });
