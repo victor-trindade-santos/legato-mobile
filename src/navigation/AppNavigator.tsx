@@ -75,9 +75,15 @@ export default function AppNavigator() {
   return (
     <Root.Navigator screenOptions={{ headerShown: false }}>
       {isAuthenticated && needsOnboarding ? (
-        <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
+        // Onboarding: nome DIFERENTE de "ProfileEdit" para que, quando
+        // needsOnboarding vira false, OnboardingEdit suma do navigator e
+        // o React Navigation mostre Main automaticamente (sem ficar preso).
+        <Root.Screen name="OnboardingEdit" component={ProfileEditScreen} />
       ) : isAuthenticated ? (
-        <Root.Screen name="Main" component={MainNavigator} />
+        <>
+          <Root.Screen name="Main" component={MainNavigator} />
+          <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
+        </>
       ) : (
         <Root.Screen name="Auth" component={AuthNavigator} />
       )}

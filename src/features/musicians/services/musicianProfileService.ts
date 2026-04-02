@@ -1,11 +1,13 @@
 /**
  * musicianProfileService — Service
  *
- * Responsabilidade exclusiva: chamadas HTTP para os endpoints de perfil de músico.
- * Sem lógica de filtro, sem estado, sem referência a outras features.
+ * Endpoints utilizados:
+ *  - GET /users/me            → perfil do próprio usuário autenticado
+ *  - GET /users/{username}    → perfil público de outro usuário
  *
- * Mock: enquanto o backend não expõe /musicians/:id, usa os dados de discovery/mocks
- * apenas no modo DEV_USE_MOCK. Em produção, chama o endpoint real.
+ * O backend usa nomes de campo diferentes do modelo interno (ex: profilePicture
+ * vs avatarUrl, instruments vs skills). O mapeamento acontece aqui, antes de
+ * entregar ao ViewModel — nenhuma outra camada precisa conhecer os nomes do backend.
  */
 
 import api from '@/services/api/axios';
@@ -14,11 +16,93 @@ import { Config } from '@/constants/config';
 import { MOCK_MUSICIANS } from '@/features/discovery/mocks/musicians.mock';
 import type { MusicianProfileDTO, FavoriteArtist } from '../models/MusicianProfile';
 
-export async function getMusicianById(musicianId: number): Promise<MusicianProfileDTO | null> {
+/** Envelope padrão do backend */
+interface BackendEnvelope<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
+
+/** DTO bruto retornado por GET /users/me e GET /users/{username} */
+interface BackendUserDTO {
+  id: number;
+  username: string;
+  displayName: string;
+  profilePicture?: string;
+  profileBanner?: string;
+  bio?: string;
+  photosCard?: string[];
+  instruments?: string[];
+  genres?: string[];
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  connectionsCount?: number;
+  followersCount?: number;
+  postsIds?: unknown[];
+}
+
+/** Converte o DTO bruto do backend para o modelo interno */
+function mapBackendUser(raw: BackendUserDTO): MusicianProfileDTO {
+  const { city, state } = raw.location ?? {};
+  const locationStr = city
+    ? [city, state].filter(Boolean).join(', ')
+    : undefined;
+
+  return {
+    id: raw.id,
+    username: raw.username,
+    displayName: raw.displayName,
+    avatarUrl: raw.profilePicture ?? undefined,
+    bannerUrl: raw.profileBanner ?? undefined,
+    bio: raw.bio,
+    location: locationStr,
+    skills: raw.instruments ?? [],
+    musicGenres: raw.genres ?? [],
+    photos: raw.photosCard ?? [],
+    connectionsCount: raw.connectionsCount ?? 0,
+    followersCount: raw.followersCount ?? 0,
+    postsCount: raw.postsIds?.length ?? 0,
+  };
+}
+
+/** Busca o perfil do próprio usuário autenticado via GET /users/me */
+export async function getMyProfile(): Promise<MusicianProfileDTO | null> {
   if (Config.DEV_USE_MOCK) {
-    const mock = MOCK_MUSICIANS.find((m) => m.id === musicianId) ?? null;
+    const mock = MOCK_MUSICIANS[0];
     if (!mock) return null;
-    // Mapeia apenas os campos do perfil (sem os campos específicos de discovery: distance, age, gender)
+    return {
+      id: mock.id,
+      username: mock.username,
+      displayName: mock.displayName,
+      avatarUrl: mock.avatarUrl,
+      bio: mock.bio,
+      location: mock.location,
+      skills: mock.skills,
+      musicGenres: mock.musicGenres,
+      photos: mock.photos,
+      connectionsCount: 0,
+      followersCount: 0,
+      postsCount: 0,
+    };
+  }
+
+  try {
+    const res = await api.get<BackendEnvelope<BackendUserDTO>>(Endpoints.users.me);
+    if (!res.data.data) return null;
+    return mapBackendUser(res.data.data);
+  } catch {
+    return null;
+  }
+}
+
+/** Busca o perfil público de outro usuário via GET /users/{username} */
+export async function getMusicianByUsername(username: string): Promise<MusicianProfileDTO | null> {
+  if (Config.DEV_USE_MOCK) {
+    const mock = MOCK_MUSICIANS.find((m) => m.username === username) ?? MOCK_MUSICIANS[0];
+    if (!mock) return null;
     return {
       id: mock.id,
       username: mock.username,
@@ -33,8 +117,11 @@ export async function getMusicianById(musicianId: number): Promise<MusicianProfi
   }
 
   try {
-    const res = await api.get<MusicianProfileDTO>(Endpoints.musicians.getById(musicianId));
-    return res.data;
+    const res = await api.get<BackendEnvelope<BackendUserDTO>>(
+      Endpoints.users.getByUsername(username),
+    );
+    if (!res.data.data) return null;
+    return mapBackendUser(res.data.data);
   } catch {
     return null;
   }

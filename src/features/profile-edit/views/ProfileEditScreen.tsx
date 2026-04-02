@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
@@ -23,10 +23,23 @@ import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Divider } from '@/components/atoms/Divider/Divider';
-import { Colors, Spacing } from '@/theme';
+import { SelectField } from '@/components/molecules/SelectField/SelectField';
+import { ModalTriggerField } from '@/components/molecules/ModalTriggerField/ModalTriggerField';
+import { Colors, Spacing, BorderRadius } from '@/theme';
 import { SKILLS } from '@/constants/skills';
 import { MUSIC_GENRES } from '@/constants/genres';
 import { useProfileEditViewModel } from '../viewmodels/useProfileEditViewModel';
+import { BioObjectiveModal } from './BioObjectiveModal';
+
+const MAX_PHOTOS = 4;
+const PHOTO_SIZE = 72;
+
+const SEX_OPTIONS = [
+  { label: 'Masculino', value: 'MALE' },
+  { label: 'Feminino', value: 'FEMALE' },
+  { label: 'Outro', value: 'OTHER' },
+  { label: 'Prefiro não dizer', value: 'PREFER_NOT_TO_SAY' },
+];
 
 export default function ProfileEditScreen() {
   const {
@@ -38,6 +51,8 @@ export default function ProfileEditScreen() {
     isOnboarding,
     displayName,
     avatarUri,
+    bioValue,
+    objectiveValue,
     tabs,
     activeTab,
     setActiveTab,
@@ -47,12 +62,22 @@ export default function ProfileEditScreen() {
     showGenresModal,
     openGenresModal,
     closeGenresModal,
+    showBioObjectiveModal,
+    openBioObjectiveModal,
+    closeBioObjectiveModal,
     selectedSkills,
     selectedGenres,
     removeSkill,
     removeGenre,
     confirmSkills,
     confirmGenres,
+    selectedSex,
+    bannerUri,
+    photos,
+    handlePickAvatar,
+    handlePickBanner,
+    handlePickPhoto,
+    removePhoto,
     scrollAreaHeight,
     onScrollAreaLayout,
   } = useProfileEditViewModel();
@@ -74,10 +99,11 @@ export default function ProfileEditScreen() {
           >
             <ProfileBanner
               avatarUri={avatarUri}
+              bannerUri={bannerUri}
               displayName={displayName}
               editable
-              onBannerPress={() => {}}
-              onAvatarPress={() => {}}
+              onBannerPress={handlePickBanner}
+              onAvatarPress={handlePickAvatar}
             />
 
             {/* ── Informações Básicas ─────────────────────────── */}
@@ -109,15 +135,94 @@ export default function ProfileEditScreen() {
 
             <Controller
               control={control}
-              name="bio"
+              name="sex"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="Bio"
-                  placeholder="Fale sobre sua trajetória musical..."
-                  value={value} onChangeText={onChange}
-                  errorMessage={errors.bio?.message}
-                  multiline numberOfLines={4} />
+                <SelectField
+                  label="Gênero"
+                  options={SEX_OPTIONS}
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Selecione seu gênero..."
+                  variant="dark"
+                />
               )}
             />
+
+            {/* Bio & Objetivo — abre modal ao tocar */}
+            <ModalTriggerField
+              label="Bio & Objetivo"
+              value={bioValue || objectiveValue ? `${bioValue ?? ''}${objectiveValue ? ` · ${objectiveValue}` : ''}` : undefined}
+              placeholder="Toque para adicionar sua bio..."
+              onPress={openBioObjectiveModal}
+              variant="dark"
+            />
+
+            <Divider marginV={Spacing.md} color={Colors.border} />
+
+            {/* ── Localização ─────────────────────────────────── */}
+            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+              LOCALIZAÇÃO
+            </LegatoText>
+
+            <Controller
+              control={control}
+              name="city"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="Cidade"
+                  placeholder="Ex: São Paulo"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="state"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="Estado"
+                  placeholder="Ex: SP"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="country"
+              render={({ field: { onChange, value } }) => (
+                <FormField variant="dark" label="País"
+                  placeholder="Ex: Brasil"
+                  value={value ?? ''} onChangeText={onChange} />
+              )}
+            />
+            
+            <Divider marginV={Spacing.md} color={Colors.border} />
+
+            {/* ── Fotos do Perfil ─────────────────────────────── */}
+            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+              FOTOS DO PERFIL
+            </LegatoText>
+
+            <View style={styles.photoGrid}>
+              {/* Slots de fotos existentes */}
+              {photos.map((uri, index) => (
+                <View key={index} style={styles.photoSlot}>
+                  <Image source={{ uri }} style={styles.photoImage} />
+                  <TouchableOpacity
+                    style={styles.photoRemove}
+                    onPress={() => removePhoto(index)}
+                    hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
+                  >
+                    <Ionicons name="close-circle" size={20} color={Colors.error} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+
+              {/* Slot de adição — visível enquanto houver espaço */}
+              {photos.length < MAX_PHOTOS && (
+                <TouchableOpacity style={styles.photoAdd} onPress={handlePickPhoto} activeOpacity={0.7}>
+                  <Ionicons name="add" size={28} color={Colors.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
 
             <Divider marginV={Spacing.md} color={Colors.border} />
 
@@ -145,6 +250,8 @@ export default function ProfileEditScreen() {
               tagColor={Colors.primaryLight}
               emptyMessage="Nenhum gênero selecionado"
             />
+
+            
 
             <Divider marginV={Spacing.md} color={Colors.border} />
 
@@ -225,6 +332,12 @@ export default function ProfileEditScreen() {
         items={MUSIC_GENRES} selected={selectedGenres}
         onConfirm={confirmGenres} onClose={closeGenresModal}
       />
+      <BioObjectiveModal
+        visible={showBioObjectiveModal}
+        onClose={closeBioObjectiveModal}
+        control={control}
+        errors={errors}
+      />
     </AppTemplate>
   );
 }
@@ -247,6 +360,44 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
     letterSpacing: 0.8,
   },
+
+  // Grade de fotos
+  photoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  photoSlot: {
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: BorderRadius.md,
+    overflow: 'visible',
+  },
+  photoImage: {
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: BorderRadius.md,
+  },
+  photoRemove: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: Colors.backgroundDark,
+    borderRadius: BorderRadius.pill,
+  },
+  photoAdd: {
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceDark,
+  },
+
   globalError: {
     marginBottom: Spacing.sm,
     textAlign: 'center',

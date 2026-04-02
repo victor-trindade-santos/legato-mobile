@@ -1,8 +1,5 @@
 /** Todas as URLs da API centralizadas — nunca escreva strings de rota espalhadas */
 
-import { ChatListItem } from "@/components/molecules/ChatListItem/ChatListItem";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
-
 export const Endpoints = {
   // Auth
   auth: {
@@ -14,8 +11,11 @@ export const Endpoints = {
 
   // Usuários
   users: {
+    me: '/users/me',
     getByUsername: (username: string) => `/users/${username}`,
-    update: '/users/me',
+    update: '/users',
+    uploadImage: '/users/upload-image',
+    cardFile: '/users/card-file',
     follow: (id: number) => `/users/${id}/follow`,
     unfollow: (id: number) => `/users/${id}/unfollow`,
     suggested: '/users/suggested',
@@ -64,14 +64,10 @@ export const Endpoints = {
   chat: {
     conversations: '/chat/conversations',
     messages: (conversationId: number) => `/chat/conversations/${conversationId}/messages`,
-  },
-
-  //Chat List
-  chatListItem:{
     list: '/chats',
     getById: (id: number) => `/chat/${id}/messages`,
   },
-  
+
   // Perfis de músicos (tela de perfil completo — diferente do card de discovery)
   musicians: {
     getById: (id: number) => `/musicians/${id}`,

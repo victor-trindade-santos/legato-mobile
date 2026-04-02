@@ -1,58 +1,52 @@
 /**
  * Notification.ts — Model (Notificações)
- * ══════════════════════════════════════════════════
- * CAMADA: Model (MVVM)
  *
- * Responsabilidade:
- * - Definir o contrato de dados da feature (interfaces TypeScript)
- * - Mapear exatamente o que a API retorna
- * - Sem lógica, sem chamadas de API — apenas tipos
- *
- * ──────────────────────────────────────────────────
- * CONVENÇÃO DO PROJETO:
- * - Use `type` para unions simples (NotificationType)
- * - Use `interface` para objetos com múltiplas propriedades (Notification)
- * - Campos opcionais (?) = podem vir como null/undefined da API
- * ──────────────────────────────────────────────────
+ * NotificationDTO   → contrato exato do backend (GET /notifications)
+ * Notification      → modelo interno usado na View/ViewModel
  */
 
-/**
- * Tipos de notificação suportados pelo sistema.
- * Correspondem aos valores que o backend (Spring Boot) envia no campo `type`.
- */
+/** Tipos retornados pelo backend (UPPERCASE) */
 export type NotificationType =
-  | 'follow'      // alguém seguiu o usuário
-  | 'comment'     // alguém comentou em um post
-  | 'connection'  // alguém enviou pedido de conexão
-  | 'like'        // alguém curtiu um post
-  | 'mention';    // alguém mencionou o usuário
+  | 'FOLLOW'
+  | 'CONNECTION_REQUEST'
+  | 'CONNECTION_ACCEPTED'
+  | 'LIKE'
+  | 'COMMENT'
+  | 'MESSAGE'
+  | 'COLLABORATION_INVITE'
+  | 'COLLABORATION_ACCEPTED';
 
-/**
- * Representa uma notificação retornada pela API.
- * Espelho do DTO do backend: NotificationResponseDTO.java
- */
+/** Entidade-alvo da notificação — direciona a navegação */
+export type TargetType = 'USER' | 'POST' | 'CHAT' | 'COLLABORATION';
+
+/** DTO bruto retornado pelo backend em GET /notifications */
+export interface NotificationDTO {
+  id: number;
+  senderName: string;
+  recipientName: string;
+  message: string;
+  read: boolean;
+  timeAgo: string;
+  type: NotificationType;
+  targetType: TargetType;
+  targetId: number;
+}
+
+/** Envelope padrão do backend */
+export interface NotificationsEnvelope {
+  success: boolean;
+  message: string;
+  data: NotificationDTO[];
+}
+
+/** Modelo interno — campos mapeados e prontos para a View */
 export interface Notification {
   id: number;
   type: NotificationType;
-
-  /** Username de quem gerou a notificação */
-  userName: string;
-
-  /** URL do avatar do usuário que gerou a ação (pode ser null no backend) */
-  userAvatar?: string;
-
-  /** Texto descritivo gerado pelo backend (ex: "curtiu sua publicação") */
-  text: string;
-
-  /** Link de navegação opcional (ex: '/posts/42') */
-  link?: string;
-
-  /** false = não lida (exibe fundo roxo + ponto indicador) */
+  senderName: string;
+  message: string;
   read: boolean;
-
-  /** Tempo relativo já formatado pelo backend (ex: "há 2 horas") */
-  time: string;
-
-  /** ISO 8601 completo — usar para ordenação se necessário */
-  createdAt?: string;
+  timeAgo: string;
+  targetType: TargetType;
+  targetId: number;
 }

@@ -4,13 +4,14 @@
    * Badge de notificações via notificationStore (Zustand).
    */
 
-  import React from 'react';
-  import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-  import { Ionicons } from '@expo/vector-icons';
-  import type { MainTabParamList } from './types';
-  import { Colors, Spacing, Typography } from '@/theme';
-  import { useNotificationStore } from '@/store/notificationStore';
-  import { useUIStore } from '@/store/uiStore';
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import type { MainTabParamList } from './types';
+import { Colors, Spacing, Typography } from '@/theme';
+import { useNotificationStore } from '@/store/notificationStore';
+import { useUIStore } from '@/store/uiStore';
+import { useAuthStore } from '@/store/authStore';
 
   // Screens
   import DiscoveryScreen from '@/features/discovery/views/DiscoveryScreen';
@@ -21,12 +22,14 @@
   // Placeholders para as features dos outros devs
   import FeedScreen from '@/features/feed/views/FeedScreen';
   import ProfileScreen from '@/features/profile/views/ProfileScreen';
+  import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
 
   const Tab = createBottomTabNavigator<MainTabParamList>();
 
-  export default function MainNavigator() {
-    const { unreadCount } = useNotificationStore();
-    const { theme } = useUIStore();
+export default function MainNavigator() {
+  const { unreadCount } = useNotificationStore();
+  const { theme } = useUIStore();
+  const { user } = useAuthStore();
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? Colors.surfaceDark : Colors.surfaceLight;
