@@ -22,6 +22,8 @@ export interface ResetPasswordDTO {
 }
 
 export interface AuthResponse {
-  token: string;
-  user: AuthUser;
+ data: {
+    token: string;
+    user: AuthUser;
+  };
 }

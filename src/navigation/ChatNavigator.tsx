@@ -8,6 +8,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import type { ChatStackParamList } from './types';
 
 import ChatListScreen from '@/features/chat_list/views/ChatListScreen';
+import ChatScreen from '@/features/chat/views/ChatScreen';
 
 const Stack = createStackNavigator<ChatStackParamList>();
 
@@ -22,7 +23,10 @@ export default function ChatNavigator() {
         name="ChatList"
         component={ChatListScreen}
       />
-      {/* ChatConversation será adicionado aqui quando implementado */}
+      <Stack.Screen
+        name="Chat"
+        component={ChatScreen}
+      />
     </Stack.Navigator>
   );
 }

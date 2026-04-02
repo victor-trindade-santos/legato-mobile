@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
-import { RootStackParamList } from '@/navigation/types';
+import { ChatStackParamList, RootStackParamList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
@@ -18,7 +18,7 @@ import { useChatListViewModel } from '../viewmodels/useChatListViewModel';
 import { FlatList } from 'react-native-gesture-handler';
 import { Spacing } from '@/theme';
 
-type ChatListNav = StackNavigationProp<RootStackParamList>;
+type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
 export default function ChatListScreen() {
     const navigation = useNavigation<ChatListNav>();
@@ -67,11 +67,7 @@ export default function ChatListScreen() {
                                 lastMessage={item.lastMessageContent}
                                 timeStamp={item.lastMessageTimestamp}
                                 onPress={() => {
-                                    // TODO: Navegar para ChatConversation
-                                    // navigation.navigate('ChatConversation', {
-                                    //   conversationId: item.id,
-                                    //   userName: item.otherUserName,
-                                    // });
+                                    navigation.navigate('Chat');
                                 }}
                             />
                         )}

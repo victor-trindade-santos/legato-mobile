@@ -12,9 +12,9 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
   Discovery: undefined;
+  ChatTab: undefined;
   Feed: undefined;
   Collaborations: undefined;
-  Chat: undefined;
   Notifications: undefined;
   Profile: { username?: string };
 };
@@ -27,8 +27,8 @@ export type ProfileStackParamList = {
 };
 
 export type ChatStackParamList = {
-  ChatList: undefined;
-  ChatConversation: { conversationId: number; userName: string };
+   ChatList: undefined;
+  Chat: undefined;
 };
 
 export type MusicianProfileRouteParams = {
