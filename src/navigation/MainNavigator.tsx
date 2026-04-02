@@ -105,7 +105,7 @@ export default function MainNavigator() {
         />
         <Tab.Screen
           name="Profile"
-          component={ProfileScreen}
+          component={MusicianProfileScreen}
           options={{ tabBarLabel: 'Perfil' }}
         />
       </Tab.Navigator>
