@@ -59,13 +59,13 @@ export default function ChatListScreen() {
                 ) : (
                     <FlatList
                         data={chatItems}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <ChatListItem
                                 userAvatar={item.otherUserProfilePictureUrl || ''}
                                 userName={item.otherUserName}
-                                lastMessage={item.lastMessageContent}
-                                timeStamp={item.lastMessageTimestamp}
+                                lastMessage={item.lastMessageContent || 'Sem mensagens'}
+                                timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
                                 onPress={() => {
                                     navigation.navigate('Chat');
                                 }}
