@@ -145,6 +145,7 @@ export function useProfileEditViewModel() {
           avatarUrl: saved.avatarUrl ?? user.avatarUrl,
           bannerUrl: saved.bannerUrl,
           bio: saved.bio,
+          objective: saved.objective,
           skills: saved.skills,
           musicGenres: saved.musicGenres,
           location: saved.location,

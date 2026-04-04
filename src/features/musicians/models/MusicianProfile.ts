@@ -23,6 +23,7 @@ export interface MusicianProfileDTO {
   avatarUrl?: string;
   bannerUrl?: string;
   bio?: string;
+  objective?: string;         // backend: objective (nullable)
   location?: string;          // montado como "city, state" pelo service
   skills: string[];           // backend: instruments
   musicGenres: string[];      // backend: genres
