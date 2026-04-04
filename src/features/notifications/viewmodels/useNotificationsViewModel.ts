@@ -43,9 +43,11 @@ export function useNotificationsViewModel() {
     refetchOnWindowFocus: false,
   });
 
+  // Sincroniza badge: dependência é o número (primitivo), não o array — evita loop infinito
+  const unreadCount = notifications.filter((n) => !n.read).length;
   useEffect(() => {
-    setUnreadCount(notifications.filter((n) => !n.read).length);
-  }, [notifications]);
+    setUnreadCount(unreadCount);
+  }, [unreadCount, setUnreadCount]);
 
   // ── Mutations ──────────────────────────────────────────────
   const markReadMutation = useMutation({

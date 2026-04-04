@@ -31,6 +31,7 @@ interface BackendUserDTO {
   profilePicture?: string;
   profileBanner?: string;
   bio?: string;
+  objective?: string | null;
   photosCard?: string[];
   instruments?: string[];
   genres?: string[];
@@ -58,6 +59,7 @@ function mapBackendUser(raw: BackendUserDTO): MusicianProfileDTO {
     avatarUrl: raw.profilePicture ?? undefined,
     bannerUrl: raw.profileBanner ?? undefined,
     bio: raw.bio,
+    objective: raw.objective ?? undefined,
     location: locationStr,
     skills: raw.instruments ?? [],
     musicGenres: raw.genres ?? [],

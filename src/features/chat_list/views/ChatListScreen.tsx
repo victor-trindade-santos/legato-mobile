@@ -31,53 +31,51 @@ export default function ChatListScreen() {
         handleSearch
     } = useChatListViewModel();
 
-    if (isLoading) return <Spinner fullScreen />;
-
     return (
         <AppTemplate noPadding>
-            {/* ── Controles rápidos ─────────────────────────── */}
-            <View style={styles.searchContainer}>
-                <SearchInput 
-                    placeholder="Buscar contatos"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    onSearchPress={handleSearch}
-                    inputThemeOverride={{
-                        background: styles.searchContainer.backgroundColor,
-                        text: styles.searchContainer.color,
-                        border: styles.searchContainer.borderColor,
-                    }}
-                />
-            </View>
-
-            {/* Lista de chats */}
-            <View style={styles.chatListContainer}>
-                {chatItems.length === 0 ? (
-                    <View style={styles.noChatsContainer}>
-                        <LegatoText style={styles.noChatsText}>Nenhum chat encontrado</LegatoText>
+            {isLoading ? (
+                <Spinner fullScreen />
+            ) : (
+                <>
+                    {/* ── Busca ─────────────────────────────────── */}
+                    <View style={styles.searchContainer}>
+                        <SearchInput
+                            placeholder="Buscar contatos"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onSearchPress={handleSearch}
+                            inputThemeOverride={{
+                                background: styles.searchContainer.backgroundColor,
+                                text: styles.searchContainer.color,
+                                border: styles.searchContainer.borderColor,
+                            }}
+                        />
                     </View>
-                ) : (
-                    <FlatList
-                        data={chatItems}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <ChatListItem
-                                userAvatar={item.otherUserProfilePictureUrl || ''}
-                                userName={item.otherUserName}
-                                lastMessage={item.lastMessageContent}
-                                timeStamp={item.lastMessageTimestamp}
-                                onPress={() => {
-                                    // TODO: Navegar para ChatConversation
-                                    // navigation.navigate('ChatConversation', {
-                                    //   conversationId: item.id,
-                                    //   userName: item.otherUserName,
-                                    // });
-                                }}
+
+                    {/* ── Lista de chats ────────────────────────── */}
+                    <View style={styles.chatListContainer}>
+                        {chatItems.length === 0 ? (
+                            <View style={styles.noChatsContainer}>
+                                <LegatoText style={styles.noChatsText}>Nenhum chat encontrado</LegatoText>
+                            </View>
+                        ) : (
+                            <FlatList
+                                data={chatItems}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <ChatListItem
+                                        userAvatar={item.otherUserProfilePictureUrl || ''}
+                                        userName={item.otherUserName}
+                                        lastMessage={item.lastMessageContent}
+                                        timeStamp={item.lastMessageTimestamp}
+                                        onPress={() => {}}
+                                    />
+                                )}
                             />
                         )}
-                    />                    
-                )}
-            </View>
+                    </View>
+                </>
+            )}
         </AppTemplate>
     );
 }

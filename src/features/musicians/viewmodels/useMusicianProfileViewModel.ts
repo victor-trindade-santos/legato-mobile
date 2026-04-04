@@ -97,7 +97,6 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
     if (!source) return null;
 
     const bio = source.bio ?? 'Sem bio disponível.';
-    const firstSentence = source.bio?.split('.')[0]?.trim();
 
     return {
       id: source.id,
@@ -109,7 +108,7 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
       location: source.location,
       skills: source.skills ?? [],
       musicGenres: source.musicGenres ?? [],
-      objective: firstSentence ? `${firstSentence}.` : 'Sem objetivo definido.',
+      objective: source.objective ?? 'Sem objetivo definido.',
       photos: source.photos ?? [],
       stats: {
         connections: source.connectionsCount ?? 0,
