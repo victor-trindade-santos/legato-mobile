@@ -13,12 +13,31 @@ export interface Message {
   senderAvatar?: string;
   content: string;
   timestamp: string; // ISO 8601 (ex: "2026-04-02T14:32:00Z")
-  status: 'sending' | 'sent' | 'delivered' | 'read';
   isMine: boolean; // True se foi enviado por mim
 }
 
 /**
- * DTOs que vêm do backend (para serialização/deserialização)
+ * DTO que vem do backend ao buscar histórico (HTTP GET)
+ * 
+ * Exemplo:
+ * {
+ *   id: 1,
+ *   content: "Oi, tudo bem?",
+ *   timestamp: "28/03/2026 05:09",
+ *   senderName: "victor_test",
+ *   senderEmail: "email@gmail.com"
+ * }
+ */
+export interface MessageHistoryDTO {
+  id: number;
+  content: string;
+  timestamp: string; // Formato: "dd/mm/yyyy HH:mm"
+  senderName: string;
+  senderEmail: string;
+}
+
+/**
+ * DTOs que vêm do backend via WebSocket (para serialização)
  */
 export interface MessageDTO {
   id: string;

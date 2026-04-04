@@ -29,6 +29,7 @@ import { useChatStore } from '@/store/chatStore';
 import { useChatMessages, useChatConnectionStatus } from '@/hooks';
 import { WebSocketService } from '@/services/websocket/WebSocketService';
 import { chatService } from '@/features/chat/services/ChatService';
+import { Config } from '@/constants/config';
 import type {
   Message,
   SendMessagePayload,
@@ -79,7 +80,10 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
         // 2. Carrega histórico de mensagens via HTTP
         // ─────────────────────────────────────────────────────────────
         try {
-          const historicalMessages = await chatService.fetchMessages(conversationId);
+          const historicalMessages = await chatService.fetchMessages(
+            conversationId,
+            user.email
+          );
           if (isMounted) {
             chatStore.setMessages(historicalMessages);
           }
@@ -91,19 +95,25 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
         // ─────────────────────────────────────────────────────────────
         // 3. Conecta ao WebSocket (se não estiver já)
         // ─────────────────────────────────────────────────────────────
-        if (connectionStatus === 'disconnected' || connectionStatus === 'idle') {
-          try {
-            await WebSocketService.connect();
-          } catch (error) {
-            console.error('[ViewModel] Erro ao conectar WebSocket:', error);
-            chatStore.addError('Erro ao conectar ao servidor');
+        if (!Config.DEV_DISABLE_WEBSOCKET) {
+          if (connectionStatus === 'disconnected' || connectionStatus === 'idle') {
+            try {
+              await WebSocketService.connect();
+            } catch (error) {
+              console.error('[ViewModel] Erro ao conectar WebSocket:', error);
+              chatStore.addError('Erro ao conectar ao servidor');
+            }
           }
+        } else {
+          console.log('[ViewModel] ⚠️ WebSocket desabilitado em dev');
+          chatStore.setConnectionStatus('disconnected');
         }
 
         // ─────────────────────────────────────────────────────────────
-        // 4. Escuta mudanças de status da conexão
+        // 4-6. Escuta + Subscreve (apenas se WebSocket habilitado)
         // ─────────────────────────────────────────────────────────────
-        if (isMounted) {
+        if (!Config.DEV_DISABLE_WEBSOCKET && isMounted) {
+          // 4. Escuta mudanças de status da conexão
           statusUnsubscribeRef.current = WebSocketService.onStatusChange((status) => {
             chatStore.setConnectionStatus(status);
           });
@@ -111,12 +121,8 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
           errorUnsubscribeRef.current = WebSocketService.onError((error) => {
             chatStore.addError(error);
           });
-        }
 
-        // ─────────────────────────────────────────────────────────────
-        // 5. Subscreve a mensagens em tempo real
-        // ─────────────────────────────────────────────────────────────
-        if (isMounted) {
+          // 5. Subscreve a mensagens em tempo real
           const messageSubId = WebSocketService.subscribe(
             '/user/queue/messages',
             (payload) => {
@@ -132,7 +138,6 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
                   senderAvatar: payload.senderAvatar,
                   content: payload.content,
                   timestamp: payload.timestamp,
-                  status: 'delivered',
                   isMine: payload.senderId === user?.id,
                 };
 
@@ -157,26 +162,24 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
           );
 
           subscriptionsRef.current.push(messageSubId);
-        }
 
-        // ─────────────────────────────────────────────────────────────
-        // 6. Subscreve a eventos de digitação
-        // ─────────────────────────────────────────────────────────────
-        if (isMounted) {
-          const typingSubId = WebSocketService.subscribe(
-            `/topic/typing/${conversationId}`,
-            (event: TypingEventPayload) => {
-              // event = { conversationId, senderId, senderName }
-              chatStore.setTypingUsers([event.senderName]);
+          // 6. Subscreve a eventos de digitação
+          // const typingSubId = WebSocketService.subscribe(
+          //   `/topic/typing/${conversationId}`,
+          //   (payload: TypingEventPayload) => {
+          //     // Se não é o user atual digitando
+          //     if (payload.senderId !== user?.id) {
+          //       chatStore.setTypingUsers([
+          //         {
+          //           userId: payload.senderId,
+          //           userName: payload.senderName || 'Usuário',
+          //         },
+          //       ]);
+          //     }
+          //   }
+          // );
 
-              // Remove após 3s de inatividade
-              setTimeout(() => {
-                chatStore.setTypingUsers([]);
-              }, 3000);
-            }
-          );
-
-          subscriptionsRef.current.push(typingSubId);
+          // subscriptionsRef.current.push(typingSubId);
         }
 
         console.log('[ViewModel] Chat setup completo');
@@ -243,7 +246,6 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
         senderAvatar: user.avatarUrl,
         content,
         timestamp: new Date().toISOString(),
-        status: 'sending',
         isMine: true,
       };
 
@@ -286,11 +288,16 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
       chatStore.setLoadingMessages(true);
 
       // Recarrega histórico
-      const messages = await chatService.fetchMessages(conversationId);
+      const messages = await chatService.fetchMessages(conversationId, user?.email || '');
       chatStore.setMessages(messages);
 
-      // Reconecta WebSocket
-      await WebSocketService.connect();
+      // Reconecta WebSocket (se não desabilitado)
+      if (!Config.DEV_DISABLE_WEBSOCKET) {
+        await WebSocketService.connect();
+      } else {
+        console.log('[ViewModel] ⚠️ WebSocket desabilitado, pulando reconexão');
+        chatStore.setConnectionStatus('disconnected');
+      }
 
       console.log('[ViewModel] Reconexão bem-sucedida');
     } catch (error) {
@@ -303,11 +310,24 @@ export function useChatViewModel(conversationId: number): ChatViewModelReturn {
    * Marca conversa como lida
    */
   const markAsRead = async (): Promise<void> => {
+    // ⚠️ Validação
+    if (!conversationId || conversationId === undefined) {
+      console.warn('[ViewModel] ⚠️ markAsRead pulado - conversationId inválido:', {
+        conversationId,
+        type: typeof conversationId,
+      });
+      return;
+    }
+
     try {
+      console.log('[ViewModel] Marcando conversa como lida:', conversationId);
       await chatService.markAsRead(conversationId);
-      console.log('[ViewModel] Conversa marcada como lida:', conversationId);
+      console.log('[ViewModel] ✅ Conversa marcada como lida:', conversationId);
     } catch (error) {
-      console.error('[ViewModel] Erro ao marcar como lido:', error);
+      console.error('[ViewModel] ❌ Erro ao marcar como lido:', {
+        conversationId,
+        error,
+      });
     }
   };
 

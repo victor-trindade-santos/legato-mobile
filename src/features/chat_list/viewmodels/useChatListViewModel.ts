@@ -25,10 +25,17 @@ export function useChatListViewModel() {
 
         try {
             const items = await fetchChatItemsList();
-            setChatItems(items);
-            setFilteredChatItems(items);
-        } catch (err) {
+            console.log('[ChatListViewModel] Items carregados do serviço:', items);
+            
+            setChatItems(items || []);
+            setFilteredChatItems(items || []);
+            
+            console.log('[ChatListViewModel] Items salvos no state:', items);
+        } catch (err: any) {
+            console.error('[ChatListViewModel] Erro ao carregar items:', err);
             setError('Erro ao carregar a lista de chats. Tente novamente mais tarde.');
+            setChatItems([]);
+            setFilteredChatItems([]);
         } finally {
             setIsLoading(false);
         }

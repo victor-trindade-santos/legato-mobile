@@ -27,8 +27,12 @@ export type ProfileStackParamList = {
 };
 
 export type ChatStackParamList = {
-   ChatList: undefined;
-  Chat: undefined;
+  ChatList: undefined;
+  Chat: {
+    conversationId: number;
+    userName: string;
+    avatarUri?: string;
+  }
 };
 
 export type MusicianProfileRouteParams = {

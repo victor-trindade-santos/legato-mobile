@@ -13,7 +13,6 @@ export interface UserInfo {
   username: string;
   displayName: string;
   avatarUrl?: string;
-  statusText?: 'online' | 'offline' | 'away';
 }
 
 /**

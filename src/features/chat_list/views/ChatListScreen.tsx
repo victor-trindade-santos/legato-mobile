@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
-import { ChatStackParamList, RootStackParamList } from '@/navigation/types';
+import { ChatStackParamList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
@@ -59,18 +59,29 @@ export default function ChatListScreen() {
                 ) : (
                     <FlatList
                         data={chatItems}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => (
-                            <ChatListItem
-                                userAvatar={item.otherUserProfilePictureUrl || ''}
-                                userName={item.otherUserName}
-                                lastMessage={item.lastMessageContent || 'Sem mensagens'}
-                                timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
-                                onPress={() => {
-                                    navigation.navigate('Chat');
-                                }}
-                            />
-                        )}
+                        keyExtractor={(item, index) => String(item?.chatId ?? index)}
+                        renderItem={({ item }) => {
+                            console.log('[ChatListScreen] Item renderizado:', item);
+                            return (
+                                <ChatListItem
+                                    userAvatar={item.otherUserProfilePictureUrl || ''}
+                                    userName={item.otherUserName}
+                                    lastMessage={item.lastMessageContent || 'Sem mensagens'}
+                                    timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
+                                    onPress={() => {
+                                        console.log('[ChatListScreen] Chat clicado:', {
+                                            id: item.chatId,
+                                            userName: item.otherUserName,
+                                        });
+                                        navigation.navigate('Chat', {
+                                            conversationId: item.chatId,
+                                            userName: item.otherUserName,
+                                            avatarUri: item.otherUserProfilePictureUrl
+                                        });
+                                    }}
+                                />
+                            );
+                        }}
                     />                    
                 )}
             </View>

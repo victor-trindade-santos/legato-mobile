@@ -16,8 +16,15 @@ export const Config = {
   DEV_BYPASS_AUTH: false,
 
   /**
-   * DEV: define true para usar dados mock na tela de Descoberta (sem backend).
+   * DEV: define true para usar dados mock na tela de Chat List (sem backend).
    * Lembre de voltar para false antes de commitar.
    */
   DEV_USE_MOCK: false,
+
+  /**
+   * DEV: define true para desabilitar WebSocket durante desenvolvimento.
+   * Mensagens em tempo real não funcionarão, mas lista de chats vai funcionar.
+   * Lembre de voltar para false antes de commitar.
+   */
+  DEV_DISABLE_WEBSOCKET: false,
 } as const;

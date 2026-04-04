@@ -38,23 +38,17 @@ import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { useChatViewModel } from '../viewmodels/useChatViewModel';
 import type { Message } from '../models/MessageModel';
 
+import { ChatStackParamList } from '@/navigation/types';
+
 // ════════════════════════════════════════════════════════════════════
 // TIPOS
 // ════════════════════════════════════════════════════════════════════
 
-type ChatScreenRouteParams = {
-  Chat: {
-    conversationId: number;
-    userName: string;
-    avatarUri?: string;
-    statusText?: string;
-    statusVariant?: 'online' | 'offline' | 'away';
-  };
-};
+type ChatScreenRouteParams = RouteProp<ChatStackParamList, 'Chat'>;
 
 export default function ChatScreen() {
   const navigation = useNavigation();
-  const route = useRoute<RouteProp<ChatScreenRouteParams, 'Chat'>>();
+  const route = useRoute<ChatScreenRouteParams>();
   const flatListRef = useRef<FlatList>(null);
 
   // ════════════════════════════════════════════════════════════════════
@@ -64,8 +58,6 @@ export default function ChatScreen() {
     conversationId,
     userName,
     avatarUri,
-    statusText = 'online',
-    statusVariant = 'online',
   } = route.params || {};
 
   // ════════════════════════════════════════════════════════════════════
@@ -89,9 +81,14 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // LIFECYCLE - MARCAR COMO LIDO
   // ════════════════════════════════════════════════════════════════════
-  useEffect(() => {
-    markAsRead();
-  }, [conversationId, markAsRead]);
+  // useEffect(() => {
+  //   // ⚠️ Validação: só marca como lido se conversationId for válido
+  //   if (!conversationId || conversationId === undefined) {
+  //     console.warn('[ChatScreen] ⚠️ conversationId inválido, pulando markAsRead:', conversationId);
+  //     return;
+  //   }
+  //   markAsRead();
+  // }, [conversationId, markAsRead]);
 
   // ════════════════════════════════════════════════════════════════════
   // SCROLL AUTOMÁTICO
@@ -115,11 +112,11 @@ export default function ChatScreen() {
       <MessageContent
         message={item.content}
         timestamp={item.timestamp}
-        statusElement={
-          item.isMine && item.status ? (
-            <UnreadMessagesBadge status={item.status} />
-          ) : undefined
-        }
+        // statusElement={
+        //   item.isMine && item.status ? (
+        //     <UnreadMessagesBadge status={item.status} />
+        //   ) : undefined
+        // }
       />
     );
 
@@ -159,12 +156,12 @@ export default function ChatScreen() {
               .map((n) => n[0])
               .join('')}
             avatarUri={avatarUri}
-            statusText={statusText}
-            statusVariant={statusVariant}
+            // statusText={statusText}
+            // statusVariant={statusVariant}
           />
         </View>
-
-        {/* ── Connection Status Badge ──────────────────────– */}
+{/* 
+        ── Connection Status Badge ──────────────────────–
         {connectionStatus !== 'connected' && (
           <View
             style={[
@@ -199,7 +196,7 @@ export default function ChatScreen() {
                     : 'Desconectado'}
             </Text>
           </View>
-        )}
+        )} */}
 
         {/* ── Lista de Mensagens ──────────────────────────– */}
         <FlatList
@@ -217,10 +214,10 @@ export default function ChatScreen() {
           }
         />
 
-        {/* ── Typing Indicator ──────────────────────────── */}
+        {/* ── Typing Indicator ────────────────────────────
         {typingUsers.length > 0 && (
           <TypingIndicator userName={typingUsers[0]} />
-        )}
+        )} */}
 
         {/* ── Input ──────────────────────────────────────– */}
         <ChatInputBar

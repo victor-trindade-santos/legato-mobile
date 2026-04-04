@@ -5,7 +5,7 @@ export interface ChatHeaderUserInfoProps {
   fallbackInitials: string;
 
   name: string;
-  statusText: string; // "online", "digitando...", "visto por último às 14:32"
+  // statusText: string; // "online", "digitando...", "visto por último às 14:32"
 
-  statusVariant?: StatusDotVariant;
+  // statusVariant?: StatusDotVariant;
 }

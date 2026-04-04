@@ -7,13 +7,10 @@
  */
 
 export interface ChatItemDTO {
-  id: number;
+  chatId: number;
   otherUserId: number;
   otherUserName: string;
   otherUserProfilePictureUrl?: string;
   lastMessageContent?: string;
   lastMessageTimestamp?: string;
-  unreadCount: number;
-  createdAt: string; // ISO 8601
-  updatedAt: string; // ISO 8601
 }
