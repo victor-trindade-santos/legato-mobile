@@ -93,46 +93,46 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // SCROLL AUTOMÁTICO
   // ════════════════════════════════════════════════════════════════════
-  useEffect(() => {
-    if (messages.length > 0) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
-  }, [messages]);
+  // useEffect(() => {
+  //   if (messages.length > 0) {
+  //     flatListRef.current?.scrollToEnd({ animated: true });
+  //   }
+  // }, [messages]);
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZADOR DE MENSAGENS
   // ════════════════════════════════════════════════════════════════════
-  const renderMessage = ({ item }: { item: Message }) => {
-    // Separador de dia
-    if (!item.content) {
-      return <DaySeparator label={item.senderName} />;
-    }
+  // const renderMessage = ({ item }: { item: Message }) => {
+  //   // Separador de dia
+  //   if (!item.content) {
+  //     return <DaySeparator label={item.senderName} />;
+  //   }
 
-    const content = (
-      <MessageContent
-        message={item.content}
-        timestamp={item.timestamp}
-        // statusElement={
-        //   item.isMine && item.status ? (
-        //     <UnreadMessagesBadge status={item.status} />
-        //   ) : undefined
-        // }
-      />
-    );
+  //   const content = (
+  //     <MessageContent
+  //       message={item.content}
+  //       timestamp={item.timestamp}
+  //       // statusElement={
+  //       //   item.isMine && item.status ? (
+  //       //     <UnreadMessagesBadge status={item.status} />
+  //       //   ) : undefined
+  //       // }
+  //     />
+  //   );
 
-    return item.isMine ? (
-      <MyMessageBubble>{content}</MyMessageBubble>
-    ) : (
-      <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
-    );
-  };
+  //   return item.isMine ? (
+  //     <MyMessageBubble>{content}</MyMessageBubble>
+  //   ) : (
+  //     <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
+  //   );
+  // };
 
   // ════════════════════════════════════════════════════════════════════
   // ESTADO DE CARREGAMENTO
   // ════════════════════════════════════════════════════════════════════
-  if (isLoadingMessages && messages.length === 0) {
-    return <Spinner fullScreen />;
-  }
+  // if (isLoadingMessages && messages.length === 0) {
+  //   return <Spinner fullScreen />;
+  // }
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZAÇÃO
@@ -198,28 +198,7 @@ export default function ChatScreen() {
           </View>
         )} */}
 
-        {/* ── Lista de Mensagens ──────────────────────────– */}
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={styles.listContent}
-          ListEmptyComponent={
-            !isLoadingMessages ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>Sem mensagens ainda</Text>
-              </View>
-            ) : null
-          }
-        />
-
-        {/* ── Typing Indicator ────────────────────────────
-        {typingUsers.length > 0 && (
-          <TypingIndicator userName={typingUsers[0]} />
-        )} */}
-
-        {/* ── Input ──────────────────────────────────────– */}
+       
         <ChatInputBar
           value={inputValue}
           onChangeText={onInputChange}
