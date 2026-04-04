@@ -52,7 +52,7 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   // ════════════════════════════════════════════════════════════════════
-  // PROPS DA ROTA
+  // PROPS DA ROTA RECEBIDAS DE CHATLIST
   // ════════════════════════════════════════════════════════════════════
   const {
     conversationId,
@@ -63,20 +63,8 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const viewModel = useChatViewModel(conversationId);
+  const { messages, isLoading, error } = useChatViewModel(conversationId);
 
-  const {
-    messages,
-    connectionStatus,
-    isLoadingMessages,
-    typingUsers,
-    errors,
-    inputValue,
-    isSending,
-    onInputChange,
-    sendMessage,
-    markAsRead,
-  } = viewModel;
 
   // ════════════════════════════════════════════════════════════════════
   // LIFECYCLE - MARCAR COMO LIDO
@@ -93,46 +81,35 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // SCROLL AUTOMÁTICO
   // ════════════════════════════════════════════════════════════════════
-  // useEffect(() => {
-  //   if (messages.length > 0) {
-  //     flatListRef.current?.scrollToEnd({ animated: true });
-  //   }
-  // }, [messages]);
+  useEffect(() => {
+    if (messages.length > 0) {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZADOR DE MENSAGENS
   // ════════════════════════════════════════════════════════════════════
-  // const renderMessage = ({ item }: { item: Message }) => {
-  //   // Separador de dia
-  //   if (!item.content) {
-  //     return <DaySeparator label={item.senderName} />;
-  //   }
-
-  //   const content = (
-  //     <MessageContent
-  //       message={item.content}
-  //       timestamp={item.timestamp}
-  //       // statusElement={
-  //       //   item.isMine && item.status ? (
-  //       //     <UnreadMessagesBadge status={item.status} />
-  //       //   ) : undefined
-  //       // }
-  //     />
-  //   );
-
-  //   return item.isMine ? (
-  //     <MyMessageBubble>{content}</MyMessageBubble>
-  //   ) : (
-  //     <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
-  //   );
-  // };
+  const renderMessage = ({ item }: { item: Message }) => {
+    const content = (
+      <MessageContent
+        message={item.content}
+        timestamp={item.timestamp}
+      />
+    )
+   
+    return item.isMine ? (
+      <MyMessageBubble>{content}</MyMessageBubble>
+    ) : (
+      <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
+    );
+  };
 
   // ════════════════════════════════════════════════════════════════════
   // ESTADO DE CARREGAMENTO
   // ════════════════════════════════════════════════════════════════════
-  // if (isLoadingMessages && messages.length === 0) {
-  //   return <Spinner fullScreen />;
-  // }
+  if (isLoading) return <Spinner fullScreen />;
+
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZAÇÃO
@@ -160,6 +137,19 @@ export default function ChatScreen() {
             // statusVariant={statusVariant}
           />
         </View>
+        {/* ── Lista de Mensagens ─────────────────────────── */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessage}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Sem mensagens ainda</Text>
+            </View>
+          }
+        />
 {/* 
         ── Connection Status Badge ──────────────────────–
         {connectionStatus !== 'connected' && (
@@ -200,16 +190,16 @@ export default function ChatScreen() {
 
        
         <ChatInputBar
-          value={inputValue}
-          onChangeText={onInputChange}
-          onSend={sendMessage}
+          value=""
+          onChangeText={() => {}}
+          onSend={() => {}}
           placeholder="Digite uma mensagem..."
         />
 
         {/* ── Errors ────────────────────────────────────– */}
-        {errors.length > 0 && (
+        {error && (
           <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>{errors[0]}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
       </View>
