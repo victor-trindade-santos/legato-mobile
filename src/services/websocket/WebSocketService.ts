@@ -3,296 +3,206 @@
  *
  * Gerencia conexão WebSocket com backend via STOMP protocol.
  * Responsabilidades:
- * - Conectar ao endpoint /ws-chat com JWT token
- * - Subscrever em /user/queue/messages (receber mensagens)
- * - Enviar para /app/sendMessage (mandar mensagens)
- * - Reconexão automática com exponential backoff
- * - Notificar listeners sobre estado de conexão e mensagens
+ * - Abrir/fechar conexão WebSocket
+ * - Autenticar via JWT no handshake
+ * - Subscrever no canal privado do usuário (/user/queue/messages)
+ * - Enviar mensages
+ * 
+ * Não faz:
+ * - Gerenciamento de estado
+ * - Lógica de negócio
+ * - Conhece componentes ou viewModels
  */
 
-import { Client, IFrame } from '@stomp/stompjs';
-import { storage } from '@/utils/storage';
-import { Config } from '@/constants/config';
-import type {
-  ReceiveMessagePayload,
-  SendMessagePayload,
-} from '@/features/chat/models/MessageModel';
 
-import type {
-    StompConnectConfig,
-    WebSocketConnectionStatus
-} from '@/types/WebSocket.types';
 
-type MessageCallback = (message: ReceiveMessagePayload) => void;
-type ConnectionStatusCallback = (status: WebSocketConnectionStatus) => void;
-type ErrorCallback = (error: string) => void;
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import type { IncomingWSMessage, OutgoingWSMessage, MessageHandler } from '@/types/WebSocket.types';
 
-interface Subscription {
-  id: string;
-  destination: string;
-  callback: MessageCallback;
-}
 
-class WebSocketServiceImpl {
-  private client: Client | null = null;
-  private connectionStatus: WebSocketConnectionStatus = 'idle';
-  private subscriptions: Map<string, Subscription> = new Map();
+// ─────────────────────────────────────────────────────────────
+// CONSTANTES
+// ─────────────────────────────────────────────────────────────
 
-  // Callbacks
-  private statusCallbacks: Set<ConnectionStatusCallback> = new Set();
-  private errorCallbacks: Set<ErrorCallback> = new Set();
+const WS_URL = 'wss://legato-mobile-backend.onrender.com/ws-chat';
 
-  // Reconnection config
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 15;
-  private reconnectDelay = 1000; // 1 segundo inicial
-  private maxReconnectDelay = 30000; // 30 segundos máximo
-  private reconnectTimer: NodeJS.Timeout | null = null;
+/**
+ * Canal onde o usuário recebe mensagens privadas.
+ * O /user/ é automaticamente prefixado pelo STOMP com o ID
+ * do usuário autenticado — ou seja, cada usuário recebe
+ * apenas as mensagens destinadas a ele.
+ */
+const SUBSCRIBE_DESTINATION = '/user/queue/messages';
+
+/**
+ * Canal para onde enviamos mensagens.
+ * O /app/ é o prefixo que o backend definiu como
+ * "applicationDestinationPrefixes" — significa que essa
+ * mensagem vai ser processada por um @MessageMapping no servidor.
+ */
+const SEND_DESTINATION = '/app/sendMessage';
+
+
+// ─────────────────────────────────────────────────────────────
+// SERVIÇO
+// ─────────────────────────────────────────────────────────────
+export class WebSocketService {
+  /**
+   * O Client do @stomp/stompjs é quem gerencia toda a
+   * conexão STOMP por baixo dos panos — reconexão automática,
+   * heartbeat, framing das mensagens, etc.
+ */
+  private client: Client;
 
   /**
-   * Conecta ao servidor WebSocket
-   * Injeta automaticamente o JWT token no header
+   * Guardamos a referência da subscription para poder
+   * cancelar (unsubscribe) quando necessário — por exemplo,
+   * quando o usuário sai da tela de chat.
+ */
+  private subscription: StompSubscription | null = null;
+
+  /** Flag para saber se estamos conectados */
+  private isConnected: boolean = false;
+
+  constructor(token: string, onMessage: MessageHandler) {
+    this.client = new Client({
+      /**
+       * brokerURL: endereço direto do WebSocket.
+       *
+       * Usamos /websocket no final porque o SockJS (que o backend
+       * usa como fallback) expõe o WebSocket nativo nesse sub-path.
+       * Com o @stomp/stompjs puro (sem SockJS no front), precisamos
+       * apontar diretamente para o endpoint WebSocket nativo.
+       */
+      brokerURL: WS_URL,
+
+      /**
+       * connectHeaders: headers enviados no frame STOMP CONNECT.
+       * É aqui que mandamos o JWT para o backend autenticar.
+       * O backend tem um AuthHandshakeInterceptor que lê esse header.
+       */
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+
+      /**
+       * reconnectDelay: tempo em ms antes de tentar reconectar
+       * automaticamente se a conexão cair. 5000ms = 5 segundos.
+       * O próprio @stomp/stompjs gerencia isso pra você.
+       */
+      reconnectDelay: 5000,
+
+      /**
+     * onConnect: chamado quando a conexão STOMP é estabelecida
+     * com sucesso (após o handshake e autenticação).
+     * É aqui que fazemos o subscribe no canal privado.
+     */
+      onConnect: () => {
+        console.log('[WebSocketService] ✅ Conectado ao STOMP');
+        this.isConnected = true;
+
+        /**
+         * subscribe: nos inscrevemos no canal privado do usuário.
+         * Toda vez que o backend mandar uma mensagem para esse usuário,
+         * essa callback será chamada com o frame STOMP (IMessage).
+         */
+        this.subscription = this.client.subscribe(
+          SUBSCRIBE_DESTINATION,
+          (frame: IMessage) => {
+            try {
+              /**
+               * frame.body é sempre uma string.
+               * O backend manda JSON, então precisamos parsear.
+               */
+              const message: IncomingWSMessage = JSON.parse(frame.body);
+              console.log('[WebSocketService] 📨 Mensagem recebida:', message)
+            } catch (err) {
+              console.error('[WebSocketService] ❌ Erro ao parsear mensagem:', err);
+            }
+          }
+        );
+      },
+
+      onDisconnect: () => {
+        console.log('[WebSocketService] 🔌 Desconectado do STOMP');
+        this.isConnected = false;
+      },
+
+      onStompError: (frame) => {
+        console.error('[WebSocketService] ❌ Erro STOMP:', frame.headers['message']);
+      },
+
+      onWebSocketError: (event) => {
+        console.error('[WebSocketService] ❌ Erro WebSocket:', event);
+      },
+    });
+  }
+
+  /**
+   * connect()
+   *
+   * Ativa o cliente STOMP — abre a conexão WebSocket e
+   * inicia o processo de handshake STOMP.
+   * Deve ser chamado uma vez quando o usuário entra no chat.
    */
-  async connect(): Promise<void> {
-    if (this.connectionStatus === 'connected' || this.connectionStatus === 'connecting') {
-      console.warn('[WebSocket] Já conectado ou conectando');
+  connect(): void {
+    if (this.isConnected) {
+      console.warn('[WebSocketService] ⚠️ Já conectado, ignorando connect()');
+      return;
+    }
+    console.log('[WebSocketService] 🔄 Conectando...');
+    this.client.activate();
+  }
+
+  /**
+   * disconnect()
+   *
+   * Cancela a subscription e fecha a conexão STOMP de forma limpa.
+   * Deve ser chamado quando o usuário sai da tela de chat.
+   * Se não fizer isso, a conexão fica aberta à toa consumindo recursos.
+   */
+  disconnect(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
+    this.client.deactivate();
+    this.isConnected = false;
+    console.log('[WebSocketService] 👋 Desconectado manualmente');
+  }
+
+  /**
+   * sendMessage()
+   *
+   * Publica uma mensagem no canal /app/sendMessage.
+   * O backend vai processar e entregar para o receiverId.
+   *
+   * @param receiverId - ID do usuário que vai receber a mensagem
+   * @param content - Texto da mensagem
+   */
+  sendMessage(receiverId: number, content: string): void {
+    if (!this.isConnected) {
+      console.error('[WebSocketService] ❌ Não conectado. Não foi possível enviar.');
       return;
     }
 
-    try {
-      this.setConnectionStatus('connecting');
+    const payload: OutgoingWSMessage = {receiverId, content};
 
-      // Recupera token do storage
-      const token = await storage.getItem(Config.TOKEN_KEY);
-      if (!token) {
-        throw new Error('Token JWT não encontrado no storage');
-      }
+    /**
+     * publish: envia um frame STOMP SEND para o destination.
+     * body precisa ser uma string — por isso serializamos para JSON.
+     */
+    this.client.publish({
+      destination: SEND_DESTINATION,
+      body: JSON.stringify(payload),
+    });
 
-      // Cria cliente STOMP
-      this.client = new Client({
-        brokerURL: Config.WS_URL,
-        connectHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-        // Callbacks de ciclo de vida
-        onConnect: this.handleConnect.bind(this),
-        onDisconnect: this.handleDisconnect.bind(this),
-        onStompError: this.handleError.bind(this),
-        onWebSocketError: this.handleWebSocketError.bind(this),
-        // Reconnection automática
-        reconnectDelay: 5000, // 5 segundos entre tentativas
-        heartbeatIncoming: 60000,
-        heartbeatOutgoing: 60000,
-      });
-
-      // Ativa debug em dev
-      if (__DEV__) {
-        this.client.debug = (str) => console.log('[STOMP Debug]', str);
-      }
-
-      // Inicia conexão
-      this.client.activate();
-    } catch (error) {
-      this.handleError(`Erro ao conectar WebSocket: ${error}`);
-      this.setConnectionStatus('error');
-    }
+    console.log('[WebSocketService] 📤 Mensagem enviada:', payload);
   }
 
-  /**
-   * Desconecta do servidor WebSocket
-   */
-  async disconnect(): Promise<void> {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-
-    if (this.client?.active) {
-      await this.client.deactivate();
-    }
-
-    this.subscriptions.clear();
-    this.setConnectionStatus('disconnected');
+  /** Retorna true se a conexão estiver ativa */
+  isConnectionActive(): boolean {
+    return this.isConnected;
   }
 
-  /**
-   * Subscreve a um tópico/fila e configura callback
-   * @param destination ex: "/user/queue/messages"
-   * @param callback Função chamada quando chegar mensagem
-   */
-  subscribe(destination: string, callback: MessageCallback): string {
-    if (!this.client?.connected) {
-      throw new Error('WebSocket não conectado. Chame connect() primeiro.');
-    }
-
-    const subscriptionId = `sub-${Date.now()}-${Math.random()}`;
-
-    try {
-      this.client.subscribe(destination, (frame) => {
-        try {
-          const payload = JSON.parse(frame.body) as ReceiveMessagePayload;
-          callback(payload);
-        } catch (error) {
-          this.handleError(`Erro ao parsear mensagem: ${error}`);
-        }
-      });
-
-      // Armazena subscrição para limpeza posterior
-      this.subscriptions.set(subscriptionId, {
-        id: subscriptionId,
-        destination,
-        callback,
-      });
-
-      console.log('[WebSocket] Subscrito em:', destination);
-      return subscriptionId;
-    } catch (error) {
-      this.handleError(`Erro ao subscrever em ${destination}: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Remove subscrição
-   * @param subscriptionId ID retornado por subscribe()
-   */
-  unsubscribe(subscriptionId: string): void {
-    this.subscriptions.delete(subscriptionId);
-  }
-
-  /**
-   * Envia uma mensagem para o backend
-   * @param payload {receiverId, content}
-   */
-  send(payload: SendMessagePayload): void {
-    if (!this.client?.connected) {
-      throw new Error('WebSocket não conectado');
-    }
-
-    try {
-      this.client.publish({
-        destination: '/app/sendMessage',
-        body: JSON.stringify(payload),
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
-
-      console.log('[WebSocket] Mensagem enviada para:', payload.receiverId);
-    } catch (error) {
-      this.handleError(`Erro ao enviar mensagem: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Retorna status atual de conexão
-   */
-  getConnectionStatus(): WebSocketConnectionStatus {
-    return this.connectionStatus;
-  }
-
-  /**
-   * Registra callback para mudanças de status
-   */
-  onStatusChange(callback: ConnectionStatusCallback): () => void {
-    this.statusCallbacks.add(callback);
-    // Retorna função para remover listener
-    return () => {
-      this.statusCallbacks.delete(callback);
-    };
-  }
-
-  /**
-   * Registra callback para erros
-   */
-  onError(callback: ErrorCallback): () => void {
-    this.errorCallbacks.add(callback);
-    return () => {
-      this.errorCallbacks.delete(callback);
-    };
-  }
-
-  // ────────────────────────────────────────────────────────────────
-  // HANDLERS PRIVADOS (callbacks internos)
-  // ────────────────────────────────────────────────────────────────
-
-  private handleConnect(frame: IFrame): void {
-    console.log('[WebSocket] Conectado ao servidor:', frame);
-    this.reconnectAttempts = 0;
-    this.reconnectDelay = 1000; // Reset delay
-    this.setConnectionStatus('connected');
-  }
-
-  private handleDisconnect(frame: IFrame): void {
-    console.log('[WebSocket] Desconectado:', frame);
-    this.setConnectionStatus('disconnected');
-    
-    // Tenta reconectar se teve erro
-    if (frame.body && frame.headers?.message !== 'OK') {
-      this.attemptReconnect();
-    }
-  }
-
-  private handleError(error: string | IFrame): void {
-    const errorMsg = typeof error === 'string' ? error : error.body || 'Erro desconhecido';
-    console.error('[WebSocket] Erro:', errorMsg);
-    this.setConnectionStatus('error');
-    this.errorCallbacks.forEach(cb => cb(errorMsg));
-    this.attemptReconnect();
-  }
-
-  private handleWebSocketError(event: Event): void {
-    console.error('[WebSocket] Erro WebSocket:', event);
-    this.setConnectionStatus('error');
-    this.errorCallbacks.forEach(cb => cb('Erro de conexão WebSocket'));
-    this.attemptReconnect();
-  }
-
-  /**
-   * Tenta reconectar com exponential backoff
-   */
-  private attemptReconnect(): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[WebSocket] Máximo de tentativas de reconexão atingido');
-      this.setConnectionStatus('disconnected');
-      return;
-    }
-
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-    }
-
-    this.reconnectAttempts++;
-    const delay = Math.min(
-      this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1),
-      this.maxReconnectDelay
-    );
-
-    console.log(
-      `[WebSocket] Tentando reconectar em ${delay}ms (tentativa ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-    );
-
-    this.setConnectionStatus('reconnecting');
-
-    this.reconnectTimer = setTimeout(() => {
-      this.connect().catch(error => {
-        console.error('[WebSocket] Falha ao reconectar:', error);
-      });
-    }, delay);
-  }
-
-  /**
-   * Atualiza status de conexão e notifica listeners
-   */
-  private setConnectionStatus(status: WebSocketConnectionStatus): void {
-    if (this.connectionStatus === status) return;
-
-    this.connectionStatus = status;
-    console.log('[WebSocket] Status:', status);
-    this.statusCallbacks.forEach(cb => cb(status));
-  }
 }
-
-// Singleton instance
-export const WebSocketService = new WebSocketServiceImpl();
