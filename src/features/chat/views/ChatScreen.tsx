@@ -34,8 +34,9 @@ import { UnreadMessagesBadge } from '@/components/molecules/UnreadMessagesBadge/
 import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIndicator';
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
+import { formatTimestamp } from '@/utils/dateUtils';
 
-import { useChatViewModel } from '../viewmodels/useChatViewModel';
+import { useChatViewModel, ChatListItem } from '../viewmodels/useChatViewModel';
 import type { Message } from '../models/MessageModel';
 
 import { ChatStackParamList } from '@/navigation/types';
@@ -63,7 +64,7 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { messages, isLoading, error } = useChatViewModel(conversationId);
+  const { chatItems, isLoading, error } = useChatViewModel(conversationId);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -82,23 +83,29 @@ export default function ChatScreen() {
   // SCROLL AUTOMÁTICO
   // ════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (messages.length > 0) {
+    if (chatItems.length > 0) {
       flatListRef.current?.scrollToEnd({ animated: true });
     }
-  }, [messages]);
+  }, [chatItems]);
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZADOR DE MENSAGENS
   // ════════════════════════════════════════════════════════════════════
-  const renderMessage = ({ item }: { item: Message }) => {
+  const renderMessage = ({ item }: { item: ChatListItem }) => {
+    if (item.type === 'separator') {
+      return <DaySeparator label={item.label} />;
+    }
+
+    const {data} = item;
+
     const content = (
       <MessageContent
-        message={item.content}
-        timestamp={item.timestamp}
+        message={data.content}
+        timestamp={formatTimestamp(data.timestamp)}
       />
     )
    
-    return item.isMine ? (
+    return data.isMine ? (
       <MyMessageBubble>{content}</MyMessageBubble>
     ) : (
       <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
@@ -140,8 +147,8 @@ export default function ChatScreen() {
         {/* ── Lista de Mensagens ─────────────────────────── */}
         <FlatList
           ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
+          data={chatItems}
+          keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={

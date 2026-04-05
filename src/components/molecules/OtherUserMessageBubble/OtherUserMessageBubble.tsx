@@ -31,7 +31,7 @@ import type { OtherUserMessageBubbleProps } from './OtherUserMessageBubble.types
 export function OtherUserMessageBubble({ children }: OtherUserMessageBubbleProps) {
   return (
     <View style={styles.wrapper}>
-      <MessageBubbleContainer backgroundColor={Colors.primaryLight}>
+      <MessageBubbleContainer backgroundColor={Colors.textSecondaryLight}>
         {children}
       </MessageBubbleContainer>
     </View>

@@ -3,9 +3,37 @@ import { useEffect, useState } from "react";
 import { fetchMessages } from "../services/ChatService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
 import { useAuthStore } from "@/store/authStore";
-import { set } from "react-hook-form";
+import { extractDateKey, extractDateLabel} from "@/utils/dateUtils";
+
+
+export type ChatListItem =
+  | { type: 'message'; data: Message }
+  | { type: 'separator'; label: string; key: string };
+
+function groupMessageWithSeparators(messages: Message[]): ChatListItem[] {
+  const result: ChatListItem[] = [];
+  let lastDateKey = '';
+
+  for (const message of messages) {
+    const dateKey = extractDateKey(message.timestamp);
+
+    if (dateKey !== lastDateKey) {
+      result.push({
+        type: 'separator',
+        label: extractDateLabel(message.timestamp),
+        key: `separator-${dateKey}`,
+      });
+      lastDateKey = dateKey;
+    }
+
+    result.push({ type: 'message', data: message });
+  }
+
+  return result;
+}
 
 function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message {
+
   return {
     id: String(dto.id),
     content: dto.content,
@@ -17,7 +45,7 @@ function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message
 
 
 export function useChatViewModel(conversationId: number) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatItems, setChatItems] = useState<ChatListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +59,8 @@ export function useChatViewModel(conversationId: number) {
         setIsLoading(true);
         const dtos = await fetchMessages(conversationId);
         const mapped = dtos.map((dto) => mapToMessage(dto, currentUserEmail ?? ''));
-        setMessages(mapped);
+        const items = groupMessageWithSeparators(mapped);
+        setChatItems(items);
       } catch (err) {
         setError('Erro ao carregar mensagens.');
       } finally {
@@ -41,8 +70,10 @@ export function useChatViewModel(conversationId: number) {
     loadMessages();
   }, [conversationId]);
 
+
+
   return {
-    messages,
+    chatItems,
     isLoading,
     error,
   };
