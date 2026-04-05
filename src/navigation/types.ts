@@ -32,6 +32,7 @@ export type ChatStackParamList = {
     conversationId: number;
     userName: string;
     avatarUri?: string;
+    receiverId: number;
   }
 };
 

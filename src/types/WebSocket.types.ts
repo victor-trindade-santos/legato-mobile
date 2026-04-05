@@ -13,17 +13,17 @@
 // Formato da mensagem recebida via WebSocket (STOMP)
 export interface IncomingWSMessage {
   id: number;
-  senderId: number;
   senderName: string;
   senderEmail: string;
-  receiverId: number;
   content: string;
   timestamp: string; // "DD/MM/YYYY HH:MM"
 }
 
 // Formato do payload enviado para o servidor
 export interface OutgoingWSMessage {
-  receiverId: number;
+  receiver: {
+    id: number;
+  };
   content: string;
 }
 

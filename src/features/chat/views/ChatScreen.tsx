@@ -59,12 +59,13 @@ export default function ChatScreen() {
     conversationId,
     userName,
     avatarUri,
+    receiverId,
   } = route.params || {};
 
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error } = useChatViewModel(conversationId);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend } = useChatViewModel(conversationId, receiverId);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -197,9 +198,9 @@ export default function ChatScreen() {
 
        
         <ChatInputBar
-          value=""
-          onChangeText={() => {}}
-          onSend={() => {}}
+          value={inputText}
+          onChangeText={setInputText}
+          onSend={handleSend}
           placeholder="Digite uma mensagem..."
         />
 

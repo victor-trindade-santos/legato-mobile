@@ -67,11 +67,13 @@ export default function ChatListScreen() {
                                         console.log('[ChatListScreen] Chat clicado:', {
                                             id: item.chatId,
                                             userName: item.otherUserName,
+                                            receiverId: item.otherUserId,
                                         });
                                         navigation.navigate('Chat', {
                                             conversationId: item.chatId,
                                             userName: item.otherUserName,
-                                            avatarUri: item.otherUserProfilePictureUrl
+                                            avatarUri: item.otherUserProfilePictureUrl,
+                                            receiverId: item.otherUserId,
                                         });
                                     }}
                                 />

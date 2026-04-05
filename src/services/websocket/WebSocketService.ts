@@ -17,6 +17,7 @@
 
 
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import type { IncomingWSMessage, OutgoingWSMessage, MessageHandler } from '@/types/WebSocket.types';
 
 
@@ -24,7 +25,7 @@ import type { IncomingWSMessage, OutgoingWSMessage, MessageHandler } from '@/typ
 // CONSTANTES
 // ─────────────────────────────────────────────────────────────
 
-const WS_URL = 'wss://legato-mobile-backend.onrender.com/ws-chat';
+const WS_URL = process.env.EXPO_PUBLIC_WS_URL ?? 'wss://legato-mobile-backend.onrender.com/ws-chat';
 
 /**
  * Canal onde o usuário recebe mensagens privadas.
@@ -67,22 +68,40 @@ export class WebSocketService {
   constructor(token: string, onMessage: MessageHandler) {
     this.client = new Client({
       /**
-       * brokerURL: endereço direto do WebSocket.
+       * webSocketFactory: função que o cliente STOMP chama internamente
+       * para criar a instância de transporte da conexão.
        *
-       * Usamos /websocket no final porque o SockJS (que o backend
-       * usa como fallback) expõe o WebSocket nativo nesse sub-path.
-       * Com o @stomp/stompjs puro (sem SockJS no front), precisamos
-       * apontar diretamente para o endpoint WebSocket nativo.
+       * O STOMP é um protocolo de mensageria que roda SOBRE o WebSocket.
+       * Pensa assim:
+       * - WebSocket = o tubo (conexão bruta entre cliente e servidor)
+       * - STOMP     = o protocolo que define como as mensagens trafegam dentro desse tubo
+       * - SockJS    = uma camada acima do WebSocket que garante compatibilidade
+       *               entre diferentes ambientes (browsers antigos, proxies, etc)
+       *
+       * O backend usa SockJS com .withSockJS() — isso significa que ele não
+       * aceita WebSocket puro. O SockJS tem um protocolo próprio de framing:
+       * ele embrulha cada mensagem em um array JSON antes de enviar.
+       *
+       * Exemplo do que o SockJS espera receber:
+       *   WebSocket puro manda:  CONNECT\naccept-version:1.0...
+       *   SockJS espera receber: ["CONNECT\naccept-version:1.0..."]
+       *
+       * Por isso não podemos usar new WebSocket() diretamente — o backend
+       * receberia o frame STOMP sem o embrulho JSON e quebraria a conexão.
+       *
+       * Usando o SockJS client, ele cuida automaticamente de:
+       * - Montar a URL no formato correto que o SockJS server espera
+       * - Embrulhar e desembrulhar as mensagens no formato JSON do SockJS
+       * - Negociar o melhor transporte disponível (WebSocket, long-polling, etc)
+       *
+       * O token JWT vai como query param (?token=...) na URL porque o
+       * AuthHandshakeInterceptor no backend lê a autenticação assim:
+       *   request.getURI().getQuery() → extrai o token= da URL
        */
-      brokerURL: WS_URL,
-
-      /**
-       * connectHeaders: headers enviados no frame STOMP CONNECT.
-       * É aqui que mandamos o JWT para o backend autenticar.
-       * O backend tem um AuthHandshakeInterceptor que lê esse header.
-       */
-      connectHeaders: {
-        Authorization: `Bearer ${token}`,
+      webSocketFactory: () => {
+        const url = `${WS_URL}?token=${token}`;
+        console.log(`[WebSocketService] 🌐 Conectando via SockJS: ${url}`);
+        return new SockJS(url);
       },
 
       /**
@@ -116,6 +135,7 @@ export class WebSocketService {
                */
               const message: IncomingWSMessage = JSON.parse(frame.body);
               console.log('[WebSocketService] 📨 Mensagem recebida:', message)
+              onMessage(message);
             } catch (err) {
               console.error('[WebSocketService] ❌ Erro ao parsear mensagem:', err);
             }
@@ -186,7 +206,12 @@ export class WebSocketService {
       return;
     }
 
-    const payload: OutgoingWSMessage = {receiverId, content};
+    const payload: OutgoingWSMessage = {
+      receiver: {
+        id: receiverId, // 👈 agora no formato que o backend espera
+      },
+      content,
+    };
 
     /**
      * publish: envia um frame STOMP SEND para o destination.
