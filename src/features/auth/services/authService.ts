@@ -17,15 +17,18 @@ function mapEnvelope(res: AuthResponseEnvelope): AuthResponse {
   }
 
   return {
-    token: rawToken,
-    user: {
-      id: rawUser.id,
-      email: rawUser.email,
-      username: rawUser.username,
-      displayName: rawUser.displayName,
-      avatarUrl: rawUser.profilePicture ?? undefined,
-      role: 'USER',
-    },
+    data: {
+      token: rawToken,
+      user: {
+        id: rawUser.id,
+        email: rawUser.email,
+        username: rawUser.username,
+        displayName: rawUser.displayName,
+        avatarUrl: rawUser.profilePicture ?? undefined,
+        role: 'USER',
+      },
+    }
+
   };
 }
 

@@ -36,8 +36,8 @@ export function useLoginViewModel() {
     setErrorMessage(null);
     try {
       const response = await loginUser(data);
-      await storage.setItem(Config.TOKEN_KEY, response.token);
-      setAuth(response.token, response.user);
+      await storage.setItem(Config.TOKEN_KEY, response.data.token);
+      setAuth(response.data.token, response.data.user);
     } catch {
       setErrorMessage('Usuário ou senha inválidos.');
     } finally {

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
-import { RootStackParamList } from '@/navigation/types';
+import { ChatStackParamList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
@@ -18,7 +18,7 @@ import { useChatListViewModel } from '../viewmodels/useChatListViewModel';
 import { FlatList } from 'react-native-gesture-handler';
 import { Spacing } from '@/theme';
 
-type ChatListNav = StackNavigationProp<RootStackParamList>;
+type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
 export default function ChatListScreen() {
     const navigation = useNavigation<ChatListNav>();
@@ -51,31 +51,37 @@ export default function ChatListScreen() {
                             }}
                         />
                     </View>
-
-                    {/* ── Lista de chats ────────────────────────── */}
-                    <View style={styles.chatListContainer}>
-                        {chatItems.length === 0 ? (
-                            <View style={styles.noChatsContainer}>
-                                <LegatoText style={styles.noChatsText}>Nenhum chat encontrado</LegatoText>
-                            </View>
-                        ) : (
-                            <FlatList
-                                data={chatItems}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({ item }) => (
-                                    <ChatListItem
-                                        userAvatar={item.otherUserProfilePictureUrl || ''}
-                                        userName={item.otherUserName}
-                                        lastMessage={item.lastMessageContent}
-                                        timeStamp={item.lastMessageTimestamp}
-                                        onPress={() => {}}
-                                    />
-                                )}
-                            />
-                        )}
-                    </View>
+                    {/* ── Lista de Chats ─────────────────────────── */}
+                    <FlatList
+                        data={chatItems}
+                        keyExtractor={(item, index) => String(item?.chatId ?? index)}
+                        renderItem={({ item }) => {
+                            console.log('[ChatListScreen] Item renderizado:', item);
+                            return (
+                                <ChatListItem
+                                    userAvatar={item.otherUserProfilePictureUrl || ''}
+                                    userName={item.otherUserName}
+                                    lastMessage={item.lastMessageContent || 'Sem mensagens'}
+                                    timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
+                                    onPress={() => {
+                                        console.log('[ChatListScreen] Chat clicado:', {
+                                            id: item.chatId,
+                                            userName: item.otherUserName,
+                                            receiverId: item.otherUserId,
+                                        });
+                                        navigation.navigate('Chat', {
+                                            conversationId: item.chatId,
+                                            userName: item.otherUserName,
+                                            avatarUri: item.otherUserProfilePictureUrl,
+                                            receiverId: item.otherUserId,
+                                        });
+                                    }}
+                                />
+                            );
+                        }}
+                    />                    
                 </>
-            )}
+                )}
         </AppTemplate>
     );
 }

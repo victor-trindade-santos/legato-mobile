@@ -6,13 +6,13 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { type SharedValue } from 'react-native-reanimated';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, BorderRadius, Spacing } from '@/theme';
 
 interface SwipeOverlayProps {
   direction: 'left' | 'right';
-  opacity: Animated.SharedValue<number>;
+  opacity: SharedValue<number>;
 }
 
 export function SwipeOverlay({ direction, opacity }: SwipeOverlayProps) {

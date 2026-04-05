@@ -86,9 +86,9 @@ export function useSignupViewModel() {
         role: 'USER',
         recaptchaToken: '',
       });
-      await storage.setItem(Config.TOKEN_KEY, response.token);
+      await storage.setItem(Config.TOKEN_KEY, response.data.token);
       setNeedsOnboarding(true);
-      setAuth(response.token, response.user);
+      setAuth(response.data.token, response.data.user);
     } catch (error: any) {
       const msg = error?.response?.data?.message;
       setErrorMessage(msg ?? 'Erro ao criar conta. Este e-mail já pode estar em uso.');

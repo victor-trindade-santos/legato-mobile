@@ -45,6 +45,8 @@ export interface AuthResponseEnvelope {
 
 /** Modelo interno após mapeamento pelo service */
 export interface AuthResponse {
-  token: string;
-  user: AuthUser;
+ data: {
+    token: string;
+    user: AuthUser;
+  };
 }
