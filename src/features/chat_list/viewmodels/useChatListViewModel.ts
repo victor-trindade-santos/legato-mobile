@@ -9,8 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { fetchChatItemsList } from '../services/chatListService';
-import { ChatItemDTO } from '../models/ChatItemDTO'; // Make sure this import path is correct
-import { set } from 'react-hook-form';
+import { ChatItemDTO } from '../models/ChatItemDTO';
 
 export function useChatListViewModel() {
     const [searchQuery, setSearchQuery] = useState('');

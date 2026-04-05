@@ -20,6 +20,7 @@ export interface AuthUser {
   role: 'USER' | 'ADMIN';
   // Campos de perfil — populados após o onboarding/edição
   bio?: string;
+  objective?: string;
   skills?: string[];
   musicGenres?: string[];
   location?: string;

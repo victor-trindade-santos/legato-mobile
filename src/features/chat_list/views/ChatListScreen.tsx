@@ -31,32 +31,27 @@ export default function ChatListScreen() {
         handleSearch
     } = useChatListViewModel();
 
-    if (isLoading) return <Spinner fullScreen />;
-
     return (
         <AppTemplate noPadding>
-            {/* ── Controles rápidos ─────────────────────────── */}
-            <View style={styles.searchContainer}>
-                <SearchInput 
-                    placeholder="Buscar contatos"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    onSearchPress={handleSearch}
-                    inputThemeOverride={{
-                        background: styles.searchContainer.backgroundColor,
-                        text: styles.searchContainer.color,
-                        border: styles.searchContainer.borderColor,
-                    }}
-                />
-            </View>
-
-            {/* Lista de chats */}
-            <View style={styles.chatListContainer}>
-                {chatItems.length === 0 ? (
-                    <View style={styles.noChatsContainer}>
-                        <LegatoText style={styles.noChatsText}>Nenhum chat encontrado</LegatoText>
+            {isLoading ? (
+                <Spinner fullScreen />
+            ) : (
+                <>
+                    {/* ── Busca ─────────────────────────────────── */}
+                    <View style={styles.searchContainer}>
+                        <SearchInput
+                            placeholder="Buscar contatos"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onSearchPress={handleSearch}
+                            inputThemeOverride={{
+                                background: styles.searchContainer.backgroundColor,
+                                text: styles.searchContainer.color,
+                                border: styles.searchContainer.borderColor,
+                            }}
+                        />
                     </View>
-                ) : (
+                    {/* ── Lista de Chats ─────────────────────────── */}
                     <FlatList
                         data={chatItems}
                         keyExtractor={(item, index) => String(item?.chatId ?? index)}
@@ -83,8 +78,8 @@ export default function ChatListScreen() {
                             );
                         }}
                     />                    
+                </>
                 )}
-            </View>
         </AppTemplate>
     );
 }

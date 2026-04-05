@@ -98,6 +98,7 @@ export interface SavedProfileData {
   avatarUrl?: string;
   bannerUrl?: string;
   bio?: string;
+  objective?: string;
   skills: string[];
   musicGenres: string[];
   location?: string;
@@ -146,6 +147,7 @@ export async function saveProfile(
     profileBanner,
     photosCard,
     bio: data.bio ?? '',
+    ...(data.objective ? { objective: data.objective } : {}),
     instruments: data.skills,
     genres: data.musicGenres,
     location: {
@@ -175,6 +177,7 @@ export async function saveProfile(
     avatarUrl: saved?.profilePicture ?? profilePicture ?? undefined,
     bannerUrl: saved?.profileBanner ?? profileBanner ?? undefined,
     bio: data.bio,
+    objective: data.objective,
     skills: data.skills,
     musicGenres: data.musicGenres,
     location,

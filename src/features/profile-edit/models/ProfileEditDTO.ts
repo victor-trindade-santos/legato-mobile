@@ -31,6 +31,7 @@ export interface UpdateProfileDTO {
   photosCard: string[];
   sex?: string;        // opcional — não enviar se não selecionado
   bio: string;
+  objective?: string;  // opcional — não enviar se vazio
   instruments: string[];
   genres: string[];
   location: ProfileLocationDTO;
