@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -18,12 +18,20 @@ export default function SettingsScreen() {
 
   return (
     <AppTemplate showHeader={false}>
-      {/* Header manual com botão de voltar */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Ionicons name="arrow-back" size={Spacing.iconLg} color={Colors.white} />
         </TouchableOpacity>
-        <LegatoText style={styles.title}>Configurações</LegatoText>
+        <View style={styles.logoRow}>
+          <Image
+            source={require('@/assets/icons/legato_logo_horizontal_dark_version.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <LegatoText style={styles.separator}>|</LegatoText>
+          <LegatoText style={styles.title}>Configurações</LegatoText>
+        </View>
         <View style={styles.backBtn} />
       </View>
 
@@ -47,10 +55,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  logo: {
+    height: 28,
+    width: 80,
+  },
+  separator: {
+    color: Colors.textSecondaryDark,
+    fontSize: Typography.FontSize.md,
+  },
   title: {
     color: Colors.white,
-    fontSize: Typography.FontSize.lg,
-    fontWeight: '600',
+    fontSize: Typography.FontSize.md,
+    fontWeight: '500',
   },
   empty: {
     flex: 1,
