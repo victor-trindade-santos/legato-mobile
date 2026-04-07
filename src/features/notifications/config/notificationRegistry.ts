@@ -59,7 +59,26 @@ export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationConfig>
     icon: 'chatbubble-outline',
     iconColor: Colors.info,
     actions: [],
-    getNavTarget: undefined, // Chat ainda não implementado
+    getNavTarget: (n) => ({
+      screen: 'Main',
+      params: {
+        screen: 'ChatTab',
+        params: { screen: 'Chat', params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId } },
+      },
+    }),
+  },
+
+  MATCH: {
+    icon: 'heart',
+    iconColor: Colors.error,
+    actions: [],
+    getNavTarget: (n) => ({
+      screen: 'Main',
+      params: {
+        screen: 'ChatTab',
+        params: { screen: 'Chat', params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId } },
+      },
+    }),
   },
 
   LIKE: {
