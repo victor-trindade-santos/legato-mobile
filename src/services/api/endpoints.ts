@@ -23,9 +23,9 @@ export const Endpoints = {
 
   // Descoberta
   discovery: {
-    musicians: '/discovery/musicians',
-    swipe: '/discovery/swipe',
-    filters: '/discovery/filters',
+    musicians: '/users/discovery',
+    like: (id: number) => `/users/discovery/like/${id}`,
+    dislike: (id: number) => `/users/discovery/dislike/${id}`,
   },
 
   // Conexões
@@ -69,7 +69,7 @@ export const Endpoints = {
   // Perfis de músicos (tela de perfil completo — diferente do card de discovery)
   musicians: {
     getById: (id: number) => `/musicians/${id}`,
-    favoriteArtists: (id: number) => `/musicians/${id}/favorite-artists`,
+    favoriteArtists: (id: number) => `/users/musicians/${id}/favorite-artists`,
     updateProfile: '/musicians/me',
   },
 
