@@ -49,5 +49,6 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
   OnboardingEdit: undefined;
   ProfileEdit: undefined;
+  Settings: undefined;
   MusicianProfile: MusicianProfileRouteParams;
 };

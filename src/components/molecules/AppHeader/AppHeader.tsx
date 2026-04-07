@@ -14,12 +14,14 @@ import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useNotificationStore } from '@/store/notificationStore';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
-import type { MainTabParamList } from '@/navigation/types';
+import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import type { AppHeaderProps } from './AppHeader.types';
 
 type MainNav = BottomTabNavigationProp<MainTabParamList>;
+type RootNav = StackNavigationProp<RootStackParamList>;
 
 export function AppHeader({
   title,
@@ -34,8 +36,9 @@ export function AppHeader({
 
   const handleNotifications = () => navigation.navigate('Notifications');
   const handleSettings = () => {
-    if (onSettingsPress) onSettingsPress();
-    // navegação para Settings quando a rota existir
+    if (onSettingsPress) { onSettingsPress(); return; }
+    // Sobe para o RootStack e navega para Settings
+    navigation.getParent<RootNav>()?.navigate('Settings');
   };
   const handleSearch = () => {
     if (onSearchPress) onSearchPress();
