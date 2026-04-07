@@ -45,8 +45,10 @@ export default function MusicianProfileScreen() {
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
   const { user } = useAuthStore();
-  const { displayName, musicianId, username } = route.params;
-  const isOwnProfile = musicianId === user?.id;
+  const musicianId = route.params?.musicianId ?? user?.id ?? 0;
+  const username = route.params?.username ?? user?.username;
+  const displayName = route.params?.displayName ?? user?.displayName ?? '';
+  const isOwnProfile = !route.params?.musicianId || musicianId === user?.id;
 
   const {
     profile,
