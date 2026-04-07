@@ -3,6 +3,8 @@
  * Tipagem completa das rotas para TypeScript.
  */
 
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export type AuthStackParamList = {
   Splash: undefined;
   Login: undefined;
@@ -44,7 +46,7 @@ export type MusicianProfileRouteParams = {
 
 export type RootStackParamList = {
   Auth: undefined;
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   OnboardingEdit: undefined;
   ProfileEdit: undefined;
   MusicianProfile: MusicianProfileRouteParams;
