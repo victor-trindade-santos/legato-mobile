@@ -105,16 +105,20 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
   // ── 1b. Handler de eventos de typing recebidos ─────────────
   const handleIncomingTyping = useCallback<TypingHandler>((dto) => {
-    // Ignora evento gerado por mim mesmo
-    if (dto.userId === currentUserId) return;
+    console.log('[ViewModel] handleIncomingTyping ←', dto, '| meuId=', currentUserId);
 
-    setIsOtherUserTyping(dto.isTyping);
+    if (dto.userId === currentUserId) {
+      console.log('[ViewModel] typing ignorado (evento próprio)');
+      return;
+    }
 
-    // Timer de segurança no receptor: se "isTyping: false" nunca chegar
-    // (ex.: outro usuário desconectou), apaga o indicador após 5s.
-    if (dto.isTyping) {
+    console.log('[ViewModel] isOtherUserTyping →', dto.typing);
+    setIsOtherUserTyping(dto.typing);
+
+    if (dto.typing) {
       if (typingResetRef.current) clearTimeout(typingResetRef.current);
       typingResetRef.current = setTimeout(() => {
+        console.log('[ViewModel] typing reset por timeout de segurança (5s)');
         setIsOtherUserTyping(false);
       }, 5000);
     } else {
@@ -152,21 +156,22 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
   // ── Lida com mudança no input + debounce de typing ────────
   const handleInputChange = useCallback((text: string) => {
+    console.log('[ViewModel] handleInputChange | text=', text, '| currentUserId=', currentUserId);
     setInputText(text);
 
-    if (!currentUserId) return;
+    if (currentUserId == null) return;
 
     if (text.trim().length > 0) {
-      // Envia "digitando" imediatamente (se ainda não enviou)
+      console.log('[ViewModel] handleInputChange → enviando isTyping=true');
       wsSendTyping(conversationId, currentUserId, true);
 
-      // Reinicia o timer: após 2s sem digitar, sinaliza que parou
       if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
       typingDebounceRef.current = setTimeout(() => {
+        console.log('[ViewModel] debounce expirou → enviando isTyping=false');
         wsSendTyping(conversationId, currentUserId, false);
       }, 2000);
     } else {
-      // Campo vazio: para imediatamente
+      console.log('[ViewModel] input vazio → enviando isTyping=false');
       if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
       wsSendTyping(conversationId, currentUserId, false);
     }
@@ -179,7 +184,7 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
     // Para o indicador de typing imediatamente ao enviar
     if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
-    if (currentUserId) wsSendTyping(conversationId, currentUserId, false);
+    if (currentUserId != null) wsSendTyping(conversationId, currentUserId, false);
 
     /**
      * Otimismo de UI: adicionamos a mensagem na lista

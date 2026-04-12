@@ -209,6 +209,7 @@ export class WebSocketService {
    */
   subscribeToTyping(chatId: number, onTyping: TypingHandler): void {
     this.pendingTyping = { chatId, onTyping };
+    console.log(`[WebSocketService] subscribeToTyping | chatId=${chatId} | conectado=${this.isConnected}`);
 
     if (this.isConnected) {
       this._doSubscribeToTyping(chatId, onTyping);
@@ -231,9 +232,14 @@ export class WebSocketService {
    * O backend re-transmite para todos os inscritos no tópico do chat.
    */
   sendTyping(chatId: number, userId: number, isTyping: boolean): void {
-    if (!this.isConnected) return;
+    if (!this.isConnected) {
+      console.warn('[WebSocketService] sendTyping ignorado — não conectado');
+      return;
+    }
 
-    const payload: TypingDTO = { chatId, userId, isTyping };
+    console.log(`[WebSocketService] sendTyping → chatId=${chatId} userId=${userId} isTyping=${isTyping}`);
+
+    const payload: TypingDTO = { chatId, userId, typing: isTyping };
 
     this.client.publish({
       destination: `/app/chat/${chatId}/typing`,
@@ -243,16 +249,19 @@ export class WebSocketService {
 
   /** Faz o subscribe efetivo no canal de typing do STOMP. */
   private _doSubscribeToTyping(chatId: number, onTyping: TypingHandler): void {
-    // Cancela subscribe anterior se houver (ex: mudança de chat)
     if (this.typingSubscription) {
       this.typingSubscription.unsubscribe();
     }
 
+    const destination = `/topic/chats/${chatId}/typing`;
+    console.log(`[WebSocketService] _doSubscribeToTyping → ${destination}`);
+
     this.typingSubscription = this.client.subscribe(
-      `/topic/chats/${chatId}/typing`,
+      destination,
       (frame: IMessage) => {
         try {
           const dto: TypingDTO = JSON.parse(frame.body);
+          console.log('[WebSocketService] typing recebido ←', dto);
           onTyping(dto);
         } catch (err) {
           console.error('[WebSocketService] ❌ Erro ao parsear typing:', err);

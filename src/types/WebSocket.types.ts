@@ -34,7 +34,7 @@ export type MessageHandler = (message: IncomingWSMessage) => void;
 export interface TypingDTO {
   chatId: number;
   userId: number;
-  isTyping: boolean;
+  typing: boolean; // Jackson serializa 'boolean isTyping' como 'typing' (strips prefixo 'is')
 }
 
 // Callback chamado quando um evento de typing chega via WebSocket
