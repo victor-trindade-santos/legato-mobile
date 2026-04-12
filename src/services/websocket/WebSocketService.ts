@@ -100,7 +100,6 @@ export class WebSocketService {
        */
       webSocketFactory: () => {
         const url = `${WS_URL}?token=${token}`;
-        console.log(`[WebSocketService] 🌐 Conectando via SockJS: ${url}`);
         return new SockJS(url);
       },
 
@@ -117,7 +116,6 @@ export class WebSocketService {
      * É aqui que fazemos o subscribe no canal privado.
      */
       onConnect: () => {
-        console.log('[WebSocketService] ✅ Conectado ao STOMP');
         this.isConnected = true;
 
         /**
@@ -134,7 +132,6 @@ export class WebSocketService {
                * O backend manda JSON, então precisamos parsear.
                */
               const message: IncomingWSMessage = JSON.parse(frame.body);
-              console.log('[WebSocketService] 📨 Mensagem recebida:', message)
               onMessage(message);
             } catch (err) {
               console.error('[WebSocketService] ❌ Erro ao parsear mensagem:', err);
@@ -144,7 +141,6 @@ export class WebSocketService {
       },
 
       onDisconnect: () => {
-        console.log('[WebSocketService] 🔌 Desconectado do STOMP');
         this.isConnected = false;
       },
 
@@ -167,10 +163,8 @@ export class WebSocketService {
    */
   connect(): void {
     if (this.isConnected) {
-      console.warn('[WebSocketService] ⚠️ Já conectado, ignorando connect()');
       return;
     }
-    console.log('[WebSocketService] 🔄 Conectando...');
     this.client.activate();
   }
 
@@ -188,7 +182,6 @@ export class WebSocketService {
     }
     this.client.deactivate();
     this.isConnected = false;
-    console.log('[WebSocketService] 👋 Desconectado manualmente');
   }
 
   /**
@@ -202,7 +195,6 @@ export class WebSocketService {
    */
   sendMessage(receiverId: number, content: string): void {
     if (!this.isConnected) {
-      console.error('[WebSocketService] ❌ Não conectado. Não foi possível enviar.');
       return;
     }
 
@@ -222,7 +214,6 @@ export class WebSocketService {
       body: JSON.stringify(payload),
     });
 
-    console.log('[WebSocketService] 📤 Mensagem enviada:', payload);
   }
 
   /** Retorna true se a conexão estiver ativa */

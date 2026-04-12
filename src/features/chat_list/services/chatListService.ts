@@ -29,7 +29,6 @@ export async function fetchChatItemsList(): Promise<ChatItemDTO[]> {
     
     // Mapeia cada item da resposta do backend
     const mappedItems = res.data.map(mapBackendResponse);
-    console.log('[chatListService] Items mapeados:', mappedItems);
     
     return mappedItems;
 }
