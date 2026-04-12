@@ -13,6 +13,7 @@ import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { NotificationItemProps } from './NotificationItem.types';
 
 export function NotificationItem({
@@ -23,6 +24,7 @@ export function NotificationItem({
   onPress,
   onAction,
 }: NotificationItemProps) {
+  const colors = useColors();
   const { read, senderName, message, timeAgo } = notification;
 
   return (
@@ -34,14 +36,14 @@ export function NotificationItem({
       {/* Avatar com ícone do tipo sobreposto */}
       <View style={styles.avatarWrapper}>
         <Avatar size="md" fallbackInitials={senderName} />
-        <View style={[styles.iconBadge, { backgroundColor: iconColor }]}>
+        <View style={[styles.iconBadge, { backgroundColor: iconColor, borderColor: colors.background }]}>
           <Ionicons name={icon as any} size={10} color={Colors.white} />
         </View>
       </View>
 
       <View style={styles.content}>
-        <LegatoText variant="bodySmall" color={Colors.textPrimaryDark}>
-          <LegatoText variant="bodyMedium" color={Colors.white}>{senderName} </LegatoText>
+        <LegatoText variant="bodySmall" color={colors.textSecondary}>
+          <LegatoText variant="bodyMedium" color={colors.textPrimary}>{senderName} </LegatoText>
           {message}
         </LegatoText>
 
@@ -102,7 +104,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.backgroundDark,
   },
   content: {
     flex: 1,

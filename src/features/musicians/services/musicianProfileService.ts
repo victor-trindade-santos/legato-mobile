@@ -143,8 +143,21 @@ export async function getFavoriteArtists(musicianId: number): Promise<FavoriteAr
   }
 
   try {
-    const res = await api.get<FavoriteArtist[]>(Endpoints.musicians.favoriteArtists(musicianId));
-    return res.data;
+    const res = await api.get<{ success: boolean; data: unknown[] }>(
+      Endpoints.musicians.favoriteArtists(musicianId),
+    );
+    const raw = res.data.data ?? [];
+    if (!Array.isArray(raw)) return [];
+    // Backend retorna string[] com nomes dos artistas — adapta para o modelo interno
+    if (raw.length > 0 && typeof raw[0] === 'string') {
+      return (raw as string[]).map((name, index) => ({
+        id: index,
+        displayName: name,
+        username: name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+        avatarUrl: undefined,
+      }));
+    }
+    return raw as FavoriteArtist[];
   } catch {
     return [];
   }

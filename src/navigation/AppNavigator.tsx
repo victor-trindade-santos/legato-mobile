@@ -19,6 +19,7 @@ import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import MusicianProfileScreen from '@/features/musicians/views/MusicianProfileScreen';
 import ProfileEditScreen from '@/features/profile-edit/views/ProfileEditScreen';
+import SettingsScreen from '@/features/settings/views/SettingsScreen';
 import type { RootStackParamList } from './types';
 
 const Root = createStackNavigator<RootStackParamList>();
@@ -73,7 +74,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <Root.Navigator screenOptions={{ headerShown: false }}>
+    <Root.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: Colors.backgroundDark } }}>
       {isAuthenticated && needsOnboarding ? (
         // Onboarding: nome DIFERENTE de "ProfileEdit" para que, quando
         // needsOnboarding vira false, OnboardingEdit suma do navigator e
@@ -83,15 +84,20 @@ export default function AppNavigator() {
         <>
           <Root.Screen name="Main" component={MainNavigator} />
           <Root.Screen name="ProfileEdit" component={ProfileEditScreen} />
+          <Root.Screen
+            name="MusicianProfile"
+            component={MusicianProfileScreen}
+            options={{ presentation: 'modal' }}
+          />
+          <Root.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ presentation: 'modal' }}
+          />
         </>
       ) : (
         <Root.Screen name="Auth" component={AuthNavigator} />
       )}
-      <Root.Screen
-        name="MusicianProfile"
-        component={MusicianProfileScreen}
-        options={{ presentation: 'modal' }}
-      />
     </Root.Navigator>
   );
 }

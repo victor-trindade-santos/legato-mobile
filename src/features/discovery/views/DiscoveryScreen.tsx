@@ -87,7 +87,7 @@ export default function DiscoveryScreen() {
               </LegatoText>
             </View>
           ) : (
-            cards.slice(0, 3).reverse().map((musician, index) => (
+            cards.slice(0, 3).reverse().map((musician, index, arr) => (
               <View
                 key={musician.id}
                 style={[
@@ -101,10 +101,10 @@ export default function DiscoveryScreen() {
               >
                 <MusicianCard
                   musician={musician}
-                  isTop={index === 2}
+                  isTop={index === arr.length - 1}
                   onSwipeLeft={() => handleSwipe(musician, 'dislike')}
                   onSwipeRight={() => handleSwipe(musician, 'like')}
-                  onSwipeDown={index === 2 ? () => navigation.navigate('MusicianProfile', {
+                  onSwipeDown={index === arr.length - 1 ? () => navigation.navigate('MusicianProfile', {
                     musicianId: musician.id,
                     displayName: musician.displayName,
                   }) : undefined}

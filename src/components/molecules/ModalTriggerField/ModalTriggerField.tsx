@@ -22,6 +22,8 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useUIStore } from '@/store/uiStore';
+import { useColors } from '@/hooks/useColors';
 import type { ModalTriggerFieldProps } from './ModalTriggerField.types';
 
 const THEME = {
@@ -42,14 +44,17 @@ export function ModalTriggerField({
   value,
   placeholder = 'Toque para editar...',
   onPress,
-  variant = 'dark',
+  variant,
 }: ModalTriggerFieldProps) {
-  const theme = THEME[variant];
+  const storeTheme = useUIStore((s) => s.theme);
+  const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
+  const theme = THEME[resolvedVariant];
+  const colors = useColors();
   const hasValue = !!value?.trim();
 
   return (
     <View style={styles.wrapper}>
-      <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.label}>
+      <LegatoText variant="label" color={colors.textSecondary} style={styles.label}>
         {label}
       </LegatoText>
 

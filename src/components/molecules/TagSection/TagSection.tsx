@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tag } from '@/components/atoms/Tag/Tag';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { TagSectionProps } from './TagSection.types';
 
 export function TagSection({
@@ -27,10 +28,11 @@ export function TagSection({
   tagColor = Colors.primary,
   emptyMessage = 'Nenhum item selecionado',
 }: TagSectionProps) {
+  const colors = useColors();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <LegatoText variant="bodySmall" color={Colors.white}>{label}</LegatoText>
+        <LegatoText variant="bodySmall" color={colors.textPrimary}>{label}</LegatoText>
         <TouchableOpacity style={styles.addBtn} onPress={onAdd}>
           <Ionicons name="add" size={16} color={Colors.primary} />
           <LegatoText variant="caption" color={Colors.primary}>Add</LegatoText>

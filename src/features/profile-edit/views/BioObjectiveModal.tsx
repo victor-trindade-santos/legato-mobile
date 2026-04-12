@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,7 @@ import { FormField } from '@/components/molecules/FormField/FormField';
 import { Button } from '@/components/atoms/Button/Button';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { ProfileEditFormData } from '../viewmodels/useProfileEditViewModel';
 
 interface BioObjectiveModalProps {
@@ -27,68 +28,76 @@ interface BioObjectiveModalProps {
 }
 
 export function BioObjectiveModal({ visible, onClose, control, errors }: BioObjectiveModalProps) {
+  const colors = useColors();
   return (
     <ModalTemplate visible={visible} onClose={onClose}>
-      <LegatoText variant="sectionTitle" color={Colors.white} style={styles.title}>
-        Bio &amp; Objetivo
-      </LegatoText>
-
-      {/* Bio */}
-      <Controller
-        control={control}
-        name="bio"
-        render={({ field: { onChange, value } }) => (
-          <FormField
-            variant="dark"
-            label="Bio"
-            placeholder="Fale sobre sua trajetória musical..."
-            value={value ?? ''}
-            onChangeText={onChange}
-            errorMessage={errors.bio?.message}
-            multiline
-            numberOfLines={4}
-          />
-        )}
-      />
-
-      {/* Objetivo */}
-      <View style={styles.objectiveHeader}>
-        <Ionicons name="flag-outline" size={Spacing.iconSm} color={Colors.success} />
-        <LegatoText variant="label" color={Colors.textSecondaryDark}>
-          Objetivo
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+      >
+        <LegatoText variant="sectionTitle" color={colors.textPrimary} style={styles.title}>
+          Bio &amp; Objetivo
         </LegatoText>
-      </View>
-      <Controller
-        control={control}
-        name="objective"
-        render={({ field: { onChange, value } }) => (
-          <FormField
-            variant="dark"
-            label=""
-            placeholder="Qual é o seu objetivo musical?"
-            value={value ?? ''}
-            onChangeText={onChange}
-            errorMessage={errors.objective?.message}
-            multiline
-            numberOfLines={3}
-            containerStyle={styles.objectiveField}
-          />
-        )}
-      />
 
-      <Button
-        label="Salvar"
-        variant="primary"
-        size="md"
-        fullWidth
-        onPress={onClose}
-        style={styles.saveBtn}
-      />
+        {/* Bio */}
+        <Controller
+          control={control}
+          name="bio"
+          render={({ field: { onChange, value } }) => (
+            <FormField
+              label="Bio"
+              placeholder="Fale sobre sua trajetória musical..."
+              value={value ?? ''}
+              onChangeText={onChange}
+              errorMessage={errors.bio?.message}
+              multiline
+              numberOfLines={4}
+            />
+          )}
+        />
+
+        {/* Objetivo */}
+        <View style={styles.objectiveHeader}>
+          <Ionicons name="flag-outline" size={Spacing.iconSm} color={Colors.success} />
+          <LegatoText variant="label" color={colors.textSecondary}>
+            Objetivo
+          </LegatoText>
+        </View>
+        <Controller
+          control={control}
+          name="objective"
+          render={({ field: { onChange, value } }) => (
+            <FormField
+              label=""
+              placeholder="Qual é o seu objetivo musical?"
+              value={value ?? ''}
+              onChangeText={onChange}
+              errorMessage={errors.objective?.message}
+              multiline
+              numberOfLines={3}
+              containerStyle={styles.objectiveField}
+            />
+          )}
+        />
+
+        <Button
+          label="Salvar"
+          variant="primary"
+          size="md"
+          fullWidth
+          onPress={onClose}
+          style={styles.saveBtn}
+        />
+      </ScrollView>
     </ModalTemplate>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+  },
   title: {
     marginBottom: Spacing.md,
   },

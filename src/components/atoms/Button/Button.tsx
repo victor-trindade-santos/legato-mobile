@@ -14,6 +14,7 @@ import React from 'react';
 import { TouchableOpacity, ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { LegatoText } from '../Text/Text';
+import { useColors } from '@/hooks/useColors';
 import type { ButtonProps } from './Button.types';
 
 export function Button({
@@ -30,7 +31,15 @@ export function Button({
   containerStyle,
   ...rest
 }: ButtonProps) {
+  const colors = useColors();
   const isDisabled = disabled || isLoading;
+
+  const textColor =
+    variant === 'primary' || variant === 'danger'
+      ? Colors.white
+      : variant === 'outline' || variant === 'ghost' || variant === 'outline_gray'
+      ? Colors.grayBorder
+      : colors.textPrimary; // secondary adapta ao tema
 
   return (
     <TouchableOpacity
@@ -39,7 +48,9 @@ export function Button({
       style={[
         styles.base,
         { borderRadius },
-        styles[variant],
+        variant === 'secondary'
+          ? { backgroundColor: colors.surface }
+          : styles[variant],
         styles[size],
         fullWidth && styles.fullWidth,
         isDisabled && styles.disabled,
@@ -57,13 +68,7 @@ export function Button({
           {leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
           <LegatoText
             variant={size === 'sm' ? 'buttonSm' : size === 'lg' ? 'buttonLg' : 'buttonMd'}
-            color={
-              variant === 'primary' || variant === 'danger'
-                ? Colors.white
-                : variant === 'outline' || variant === 'ghost' || variant === 'outline_gray'
-                ? Colors.grayBorder
-                : Colors.textPrimaryDark
-            }
+            color={textColor}
           >
             {label}
           </LegatoText>

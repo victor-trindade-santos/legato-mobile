@@ -23,7 +23,18 @@ export interface AuthUser {
   objective?: string;
   skills?: string[];
   musicGenres?: string[];
-  location?: string;
+  sex?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  // Localização estruturada
+  city?: string;
+  state?: string;
+  country?: string;
+  // Links sociais
+  instagram?: string;
+  spotify?: string;
+  youtube?: string;
+  soundcloud?: string;
+  website?: string;
+  // Mídia
   photos?: string[];
 }
 

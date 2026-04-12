@@ -1,9 +1,94 @@
+/**
+ * discoveryService — Service (Descoberta)
+ *
+ * Endpoints:
+ *  GET  /users/discovery          → lista de músicos para o swipe
+ *  POST /users/discovery/like/:id → registra like; retorna { match, conversationId }
+ *  POST /users/discovery/dislike/:id → registra dislike
+ */
+
 import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import { MOCK_MUSICIANS } from '../mocks/musicians.mock';
 import type { Musician } from '../models/Musician';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
+
+// ─── DTO do backend ────────────────────────────────────────────────────────────
+
+interface BackendDiscoveryUserDTO {
+  id: number;
+  username: string;
+  displayName: string;
+  profilePicture?: string;
+  photosCard?: string[];
+  sex?: string;
+  birthDate?: string;
+  instruments?: string[];
+  genres?: string[];
+  bio?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+}
+
+interface BackendDiscoveryEnvelope {
+  success: boolean;
+  message: string;
+  data: BackendDiscoveryUserDTO[];
+}
+
+interface BackendLikeResponse {
+  success: boolean;
+  message: string;
+  data: {
+    match: boolean;
+    conversationId: number;
+  };
+}
+
+// ─── Mapper ────────────────────────────────────────────────────────────────────
+
+const SEX_MAP: Record<string, Musician['gender']> = {
+  MALE: 'Masculino',
+  FEMALE: 'Feminino',
+  OTHER: 'Outro',
+  PREFER_NOT_TO_SAY: 'Outro',
+};
+
+function calculateAge(birthDate: string): number {
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function mapBackendUserToMusician(raw: BackendDiscoveryUserDTO): Musician {
+  const city = raw.location?.city ?? '';
+  const state = raw.location?.state ?? '';
+  const location = city ? `${city}${state ? `, ${state}` : ''}` : undefined;
+
+  return {
+    id: raw.id,
+    username: raw.username,
+    displayName: raw.displayName,
+    avatarUrl: raw.profilePicture ?? undefined,
+    distance: 0,
+    age: raw.birthDate ? calculateAge(raw.birthDate) : 0,
+    gender: SEX_MAP[raw.sex ?? ''] ?? 'Outro',
+    skills: raw.instruments ?? [],
+    musicGenres: raw.genres ?? [],
+    bio: raw.bio,
+    location,
+    photos: raw.photosCard ?? [],
+  };
+}
+
+// ─── Funções exportadas ────────────────────────────────────────────────────────
 
 export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promise<Musician[]> {
   if (Config.DEV_USE_MOCK) {
@@ -23,35 +108,29 @@ export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promi
     if (filters?.musicGenres?.length) {
       result = result.filter(m => m.musicGenres.some(g => filters.musicGenres!.includes(g)));
     }
-    if (filters?.distanceMin !== undefined) {
-      result = result.filter(m => m.distance >= filters.distanceMin!);
-    }
-    if (filters?.distanceMax !== undefined) {
-      result = result.filter(m => m.distance <= filters.distanceMax!);
-    }
     return result;
   }
 
-  const res = await api.get<Musician[]>(Endpoints.discovery.musicians, { params: filters });
-  return res.data;
+  const res = await api.get<BackendDiscoveryEnvelope>(Endpoints.discovery.musicians);
+  const list = res.data.data ?? [];
+  return list.map(mapBackendUserToMusician);
 }
 
-export async function fetchMusicianById(musicianId: number): Promise<Musician | null> {
+/** Registra like e retorna se houve match e o conversationId */
+export async function likeMusician(
+  musicianId: number,
+): Promise<{ match: boolean; conversationId: number }> {
   if (Config.DEV_USE_MOCK) {
-    return MOCK_MUSICIANS.find((musician) => musician.id === musicianId) ?? null;
+    const match = Math.random() < 0.3;
+    return { match, conversationId: match ? 1 : 0 };
   }
 
-  const res = await api.get<Musician>(`${Endpoints.discovery.musicians}/${musicianId}`);
-  return res.data;
+  const res = await api.post<BackendLikeResponse>(Endpoints.discovery.like(musicianId));
+  return res.data.data;
 }
 
-export async function sendSwipe(musicianId: number, direction: 'like' | 'dislike'): Promise<{ match: boolean }> {
-  if (Config.DEV_USE_MOCK) {
-    // Simula match aleatório com 30% de chance no like
-    const match = direction === 'like' && Math.random() < 0.3;
-    return { match };
-  }
-
-  const res = await api.post(Endpoints.discovery.swipe, { musicianId, direction });
-  return res.data;
+/** Registra dislike (sem retorno relevante) */
+export async function dislikeMusician(musicianId: number): Promise<void> {
+  if (Config.DEV_USE_MOCK) return;
+  await api.post(Endpoints.discovery.dislike(musicianId));
 }

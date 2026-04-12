@@ -1,20 +1,20 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { BorderRadius, Colors, Spacing } from '@/theme';
+import { BorderRadius, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { LegatoText } from '@/components/atoms/Text/Text';
-import { Divider } from '@/components/atoms/Divider/Divider';
 import { Spacer } from '@/components/atoms/Spacer/Spacer';
 
 import type { DaySeparatorProps } from './DaySeparator.types';
 
 export function DaySeparator({ label }: DaySeparatorProps) {
+  const colors = useColors();
   return (
     <View style={styles.container}>
-      <View style={styles.labelContainer}>
+      <View style={[styles.labelContainer, { backgroundColor: colors.surface }]}>
         <LegatoText
           variant="caption"
-          color={Colors.white}
           align="center"
         >
           {label}
@@ -35,7 +35,6 @@ const styles = StyleSheet.create({
   labelContainer: {
     position: 'absolute',
     paddingHorizontal: Spacing.sm,
-    backgroundColor: Colors.textSecondaryLight,
-    borderRadius: BorderRadius.pill
+    borderRadius: BorderRadius.pill,
   },
 });

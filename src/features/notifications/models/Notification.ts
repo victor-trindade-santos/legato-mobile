@@ -13,6 +13,7 @@ export type NotificationType =
   | 'LIKE'
   | 'COMMENT'
   | 'MESSAGE'
+  | 'MATCH'
   | 'COLLABORATION_INVITE'
   | 'COLLABORATION_ACCEPTED';
 

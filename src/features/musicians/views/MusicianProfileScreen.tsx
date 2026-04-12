@@ -27,6 +27,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import { useAuthStore } from '@/store/authStore';
+import { useColors } from '@/hooks/useColors';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
 
@@ -45,8 +46,11 @@ export default function MusicianProfileScreen() {
   const route = useRoute<MusicianProfileRoute>();
   const navigation = useNavigation<MusicianProfileNav>();
   const { user } = useAuthStore();
-  const { displayName, musicianId, username } = route.params;
-  const isOwnProfile = musicianId === user?.id;
+  const colors = useColors();
+  const musicianId = route.params?.musicianId ?? user?.id ?? 0;
+  const username = route.params?.username ?? user?.username;
+  const displayName = route.params?.displayName ?? user?.displayName ?? '';
+  const isOwnProfile = !route.params?.musicianId || musicianId === user?.id;
 
   const {
     profile,
@@ -75,7 +79,7 @@ export default function MusicianProfileScreen() {
           </View>
         )}
         <View style={styles.fallbackContent}>
-          <LegatoText variant="subtitle" color={Colors.white} align="center">
+          <LegatoText variant="subtitle" color={colors.textPrimary} align="center">
             {displayName ?? 'Perfil do músico'}
           </LegatoText>
           <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
@@ -104,21 +108,9 @@ export default function MusicianProfileScreen() {
             style={styles.cover}
           >
             <View style={styles.coverOverlay} />
-            <View style={styles.heroHeader}>
-              {isOwnProfile ? (
-                <View style={styles.iconBtn} />
-              ) : (
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-                  <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.iconBtn}>
-                <Ionicons name="ellipsis-horizontal" size={Spacing.iconLg} color={Colors.white} />
-              </TouchableOpacity>
-            </View>
           </ImageBackground>
 
-          <View style={[styles.avatarFrame, Shadows.md]}>
+          <View style={[styles.avatarFrame, Shadows.md, { borderColor: colors.background }]}>
             <Avatar uri={profile.avatarUrl} size="xl" fallbackInitials={profile.displayName} />
           </View>
         </View>
@@ -127,10 +119,10 @@ export default function MusicianProfileScreen() {
 
           {/* ── Identidade ────────────────────────────────── */}
           <View style={styles.identityBlock}>
-            <LegatoText variant="subtitle" color={Colors.white} align="center">
+            <LegatoText variant="subtitle" color={colors.textPrimary} align="center">
               {profile.displayName}
             </LegatoText>
-            <LegatoText variant="bodySmall" color={Colors.primaryLight} align="center">
+            <LegatoText variant="bodySmall" color={Colors.primary} align="center">
               @{profile.username}
             </LegatoText>
             <View style={styles.locationRow}>
@@ -150,7 +142,7 @@ export default function MusicianProfileScreen() {
                 size="md"
                 onPress={() => navigation.navigate('ProfileEdit')}
                 leftIcon={
-                  <Ionicons name="pencil-outline" size={Spacing.iconSm} color={Colors.white} />
+                  <Ionicons name="pencil-outline" size={Spacing.iconSm} color={colors.textPrimary} />
                 }
                 style={styles.connectButton}
               />
@@ -165,38 +157,38 @@ export default function MusicianProfileScreen() {
                     <Ionicons
                       name={isConnected ? 'person' : 'person-add'}
                       size={Spacing.iconSm}
-                      color={Colors.white}
+                      color={isConnected ? Colors.white : colors.textPrimary}
                     />
                   }
                   style={styles.connectButton}
                 />
-                <TouchableOpacity style={styles.messageButton}>
-                  <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={Colors.white} />
+                <TouchableOpacity style={[styles.messageButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={colors.textPrimary} />
                 </TouchableOpacity>
               </>
             )}
           </View>
 
           {/* ── Stats ─────────────────────────────────────── */}
-          <View style={styles.statsCard}>
+          <View style={[styles.statsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.statItem}>
-              <LegatoText variant="sectionTitle" color={Colors.white}>{profile.stats.connections}</LegatoText>
-              <LegatoText variant="caption" color={Colors.textMuted}>CONEXÕES</LegatoText>
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>{profile.stats.connections}</LegatoText>
+              <LegatoText variant="caption" color={colors.textMuted}>CONEXÕES</LegatoText>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statItem}>
-              <LegatoText variant="sectionTitle" color={Colors.white}>{profile.stats.followers}</LegatoText>
-              <LegatoText variant="caption" color={Colors.textMuted}>SEGUIDORES</LegatoText>
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>{profile.stats.followers}</LegatoText>
+              <LegatoText variant="caption" color={colors.textMuted}>SEGUIDORES</LegatoText>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statItem}>
-              <LegatoText variant="sectionTitle" color={Colors.white}>{profile.stats.posts}</LegatoText>
-              <LegatoText variant="caption" color={Colors.textMuted}>POSTS</LegatoText>
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>{profile.stats.posts}</LegatoText>
+              <LegatoText variant="caption" color={colors.textMuted}>POSTS</LegatoText>
             </View>
           </View>
 
           {/* ── Abas ──────────────────────────────────────── */}
-          <View style={styles.tabsRow}>
+          <View style={[styles.tabsRow, { borderBottomColor: colors.border }]}>
             {tabs.map((tab) => (
               <TouchableOpacity
                 key={tab.key}
@@ -205,7 +197,7 @@ export default function MusicianProfileScreen() {
               >
                 <LegatoText
                   variant="label"
-                  color={activeTab === tab.key ? Colors.primary : Colors.textMuted}
+                  color={activeTab === tab.key ? Colors.primary : colors.textMuted}
                 >
                   {tab.label}
                 </LegatoText>
@@ -217,29 +209,29 @@ export default function MusicianProfileScreen() {
           {activeTab === 'overview' ? (
             <>
               {/* Bio + Objetivo */}
-              <View style={styles.card}>
-                <LegatoText variant="sectionTitle" color={Colors.white}>Bio</LegatoText>
-                <LegatoText variant="bodySmall" color={Colors.textSecondaryDark}>
+              <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <LegatoText variant="sectionTitle" color={colors.textPrimary}>Bio</LegatoText>
+                <LegatoText variant="bodySmall" color={colors.textSecondary}>
                   {profile.bio}
                 </LegatoText>
-                <LegatoText variant="label" color={Colors.white}>Objetivo</LegatoText>
-                <View style={styles.goalBox}>
+                <LegatoText variant="label" color={colors.textPrimary}>Objetivo</LegatoText>
+                <View style={[styles.goalBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <Ionicons name="flag-outline" size={Spacing.iconSm} color={Colors.success} />
-                  <LegatoText variant="bodySmall" color={Colors.textSecondaryDark} style={styles.goalText}>
+                  <LegatoText variant="bodySmall" color={colors.textSecondary} style={styles.goalText}>
                     {profile.objective}
                   </LegatoText>
                 </View>
               </View>
 
               {/* Habilidades e gêneros */}
-              <View style={styles.card}>
-                <LegatoText variant="label" color={Colors.white}>HABILIDADES</LegatoText>
+              <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <LegatoText variant="label" color={colors.textPrimary}>HABILIDADES</LegatoText>
                 <View style={styles.tagGrid}>
                   {profile.skills.map((skill) => (
                     <Tag key={skill} label={skill} />
                   ))}
                 </View>
-                <LegatoText variant="label" color={Colors.white}>GÊNEROS FAVORITOS</LegatoText>
+                <LegatoText variant="label" color={colors.textPrimary}>GÊNEROS FAVORITOS</LegatoText>
                 <View style={styles.tagGrid}>
                   {profile.musicGenres.map((genre) => (
                     <Tag key={genre} label={genre} variant="outline" color={Colors.primaryLight} />
@@ -248,9 +240,9 @@ export default function MusicianProfileScreen() {
               </View>
 
               {/* Artistas favoritos */}
-              <View style={styles.card}>
+              <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <LegatoText variant="sectionTitle" color={Colors.white}>Artistas Favoritos</LegatoText>
+                  <LegatoText variant="sectionTitle" color={colors.textPrimary}>Artistas Favoritos</LegatoText>
                   <TouchableOpacity onPress={openFavoritesPanel}>
                     <LegatoText variant="caption" color={Colors.primary}>Ver tudo</LegatoText>
                   </TouchableOpacity>
@@ -259,10 +251,10 @@ export default function MusicianProfileScreen() {
                   {visibleFavoriteArtists.map((artist) => (
                     <View key={artist.id} style={styles.favoriteItem}>
                       <Avatar uri={artist.avatarUrl} size="md" fallbackInitials={artist.displayName} />
-                      <LegatoText variant="caption" color={Colors.white} align="center" numberOfLines={1}>
+                      <LegatoText variant="caption" color={colors.textPrimary} align="center" numberOfLines={1}>
                         {artist.displayName}
                       </LegatoText>
-                      <LegatoText variant="caption" color={Colors.textMuted} align="center" numberOfLines={1}>
+                      <LegatoText variant="caption" color={colors.textMuted} align="center" numberOfLines={1}>
                         @{artist.username}
                       </LegatoText>
                     </View>
@@ -271,8 +263,8 @@ export default function MusicianProfileScreen() {
               </View>
             </>
           ) : (
-            <View style={styles.card}>
-              <LegatoText variant="bodySmall" color={Colors.textSecondaryDark} align="center">
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <LegatoText variant="bodySmall" color={colors.textSecondary} align="center">
                 {TAB_PLACEHOLDER_TEXT[activeTab]}
               </LegatoText>
             </View>
@@ -288,20 +280,20 @@ export default function MusicianProfileScreen() {
         onRequestClose={closeFavoritesPanel}
       >
         <Pressable style={styles.panelBackdrop} onPress={closeFavoritesPanel}>
-          <Pressable style={styles.panel} onPress={() => {}}>
+          <Pressable style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => {}}>
             <View style={styles.panelHeader}>
-              <LegatoText variant="sectionTitle" color={Colors.white}>Artistas Favoritos</LegatoText>
-              <TouchableOpacity style={styles.panelCloseBtn} onPress={closeFavoritesPanel}>
-                <Ionicons name="close" size={Spacing.iconMd} color={Colors.white} />
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>Artistas Favoritos</LegatoText>
+              <TouchableOpacity style={[styles.panelCloseBtn, { backgroundColor: colors.background }]} onPress={closeFavoritesPanel}>
+                <Ionicons name="close" size={Spacing.iconMd} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.panelListContent}>
               {profile.favoriteArtists.map((artist) => (
-                <View key={artist.id} style={styles.panelListItem}>
+                <View key={artist.id} style={[styles.panelListItem, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <Avatar uri={artist.avatarUrl} size="md" fallbackInitials={artist.displayName} />
                   <View style={styles.panelListTextBlock}>
-                    <LegatoText variant="bodyMedium" color={Colors.white}>{artist.displayName}</LegatoText>
-                    <LegatoText variant="caption" color={Colors.textMuted}>@{artist.username}</LegatoText>
+                    <LegatoText variant="bodyMedium" color={colors.textPrimary}>{artist.displayName}</LegatoText>
+                    <LegatoText variant="caption" color={colors.textMuted}>@{artist.username}</LegatoText>
                   </View>
                 </View>
               ))}
@@ -346,7 +338,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: -Spacing.avatarLg,
     borderWidth: Spacing.xs,
-    borderColor: Colors.surfaceDark,
     borderRadius: BorderRadius.pill,
   },
   mainSection: {
@@ -378,20 +369,16 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceDark,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   statsCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   statItem: {
     flex: 1,
@@ -401,12 +388,10 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: Spacing.xl,
-    backgroundColor: Colors.border,
   },
   tabsRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   tabButton: {
     flex: 1,
@@ -419,20 +404,16 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.primary,
   },
   card: {
-    backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.cardPadding,
     gap: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   goalBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: Spacing.xs,
-    backgroundColor: Colors.backgroundDark,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
   },
@@ -469,9 +450,7 @@ const styles = StyleSheet.create({
   panel: {
     maxHeight: '70%',
     borderRadius: BorderRadius.xl,
-    backgroundColor: Colors.surfaceDark,
     borderWidth: 1,
-    borderColor: Colors.border,
     padding: Spacing.md,
     gap: Spacing.sm,
   },
@@ -486,7 +465,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.backgroundDark,
   },
   panelListContent: {
     gap: Spacing.sm,
@@ -498,10 +476,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.backgroundDark,
   },
   panelListTextBlock: {
     flex: 1,

@@ -4,12 +4,12 @@
  * Responsável por:
  * - Carregar e filtrar a lista de músicos
  * - Gerenciar o histórico de swipes (para desfazer)
- * - Expor handlers de like/dislike para o DiscoveryStack
+ * - Expor handlers de like/dislike com suporte a match
  */
 
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { fetchMusicians, sendSwipe } from '../services/discoveryService';
+import { fetchMusicians, likeMusician, dislikeMusician } from '../services/discoveryService';
 import type { Musician } from '../models/Musician';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
 import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
@@ -23,6 +23,7 @@ export function useDiscoveryViewModel() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [matchedMusician, setMatchedMusician] = useState<Musician | null>(null);
+  const [matchConversationId, setMatchConversationId] = useState<number | null>(null);
 
   // TanStack Query v5: onSuccess removido de useQuery — usar useEffect
   const { isLoading, data, refetch } = useQuery({
@@ -38,23 +39,34 @@ export function useDiscoveryViewModel() {
     if (data) setCards(data);
   }, [data]);
 
-  // Mutation de swipe (onSuccess ainda disponível em useMutation no v5)
-  const swipeMutation = useMutation({
-    mutationFn: ({ musicianId, direction }: { musicianId: number; direction: 'like' | 'dislike' }) =>
-      sendSwipe(musicianId, direction),
-    onSuccess: (data, variables) => {
-      if (data.match) {
-        const musician = cards.find(c => c.id === variables.musicianId);
+  // ── Mutations ────────────────────────────────────────────────────────────────
+
+  const likeMutation = useMutation({
+    mutationFn: (musicianId: number) => likeMusician(musicianId),
+    onSuccess: (result, musicianId) => {
+      if (result.match) {
+        const musician = cards.find(c => c.id === musicianId);
         if (musician) setMatchedMusician(musician);
+        setMatchConversationId(result.conversationId);
       }
     },
   });
 
+  const dislikeMutation = useMutation({
+    mutationFn: (musicianId: number) => dislikeMusician(musicianId),
+  });
+
+  // ── Handlers ─────────────────────────────────────────────────────────────────
+
   const handleSwipe = useCallback((musician: Musician, direction: 'like' | 'dislike') => {
     setHistory(prev => [...prev, { musician, direction }]);
     setCards(prev => prev.filter(c => c.id !== musician.id));
-    swipeMutation.mutate({ musicianId: musician.id, direction });
-  }, [cards]);
+    if (direction === 'like') {
+      likeMutation.mutate(musician.id);
+    } else {
+      dislikeMutation.mutate(musician.id);
+    }
+  }, [likeMutation, dislikeMutation]);
 
   const handleUndo = useCallback(() => {
     const lastEntry = history[history.length - 1];
@@ -72,6 +84,11 @@ export function useDiscoveryViewModel() {
     setFilters(DEFAULT_FILTERS);
   }, []);
 
+  const dismissMatch = useCallback(() => {
+    setMatchedMusician(null);
+    setMatchConversationId(null);
+  }, []);
+
   return {
     cards,
     history,
@@ -80,10 +97,12 @@ export function useDiscoveryViewModel() {
     isFilterModalOpen,
     isHistoryModalOpen,
     matchedMusician,
+    matchConversationId,
     handleSwipe,
     handleUndo,
     handleApplyFilters,
     handleResetFilters,
+    dismissMatch,
     setIsFilterModalOpen,
     setIsHistoryModalOpen,
     setMatchedMusician,
