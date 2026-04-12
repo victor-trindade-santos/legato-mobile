@@ -163,6 +163,9 @@ export default function ChatScreen() {
               <Text style={styles.emptyText}>Sem mensagens ainda</Text>
             </View>
           }
+          ListFooterComponent={
+            isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
+          }
         />
 {/* 
         ── Connection Status Badge ──────────────────────–
@@ -201,11 +204,6 @@ export default function ChatScreen() {
             </Text>
           </View>
         )} */}
-
-       <TypingIndicator userName={userName} />
-        {isOtherUserTyping && (
-          <TypingIndicator userName={userName} />
-        )}
 
         <ChatInputBar
           value={inputText}
