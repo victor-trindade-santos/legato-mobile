@@ -12,7 +12,6 @@
  *
  * Toda a lógica fica em:
  * - useChatViewModel (orquestração)
- * - ChatStore (estado global)
  * - ChatService (HTTP)
  * - WebSocketService (tempo real)
  */

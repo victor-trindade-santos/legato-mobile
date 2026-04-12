@@ -56,7 +56,6 @@ export default function ChatListScreen() {
                         data={chatItems}
                         keyExtractor={(item, index) => String(item?.chatId ?? index)}
                         renderItem={({ item }) => {
-                            console.log('[ChatListScreen] Item renderizado:', item);
                             return (
                                 <ChatListItem
                                     userAvatar={item.otherUserProfilePictureUrl || ''}
@@ -64,11 +63,6 @@ export default function ChatListScreen() {
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
                                     timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
                                     onPress={() => {
-                                        console.log('[ChatListScreen] Chat clicado:', {
-                                            id: item.chatId,
-                                            userName: item.otherUserName,
-                                            receiverId: item.otherUserId,
-                                        });
                                         navigation.navigate('Chat', {
                                             conversationId: item.chatId,
                                             userName: item.otherUserName,

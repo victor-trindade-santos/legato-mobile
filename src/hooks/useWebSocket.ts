@@ -74,7 +74,6 @@ export function useWebSocket({ token, onMessage }: UseWebSocketOptions): UseWebS
             (message) => onMessageRef.current(message),
         );
 
-        console.log('[useWebSocket] 🟢 Hook montado — conectando...');
         wsRef.current = service;
         service.connect();
 
@@ -85,7 +84,6 @@ export function useWebSocket({ token, onMessage }: UseWebSocketOptions): UseWebS
          */
 
         return () => {
-            console.log('[useWebSocket] 🔴 Hook desmontando — desconectando...');
             service.disconnect();
             wsRef.current = null;
         };
@@ -104,7 +102,6 @@ export function useWebSocket({ token, onMessage }: UseWebSocketOptions): UseWebS
 
     const sendMessage = (receiverId: number, content: string) => {
         if (!wsRef.current) {
-            console.error('[useWebSocket] ❌ wsRef.current é null — serviço não inicializado.');
             return;
         }
         wsRef.current.sendMessage(receiverId, content);
