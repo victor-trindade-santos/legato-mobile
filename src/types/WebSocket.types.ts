@@ -29,3 +29,13 @@ export interface OutgoingWSMessage {
 
 // Callback chamado quando uma nova mensagem é recebida via WebSocket
 export type MessageHandler = (message: IncomingWSMessage) => void;
+
+// Payload de typing recebido/enviado via WebSocket
+export interface TypingDTO {
+  chatId: number;
+  userId: number;
+  isTyping: boolean;
+}
+
+// Callback chamado quando um evento de typing chega via WebSocket
+export type TypingHandler = (dto: TypingDTO) => void;

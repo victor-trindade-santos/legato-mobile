@@ -18,7 +18,7 @@
 
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import type { IncomingWSMessage, OutgoingWSMessage, MessageHandler } from '@/types/WebSocket.types';
+import type { IncomingWSMessage, OutgoingWSMessage, MessageHandler, TypingDTO, TypingHandler } from '@/types/WebSocket.types';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -61,6 +61,15 @@ export class WebSocketService {
    * quando o usuário sai da tela de chat.
  */
   private subscription: StompSubscription | null = null;
+
+  /** Subscription separada para eventos de typing */
+  private typingSubscription: StompSubscription | null = null;
+
+  /**
+   * Guarda chatId e callback de typing para que o onConnect
+   * possa (re)subscrever automaticamente após a conexão.
+   */
+  private pendingTyping: { chatId: number; onTyping: TypingHandler } | null = null;
 
   /** Flag para saber se estamos conectados */
   private isConnected: boolean = false;
@@ -138,6 +147,12 @@ export class WebSocketService {
             }
           }
         );
+
+        // Se já havia um subscribeToTyping pendente (chamado antes da conexão
+        // estar pronta), realiza o subscribe agora.
+        if (this.pendingTyping) {
+          this._doSubscribeToTyping(this.pendingTyping.chatId, this.pendingTyping.onTyping);
+        }
       },
 
       onDisconnect: () => {
@@ -180,8 +195,70 @@ export class WebSocketService {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
+    this.unsubscribeFromTyping();
     this.client.deactivate();
     this.isConnected = false;
+  }
+
+  /**
+   * subscribeToTyping()
+   *
+   * Inscreve no tópico de typing de um chat.
+   * Se a conexão ainda não estiver pronta, armazena como pendente
+   * e o onConnect irá efetivar o subscribe automaticamente.
+   */
+  subscribeToTyping(chatId: number, onTyping: TypingHandler): void {
+    this.pendingTyping = { chatId, onTyping };
+
+    if (this.isConnected) {
+      this._doSubscribeToTyping(chatId, onTyping);
+    }
+  }
+
+  /** Cancela o subscribe de typing (chamado ao sair do chat). */
+  unsubscribeFromTyping(): void {
+    if (this.typingSubscription) {
+      this.typingSubscription.unsubscribe();
+      this.typingSubscription = null;
+    }
+    this.pendingTyping = null;
+  }
+
+  /**
+   * sendTyping()
+   *
+   * Publica o status de digitando para o backend.
+   * O backend re-transmite para todos os inscritos no tópico do chat.
+   */
+  sendTyping(chatId: number, userId: number, isTyping: boolean): void {
+    if (!this.isConnected) return;
+
+    const payload: TypingDTO = { chatId, userId, isTyping };
+
+    this.client.publish({
+      destination: `/app/chat/${chatId}/typing`,
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /** Faz o subscribe efetivo no canal de typing do STOMP. */
+  private _doSubscribeToTyping(chatId: number, onTyping: TypingHandler): void {
+    // Cancela subscribe anterior se houver (ex: mudança de chat)
+    if (this.typingSubscription) {
+      this.typingSubscription.unsubscribe();
+    }
+
+    this.typingSubscription = this.client.subscribe(
+      `/topic/chats/${chatId}/typing`,
+      (frame: IMessage) => {
+        try {
+          const dto: TypingDTO = JSON.parse(frame.body);
+          onTyping(dto);
+        } catch (err) {
+          console.error('[WebSocketService] ❌ Erro ao parsear typing:', err);
+        }
+      }
+    );
   }
 
   /**
