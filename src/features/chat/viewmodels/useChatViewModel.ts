@@ -59,15 +59,12 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
   // ── 1. Define o handler ANTES do useWebSocket ──────────────
   const handleIncomingMessage = useCallback<MessageHandler>((message) => {
-     console.log('[useChatViewModel] 📨 handleIncomingMessage chamado!', message);
-  console.log('[useChatViewModel] currentUserEmail:', currentUserEmail);
     /**
        *  O WebSocket já entrega apenas mensagens destinadas ao usuário atual.
        * Então qualquer mensagem que chegar aqui já é para esta conversa -
        * desde que não seja do próprio usuário (eco)
        */
       const isFromOtherUser = message.senderEmail !== currentUserEmail;
-      console.log('[useChatViewModel] isFromOtherUser:', isFromOtherUser);
 
       if (!isFromOtherUser) return; // Ignora mensagens enviadas por mim mesmo (eco)
 
