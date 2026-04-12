@@ -66,7 +66,7 @@ export function useDiscoveryViewModel() {
     } else {
       dislikeMutation.mutate(musician.id);
     }
-  }, [cards]);
+  }, [likeMutation, dislikeMutation]);
 
   const handleUndo = useCallback(() => {
     const lastEntry = history[history.length - 1];

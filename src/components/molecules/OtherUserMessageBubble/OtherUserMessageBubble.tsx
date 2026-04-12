@@ -23,15 +23,17 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { MessageBubbleContainer } from '@/components/atoms/MessageBubbleContainer/MessageBubbleContainer';
 import type { OtherUserMessageBubbleProps } from './OtherUserMessageBubble.types';
 
 export function OtherUserMessageBubble({ children }: OtherUserMessageBubbleProps) {
+  const colors = useColors();
   return (
     <View style={styles.wrapper}>
-      <MessageBubbleContainer backgroundColor={Colors.textSecondaryLight}>
+      <MessageBubbleContainer backgroundColor={colors.surfaceAlt}>
         {children}
       </MessageBubbleContainer>
     </View>

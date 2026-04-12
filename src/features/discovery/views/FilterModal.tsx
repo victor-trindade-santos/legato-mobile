@@ -14,6 +14,7 @@ import { RangeSlider } from '@/components/molecules/RangeSlider/RangeSlider';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { SKILLS } from '@/constants/skills';
 import { MUSIC_GENRES } from '@/constants/genres';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
@@ -29,6 +30,7 @@ interface FilterModalProps {
 const GENDERS = ['Todos', 'Masculino', 'Feminino', 'Outro'] as const;
 
 export function FilterModal({ visible, filters, onApply, onClose }: FilterModalProps) {
+  const colors = useColors();
   const [local, setLocal] = useState<DiscoveryFilters>(filters);
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showGenresModal, setShowGenresModal] = useState(false);
@@ -53,9 +55,9 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
       <ModalTemplate visible={visible} onClose={onClose}>
         {/* Cabeçalho */}
         <View style={styles.header}>
-          <LegatoText variant="sectionTitle" color={Colors.white}>Filtrar Músicos</LegatoText>
+          <LegatoText variant="sectionTitle" color={colors.textPrimary}>Filtrar Músicos</LegatoText>
           <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
+            <Ionicons name="close" size={Spacing.iconLg} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -84,7 +86,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
           />
 
           {/* Gênero */}
-          <LegatoText style={styles.sectionLabel}>Gênero</LegatoText>
+          <LegatoText style={[styles.sectionLabel, { color: colors.textSecondary }]}>Gênero</LegatoText>
           <View style={styles.genderRow}>
             {GENDERS.map((g) => (
               <Button
@@ -158,7 +160,6 @@ const styles = StyleSheet.create({
     maxHeight: 440,
   },
   sectionLabel: {
-    color: Colors.textSecondaryDark,
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 1,

@@ -16,7 +16,7 @@ import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import type { ProfileEditFormData } from '../viewmodels/useProfileEditViewModel';
-import type { UpdateProfileDTO, UploadImageResponse, BackendEnvelope, UploadedUserData } from '../models/ProfileEditDTO';
+import type { UpdateProfileDTO, UploadImageResponse, BackendEnvelope, UploadedUserData, UserProfileDTO } from '../models/ProfileEditDTO';
 
 /** URIs locais de mídia selecionadas pelo usuário (ainda não enviadas ao servidor) */
 export interface ProfileMediaInput {
@@ -91,17 +91,43 @@ async function uploadCardPhoto(uri: string, index: number): Promise<string> {
   return photos[photos.length - 1] ?? '';
 }
 
-// ─── export ───────────────────────────────────────────────────────────────────
+// ─── fetch ────────────────────────────────────────────────────────────────────
+
+export async function fetchMyProfile(): Promise<UserProfileDTO> {
+  if (Config.DEV_USE_MOCK) {
+    return {
+      id: 1,
+      displayName: 'Dev User',
+      username: 'dev_user',
+      email: 'dev@legato.com',
+    };
+  }
+  const res = await api.get<BackendEnvelope<UserProfileDTO>>(Endpoints.users.me);
+  if (!res.data.success || !res.data.data) throw new Error('Perfil não encontrado');
+  return res.data.data;
+}
+
+// ─── save ─────────────────────────────────────────────────────────────────────
 
 /** Dados de perfil retornados após salvar — usados para atualizar o authStore */
 export interface SavedProfileData {
+  displayName?: string;
+  username?: string;
   avatarUrl?: string;
   bannerUrl?: string;
   bio?: string;
   objective?: string;
   skills: string[];
   musicGenres: string[];
-  location?: string;
+  sex?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  city?: string;
+  state?: string;
+  country?: string;
+  instagram?: string;
+  spotify?: string;
+  youtube?: string;
+  soundcloud?: string;
+  website?: string;
   photos: string[];
 }
 
@@ -111,10 +137,11 @@ export async function saveProfile(
 ): Promise<SavedProfileData> {
   if (Config.DEV_USE_MOCK) {
     return {
+      displayName: data.displayName,
+      username: data.username,
       bio: data.bio,
       skills: data.skills,
       musicGenres: data.musicGenres,
-      location: data.city ? `${data.city}${data.state ? `, ${data.state}` : ''}` : undefined,
       photos: media.photoUris,
     };
   }
@@ -161,6 +188,7 @@ export async function saveProfile(
       instagram: data.instagram ?? '',
       spotify: data.spotify ?? '',
       youtube: data.youtube ?? '',
+      soundcloud: data.soundcloud ?? '',
       website: data.website ?? '',
     },
     ...(data.sex ? { sex: data.sex } : {}),
@@ -169,18 +197,24 @@ export async function saveProfile(
   const res = await api.put<BackendEnvelope<UploadedUserData>>(Endpoints.users.update, dto);
   const saved = res.data.data;
 
-  const location = data.city
-    ? `${data.city}${data.state ? `, ${data.state}` : ''}`
-    : undefined;
-
   return {
+    displayName: saved?.displayName || data.displayName,
+    username: saved?.username || data.username,
     avatarUrl: saved?.profilePicture ?? profilePicture ?? undefined,
     bannerUrl: saved?.profileBanner ?? profileBanner ?? undefined,
     bio: data.bio,
     objective: data.objective,
     skills: data.skills,
     musicGenres: data.musicGenres,
-    location,
+    sex: data.sex,
+    city: data.city,
+    state: data.state,
+    country: data.country,
+    instagram: data.instagram,
+    spotify: data.spotify,
+    youtube: data.youtube,
+    soundcloud: data.soundcloud,
+    website: data.website,
     photos: saved?.photosCard ?? photosCard,
   };
 }

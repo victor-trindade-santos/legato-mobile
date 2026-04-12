@@ -10,23 +10,26 @@
  */
 
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
-import { TextStyles, Colors } from '@/theme';
+import { Text } from 'react-native';
+import { TextStyles } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { LegatoTextProps } from './Text.types';
 
 export function LegatoText({
   variant = 'body',
-  color = Colors.textPrimaryDark,
+  color,
   align = 'left',
   style,
   children,
   ...rest
 }: LegatoTextProps) {
+  const colors = useColors();
+
   return (
     <Text
       style={[
         TextStyles[variant],
-        { color, textAlign: align },
+        { color: color ?? colors.textPrimary, textAlign: align },
         style,
       ]}
       {...rest}

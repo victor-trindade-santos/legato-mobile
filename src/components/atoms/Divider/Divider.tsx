@@ -1,14 +1,18 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 interface DividerProps {
   color?: string;
   marginV?: number;
 }
 
-export function Divider({ color = Colors.border, marginV = Spacing.md }: DividerProps) {
-  return <View style={[styles.line, { backgroundColor: color, marginVertical: marginV }]} />;
+export function Divider({ color, marginV = Spacing.md }: DividerProps) {
+  const colors = useColors();
+  return <View style={[styles.line, { 
+    backgroundColor: color ?? colors.border, 
+    marginVertical: marginV }]} />;
 }
 
 const styles = StyleSheet.create({

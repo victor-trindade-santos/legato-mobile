@@ -18,8 +18,8 @@ import React, { useState } from 'react';
 import { TextInput, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, BorderRadius, Spacing, Typography } from '@/theme';
+import { useUIStore } from '@/store/uiStore';
 import type { InputProps } from './Input.types';
-import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
 const THEME = {
   light: {
@@ -43,7 +43,7 @@ type InputThemeOverride = {
 export function Input({
   hasError = false,
   isPassword = false,
-  variant = 'light',
+  variant,
   multiline = false,
   themeOverride,
   numberOfLines,
@@ -55,7 +55,9 @@ export function Input({
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const baseTheme = THEME[variant];
+  const storeTheme = useUIStore((s) => s.theme);
+  const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
+  const baseTheme = THEME[resolvedVariant];
 
   const theme = {
     background: themeOverride?.background || baseTheme.background,

@@ -1,3 +1,4 @@
+
 /**
  * TabBar — Molecule
  *
@@ -13,11 +14,13 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { TabBarProps } from './TabBar.types';
 
 export function TabBar({ tabs, activeTab, onTabChange, style }: TabBarProps) {
+  const colors = useColors();
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, { borderBottomColor: colors.border }, style]}>
       {tabs.map((tab) => {
         const isActive = tab.key === activeTab;
         return (
@@ -44,7 +47,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   tab: {
     flex: 1,

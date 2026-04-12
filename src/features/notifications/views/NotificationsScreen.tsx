@@ -50,7 +50,7 @@ export default function NotificationsScreen() {
           {isEmpty ? (
             <View style={styles.emptyState}>
               <Ionicons name="notifications-off-outline" size={Spacing.iconXxl} color={Colors.textMuted} />
-              <LegatoText variant="subtitle" color={Colors.white} align="center">
+              <LegatoText variant="subtitle" color={Colors.textMuted} align="center">
                 Sem notificações
               </LegatoText>
               <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">

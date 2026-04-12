@@ -16,7 +16,9 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { useNotificationStore } from '@/store/notificationStore';
+import { useUIStore } from '@/store/uiStore';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import type { AppHeaderProps } from './AppHeader.types';
 
@@ -30,11 +32,17 @@ export function AppHeader({
   hideSettings = false,
   onSearchPress,
   onSettingsPress,
+  onNotificationsPress,
 }: AppHeaderProps) {
   const navigation = useNavigation<MainNav>();
   const { unreadCount } = useNotificationStore();
+  const colors = useColors();
+  const isDark = useUIStore((s) => s.theme) === 'dark';
 
-  const handleNotifications = () => navigation.navigate('Notifications');
+  const handleNotifications = () => {
+    if (onNotificationsPress) { onNotificationsPress(); return; }
+    navigation.navigate('Notifications');
+  };
   const handleSettings = () => {
     if (onSettingsPress) { onSettingsPress(); return; }
     // Sobe para o RootStack e navega para Settings
@@ -45,13 +53,15 @@ export function AppHeader({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       {/* Logo ou título */}
       {title ? (
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
       ) : (
         <Image
-          source={require('@/assets/icons/legato_logo_horizontal_dark_version.png')}
+          source={isDark
+            ? require('@/assets/icons/legato_logo_horizontal_dark_version.png')
+            : require('@/assets/icons/legato_logo_horizontal_light_version.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />
@@ -61,13 +71,13 @@ export function AppHeader({
       <View style={styles.actions}>
         {!hideSearch && (
           <TouchableOpacity style={styles.iconBtn} onPress={handleSearch}>
-            <Ionicons name="search-outline" size={Spacing.iconLg} color={Colors.white} />
+            <Ionicons name="search-outline" size={Spacing.iconLg} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
 
         {!hideNotifications && (
           <TouchableOpacity style={styles.iconBtn} onPress={handleNotifications}>
-            <Ionicons name="notifications-outline" size={Spacing.iconLg} color={Colors.white} />
+            <Ionicons name="notifications-outline" size={Spacing.iconLg} color={colors.textPrimary} />
             {unreadCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>
@@ -80,7 +90,7 @@ export function AppHeader({
 
         {!hideSettings && (
           <TouchableOpacity style={styles.iconBtn} onPress={handleSettings}>
-            <Ionicons name="settings-outline" size={Spacing.iconLg} color={Colors.white} />
+            <Ionicons name="settings-outline" size={Spacing.iconLg} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
       </View>
@@ -107,7 +117,6 @@ const styles = StyleSheet.create({
     width: 120,
   },
   title: {
-    color: Colors.white,
     fontSize: Typography.FontSize.lg,
     fontWeight: '600',
   },

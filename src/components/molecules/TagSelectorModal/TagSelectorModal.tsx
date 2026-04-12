@@ -28,6 +28,7 @@ import { ModalTemplate } from '@/components/templates/ModalTemplate/ModalTemplat
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { TagSelectorModalProps } from './TagSelectorModal.types';
 
 export function TagSelectorModal({
@@ -64,21 +65,23 @@ export function TagSelectorModal({
     onClose();
   };
 
+  const colors = useColors();
+
   return (
     <ModalTemplate visible={visible} onClose={onClose}>
       {/* Cabeçalho */}
       <View style={styles.header}>
-        <LegatoText variant="sectionTitle" color={Colors.white}>{title}</LegatoText>
+        <LegatoText variant="sectionTitle" color={colors.textPrimary}>{title}</LegatoText>
         <TouchableOpacity onPress={onClose} hitSlop={8}>
-          <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
+          <Ionicons name="close" size={Spacing.iconLg} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
       {/* Busca */}
-      <View style={styles.searchRow}>
+      <View style={[styles.searchRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
         <Ionicons name="search-outline" size={Spacing.iconSm} color={Colors.textMuted} />
         <TextInput
-          style={[styles.searchInput, { outline: 'none' } as any]}
+          style={[styles.searchInput, { color: colors.textPrimary, outline: 'none' } as any]}
           placeholder="Buscar..."
           placeholderTextColor={Colors.textMuted}
           value={search}
@@ -105,11 +108,11 @@ export function TagSelectorModal({
               <TouchableOpacity
                 key={item}
                 onPress={() => toggle(item)}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }, isSelected && styles.chipSelected]}
               >
                 <LegatoText
                   variant="caption"
-                  color={isSelected ? Colors.white : Colors.textSecondaryDark}
+                  color={isSelected ? Colors.white : colors.textSecondary}
                 >
                   {item}
                 </LegatoText>
@@ -147,17 +150,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   searchInput: {
     flex: 1,
-    color: Colors.white,
     fontSize: Typography.FontSize.sm,
     paddingVertical: 0,
   },
@@ -175,8 +175,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surfaceDark,
   },
   chipSelected: {
     backgroundColor: Colors.primary,

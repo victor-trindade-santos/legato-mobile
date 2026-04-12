@@ -148,8 +148,15 @@ export async function getFavoriteArtists(musicianId: number): Promise<FavoriteAr
     );
     const raw = res.data.data ?? [];
     if (!Array.isArray(raw)) return [];
-    // Backend retorna string[] (Spotify IDs) — feature não totalmente implementada
-    if (raw.length > 0 && typeof raw[0] === 'string') return [];
+    // Backend retorna string[] com nomes dos artistas — adapta para o modelo interno
+    if (raw.length > 0 && typeof raw[0] === 'string') {
+      return (raw as string[]).map((name, index) => ({
+        id: index,
+        displayName: name,
+        username: name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+        avatarUrl: undefined,
+      }));
+    }
     return raw as FavoriteArtist[];
   } catch {
     return [];

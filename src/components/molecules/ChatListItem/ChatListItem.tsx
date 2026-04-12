@@ -16,30 +16,32 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { BorderRadius, Colors, FontFamily, FontSize, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { ChatListItemProps } from './ChatListItem.types';
 
 export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, onPress }: ChatListItemProps) {
+    const colors = useColors();
     return (
         <TouchableOpacity style={styles.chatItemContainer} onPress={onPress}>
             <View style={styles.avatarContainer}>
                 <Avatar size="sm" uri={userAvatar} fallbackInitials={userName} />
             </View>
             <View style={styles.textContainer}>
-                <View style={styles.nameRow}>  
+                <View style={styles.nameRow}>
                     <LegatoText style={styles.contactName}>
                         {userName}
                     </LegatoText>
                 </View>
                 <View style={styles.messageRow}>
-                    <LegatoText style={styles.lastMessage}>
+                    <LegatoText style={[styles.lastMessage, { color: colors.textSecondary }]}>
                         {lastMessage}
                     </LegatoText>
                 </View>
             </View>
             <View style={styles.timeStampContainer}>
-            <LegatoText style={styles.timeStamp}>
-                {timeStamp}
-            </LegatoText>
+                <LegatoText style={[styles.timeStamp, { color: colors.textMuted }]}>
+                    {timeStamp}
+                </LegatoText>
             </View>
         </TouchableOpacity>
     );
@@ -66,7 +68,6 @@ const styles = StyleSheet.create({
     },
     timeStampContainer: {
         marginLeft: Spacing.md,
-
     },
     contactName: {
         color: Colors.primary,
@@ -75,10 +76,8 @@ const styles = StyleSheet.create({
     },
     lastMessage: {
         fontSize: FontSize.xs,
-        color: Colors.textSecondaryDark,
     },
     timeStamp: {
         fontSize: FontSize.xs,
-        color: Colors.textSecondaryDark,
     },
 });

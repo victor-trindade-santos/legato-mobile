@@ -20,6 +20,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { Input } from '@/components/atoms/Input/Input';
 import { Icon } from '@/components/atoms/Icon/Icon';
@@ -35,8 +36,9 @@ export function ChatInputBar({
   onEmoji,
   placeholder = 'Digite uma mensagem...',
 }: ChatInputBarProps) {
+  const colors = useColors();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
       {onAttach && (
         <>
           <TouchableOpacity onPress={onAttach}>
@@ -57,7 +59,6 @@ export function ChatInputBar({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          variant="dark"
           multiline
           numberOfLines={1}
           containerStyle={styles.inputContainer}
@@ -100,9 +101,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: Spacing.sm,
-    backgroundColor: Colors.surfaceDark,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
   },
   inputWrapper: {
     flex: 1,

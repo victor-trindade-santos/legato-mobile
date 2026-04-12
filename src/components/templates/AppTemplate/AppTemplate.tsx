@@ -18,7 +18,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { AppHeader } from '@/components/molecules/AppHeader/AppHeader';
 import type { AppHeaderProps } from '@/components/molecules/AppHeader/AppHeader.types';
 
@@ -35,8 +36,9 @@ export function AppTemplate({
   noPadding = false,
   headerProps,
 }: AppTemplateProps) {
+  const colors = useColors();
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       {showHeader && <AppHeader {...headerProps} />}
       <View style={[styles.content, noPadding && styles.contentNoPadding]}>
         {children}
@@ -49,7 +51,6 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     minHeight: 0,
-    backgroundColor: Colors.backgroundDark,
   },
   content: {
     flex: 1,
