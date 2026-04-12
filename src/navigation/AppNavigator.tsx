@@ -47,7 +47,7 @@ export default function AppNavigator() {
         const token = await storage.getItem(Config.TOKEN_KEY);
         if (token && isTokenValid(token)) {
           const res = await api.get(Endpoints.users.me);
-          const u = res.data;
+          const u = res.data.data;
           setAuth(token, {
             id: u.id,
             username: u.username,
