@@ -1,9 +1,11 @@
+import type { MusicGenre } from '@/constants/genres';
+
 export interface DiscoveryFilters {
   skills: string[];
   gender: 'Todos' | 'Masculino' | 'Feminino' | 'Outro';
   ageMin: number;
   ageMax: number;
-  musicGenres: string[];
+  musicGenres: MusicGenre[];
   distanceMin: number;
   distanceMax: number;
 }

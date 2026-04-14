@@ -14,6 +14,7 @@ import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import { MOCK_MUSICIANS } from '@/features/discovery/mocks/musicians.mock';
+import { normalizeMusicGenres } from '@/constants/genres';
 import type { MusicianProfileDTO, FavoriteArtist } from '../models/MusicianProfile';
 
 /** Envelope padrão do backend */
@@ -62,7 +63,7 @@ function mapBackendUser(raw: BackendUserDTO): MusicianProfileDTO {
     objective: raw.objective ?? undefined,
     location: locationStr,
     skills: raw.instruments ?? [],
-    musicGenres: raw.genres ?? [],
+    musicGenres: normalizeMusicGenres(raw.genres ?? []),
     photos: raw.photosCard ?? [],
     connectionsCount: raw.connectionsCount ?? 0,
     followersCount: raw.followersCount ?? 0,
@@ -83,7 +84,7 @@ export async function getMyProfile(): Promise<MusicianProfileDTO | null> {
       bio: mock.bio,
       location: mock.location,
       skills: mock.skills,
-      musicGenres: mock.musicGenres,
+      musicGenres: normalizeMusicGenres(mock.musicGenres),
       photos: mock.photos,
       connectionsCount: 0,
       followersCount: 0,
@@ -113,7 +114,7 @@ export async function getMusicianByUsername(username: string): Promise<MusicianP
       bio: mock.bio,
       location: mock.location,
       skills: mock.skills,
-      musicGenres: mock.musicGenres,
+      musicGenres: normalizeMusicGenres(mock.musicGenres),
       photos: mock.photos,
     };
   }

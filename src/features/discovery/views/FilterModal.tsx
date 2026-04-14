@@ -4,7 +4,7 @@
  * Usa ModalTemplate como container (bottom sheet).
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ModalTemplate } from '@/components/templates/ModalTemplate/ModalTemplate';
@@ -16,7 +16,7 @@ import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { SKILLS } from '@/constants/skills';
-import { MUSIC_GENRES } from '@/constants/genres';
+import { MUSIC_GENRES, getMusicGenreLabel, normalizeMusicGenres } from '@/constants/genres';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
 import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
 
@@ -31,9 +31,19 @@ const GENDERS = ['Todos', 'Masculino', 'Feminino', 'Outro'] as const;
 
 export function FilterModal({ visible, filters, onApply, onClose }: FilterModalProps) {
   const colors = useColors();
-  const [local, setLocal] = useState<DiscoveryFilters>(filters);
+  const [local, setLocal] = useState<DiscoveryFilters>({
+    ...filters,
+    musicGenres: normalizeMusicGenres(filters.musicGenres),
+  });
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showGenresModal, setShowGenresModal] = useState(false);
+
+  useEffect(() => {
+    setLocal({
+      ...filters,
+      musicGenres: normalizeMusicGenres(filters.musicGenres),
+    });
+  }, [filters]);
 
   const removeSkill = (skill: string) =>
     setLocal(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
@@ -45,7 +55,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
     setLocal(prev => ({ ...prev, skills: items }));
 
   const confirmGenres = (items: string[]) =>
-    setLocal(prev => ({ ...prev, musicGenres: items }));
+    setLocal(prev => ({ ...prev, musicGenres: normalizeMusicGenres(items) }));
 
   const handleReset = () => setLocal(DEFAULT_FILTERS);
   const handleApply = () => onApply(local);
@@ -83,6 +93,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
             tagVariant="outline"
             tagColor={Colors.primaryLight}
             emptyMessage="Nenhum gênero selecionado"
+            getItemLabel={getMusicGenreLabel}
           />
 
           {/* Gênero */}
@@ -144,6 +155,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
         visible={showGenresModal} title="Gêneros Musicais"
         items={MUSIC_GENRES} selected={local.musicGenres}
         onConfirm={confirmGenres} onClose={() => setShowGenresModal(false)}
+        getItemLabel={getMusicGenreLabel}
       />
     </>
   );

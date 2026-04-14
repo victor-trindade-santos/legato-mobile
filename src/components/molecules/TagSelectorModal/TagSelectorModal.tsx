@@ -38,6 +38,7 @@ export function TagSelectorModal({
   selected,
   onConfirm,
   onClose,
+  getItemLabel,
 }: TagSelectorModalProps) {
   const [localSelected, setLocalSelected] = useState<string[]>(selected);
   const [search, setSearch] = useState('');
@@ -51,8 +52,14 @@ export function TagSelectorModal({
   }, [visible]);
 
   const filtered = search.trim()
-    ? items.filter((item) => item.toLowerCase().includes(search.toLowerCase()))
+    ? items.filter((item) => {
+      const label = getItemLabel ? getItemLabel(item) : item;
+      const query = search.toLowerCase();
+      return label.toLowerCase().includes(query) || item.toLowerCase().includes(query);
+    })
     : items;
+
+  const getLabel = (item: string) => getItemLabel?.(item) ?? item;
 
   const toggle = (item: string) => {
     setLocalSelected((prev) =>
@@ -114,7 +121,7 @@ export function TagSelectorModal({
                   variant="caption"
                   color={isSelected ? Colors.white : colors.textSecondary}
                 >
-                  {item}
+                  {getLabel(item)}
                 </LegatoText>
               </TouchableOpacity>
             );

@@ -15,6 +15,7 @@ import { useWindowDimensions } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Spacing } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
+import { normalizeMusicGenres } from '@/constants/genres';
 import { getMyProfile, getMusicianByUsername, getFavoriteArtists } from '../services/musicianProfileService';
 import type { PublicMusicianProfile, ProfileTab } from '../models/MusicianProfile';
 
@@ -89,7 +90,7 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
             bio: user.bio,
             location: user.location,
             skills: user.skills ?? [],
-            musicGenres: user.musicGenres ?? [],
+            musicGenres: normalizeMusicGenres(user.musicGenres ?? []),
             photos: user.photos ?? [],
           }
         : null
@@ -107,7 +108,7 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
       bio,
       location: source.location,
       skills: source.skills ?? [],
-      musicGenres: source.musicGenres ?? [],
+      musicGenres: normalizeMusicGenres(source.musicGenres ?? []),
       objective: source.objective ?? 'Sem objetivo definido.',
       photos: source.photos ?? [],
       stats: {

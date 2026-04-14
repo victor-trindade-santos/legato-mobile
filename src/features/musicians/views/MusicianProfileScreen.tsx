@@ -27,6 +27,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
 import type { RootStackParamList } from '@/navigation/types';
 import { useAuthStore } from '@/store/authStore';
+import { getMusicGenreLabel } from '@/constants/genres';
 import { useColors } from '@/hooks/useColors';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { useMusicianProfileViewModel, type ProfileTab } from '../viewmodels/useMusicianProfileViewModel';
@@ -234,7 +235,7 @@ export default function MusicianProfileScreen() {
                 <LegatoText variant="label" color={colors.textPrimary}>GÊNEROS FAVORITOS</LegatoText>
                 <View style={styles.tagGrid}>
                   {profile.musicGenres.map((genre) => (
-                    <Tag key={genre} label={genre} variant="outline" color={Colors.primaryLight} />
+                    <Tag key={genre} label={getMusicGenreLabel(genre)} variant="outline" color={Colors.primaryLight} />
                   ))}
                 </View>
               </View>

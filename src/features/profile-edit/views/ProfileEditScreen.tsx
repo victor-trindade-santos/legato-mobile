@@ -29,7 +29,7 @@ import { ModalTriggerField } from '@/components/molecules/ModalTriggerField/Moda
 import { Colors, Spacing, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { SKILLS } from '@/constants/skills';
-import { MUSIC_GENRES } from '@/constants/genres';
+import { MUSIC_GENRES, getMusicGenreLabel } from '@/constants/genres';
 import { useProfileEditViewModel } from '../viewmodels/useProfileEditViewModel';
 import { BioObjectiveModal } from './BioObjectiveModal';
 
@@ -265,6 +265,7 @@ export default function ProfileEditScreen() {
               tagVariant="outline"
               tagColor={Colors.primaryLight}
               emptyMessage="Nenhum gênero selecionado"
+              getItemLabel={getMusicGenreLabel}
             />
 
             
@@ -347,6 +348,7 @@ export default function ProfileEditScreen() {
         visible={showGenresModal} title="Gêneros Musicais"
         items={MUSIC_GENRES} selected={selectedGenres}
         onConfirm={confirmGenres} onClose={closeGenresModal}
+        getItemLabel={getMusicGenreLabel}
       />
       <BioObjectiveModal
         visible={showBioObjectiveModal}

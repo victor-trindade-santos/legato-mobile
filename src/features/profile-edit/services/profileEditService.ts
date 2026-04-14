@@ -15,6 +15,7 @@ import { Platform } from 'react-native';
 import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
+import { normalizeMusicGenres, type MusicGenre } from '@/constants/genres';
 import type { ProfileEditFormData } from '../viewmodels/useProfileEditViewModel';
 import type { UpdateProfileDTO, UploadImageResponse, BackendEnvelope, UploadedUserData, UserProfileDTO } from '../models/ProfileEditDTO';
 
@@ -118,7 +119,7 @@ export interface SavedProfileData {
   bio?: string;
   objective?: string;
   skills: string[];
-  musicGenres: string[];
+  musicGenres: MusicGenre[];
   sex?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
   city?: string;
   state?: string;
@@ -141,7 +142,7 @@ export async function saveProfile(
       username: data.username,
       bio: data.bio,
       skills: data.skills,
-      musicGenres: data.musicGenres,
+      musicGenres: normalizeMusicGenres(data.musicGenres),
       photos: media.photoUris,
     };
   }
@@ -176,7 +177,7 @@ export async function saveProfile(
     bio: data.bio ?? '',
     ...(data.objective ? { objective: data.objective } : {}),
     instruments: data.skills,
-    genres: data.musicGenres,
+    genres: normalizeMusicGenres(data.musicGenres),
     location: {
       latitude: 0,
       longitude: 0,
@@ -205,7 +206,7 @@ export async function saveProfile(
     bio: data.bio,
     objective: data.objective,
     skills: data.skills,
-    musicGenres: data.musicGenres,
+    musicGenres: normalizeMusicGenres(data.musicGenres),
     sex: data.sex,
     city: data.city,
     state: data.state,

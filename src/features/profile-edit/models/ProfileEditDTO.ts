@@ -1,3 +1,5 @@
+import type { MusicGenre } from '@/constants/genres';
+
 /**
  * ProfileEditDTO — Contratos com o backend
  *
@@ -34,7 +36,7 @@ export interface UpdateProfileDTO {
   bio: string;
   objective?: string;  // opcional — não enviar se vazio
   instruments: string[];
-  genres: string[];
+  genres: MusicGenre[];
   location: ProfileLocationDTO;
   links: ProfileLinksDTO;
 }

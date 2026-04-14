@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import type { RootStackParamList } from '@/navigation/types';
+import { normalizeMusicGenres } from '@/constants/genres';
 import { saveProfile, fetchMyProfile } from '../services/profileEditService';
 import { mediaUpload } from '@/utils/mediaUpload';
 import type { TabItem } from '@/components/molecules/TabBar/TabBar.types';
@@ -79,7 +80,7 @@ export function useProfileEditViewModel() {
       bio:         user?.bio          ?? '',
       objective:   user?.objective    ?? '',
       skills:      user?.skills       ?? [],
-      musicGenres: user?.musicGenres  ?? [],
+      musicGenres: normalizeMusicGenres(user?.musicGenres ?? []),
       sex:         user?.sex          ?? undefined,
       city:        user?.city         ?? '',
       state:       user?.state        ?? '',
@@ -110,7 +111,7 @@ export function useProfileEditViewModel() {
       bio:         profileData.bio                    || user?.bio          || '',
       objective:   profileData.objective              || user?.objective    || '',
       skills:      profileData.instruments?.length    ? profileData.instruments    : (user?.skills      ?? []),
-      musicGenres: profileData.genres?.length         ? profileData.genres         : (user?.musicGenres ?? []),
+      musicGenres: profileData.genres?.length         ? normalizeMusicGenres(profileData.genres)         : normalizeMusicGenres(user?.musicGenres ?? []),
       sex:         profileData.sex                    ?? user?.sex          ?? undefined,
       city:        profileData.location?.city         || user?.city         || '',
       state:       profileData.location?.state        || user?.state        || '',
@@ -146,7 +147,7 @@ export function useProfileEditViewModel() {
     setValue('skills', items, { shouldValidate: true });
 
   const confirmGenres = (items: string[]) =>
-    setValue('musicGenres', items, { shouldValidate: true });
+    setValue('musicGenres', normalizeMusicGenres(items), { shouldValidate: true });
 
   // ── Handlers de mídia ─────────────────────────────────────────────────
 
@@ -189,7 +190,7 @@ export function useProfileEditViewModel() {
           bio:         saved.bio,
           objective:   saved.objective,
           skills:      saved.skills,
-          musicGenres: saved.musicGenres,
+          musicGenres: normalizeMusicGenres(saved.musicGenres ?? []),
           sex:         saved.sex,
           city:        saved.city,
           state:       saved.state,

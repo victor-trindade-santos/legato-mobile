@@ -10,6 +10,7 @@
 import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
+import { normalizeMusicGenres } from '@/constants/genres';
 import { MOCK_MUSICIANS } from '../mocks/musicians.mock';
 import type { Musician } from '../models/Musician';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
@@ -81,7 +82,7 @@ function mapBackendUserToMusician(raw: BackendDiscoveryUserDTO): Musician {
     age: raw.birthDate ? calculateAge(raw.birthDate) : 0,
     gender: SEX_MAP[raw.sex ?? ''] ?? 'Outro',
     skills: raw.instruments ?? [],
-    musicGenres: raw.genres ?? [],
+    musicGenres: normalizeMusicGenres(raw.genres ?? []),
     bio: raw.bio,
     location,
     photos: raw.photosCard ?? [],

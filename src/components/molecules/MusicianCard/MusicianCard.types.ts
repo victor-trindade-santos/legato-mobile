@@ -1,3 +1,5 @@
+import type { MusicGenre } from '@/constants/genres';
+
 export interface MusicianCardData {
   id: number;
   username?: string;
@@ -6,7 +8,7 @@ export interface MusicianCardData {
   distance: number;        // km
   age: number;
   skills: string[];
-  musicGenres: string[];
+  musicGenres: MusicGenre[];
   bio?: string;
   gender?: string;
   location?: string;

@@ -27,6 +27,7 @@ export function TagSection({
   tagVariant = 'filled',
   tagColor = Colors.primary,
   emptyMessage = 'Nenhum item selecionado',
+  getItemLabel,
 }: TagSectionProps) {
   const colors = useColors();
   return (
@@ -43,7 +44,7 @@ export function TagSection({
         <View style={styles.tagRow}>
           {selected.map((item) => (
             <TouchableOpacity key={item} onPress={() => onRemove(item)}>
-              <Tag label={item} variant={tagVariant} color={tagColor} />
+              <Tag label={getItemLabel ? getItemLabel(item) : item} variant={tagVariant} color={tagColor} />
             </TouchableOpacity>
           ))}
         </View>
