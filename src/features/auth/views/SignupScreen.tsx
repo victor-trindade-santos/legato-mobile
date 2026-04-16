@@ -44,27 +44,27 @@ export default function SignupScreen() {
 
         <Controller control={control} name="username" render={({ field: { onChange, value } }) => (
           <FormField label="Username" placeholder="Seu @username único" autoCapitalize="none"
-            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.username?.message} />
+            variant="light" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.username?.message} />
         )} />
 
         <Controller control={control} name="displayName" render={({ field: { onChange, value } }) => (
           <FormField label="Display Name" placeholder="Como você quer aparecer?"
-            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.displayName?.message} />
+            variant="light" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.displayName?.message} />
         )} />
 
         <Controller control={control} name="email" render={({ field: { onChange, value } }) => (
           <FormField label="Email" placeholder="Digite seu e-mail" keyboardType="email-address"
-            autoCapitalize="none" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
+            autoCapitalize="none" variant="light" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
         )} />
 
         <Controller control={control} name="password" render={({ field: { onChange, value } }) => (
           <FormField label="Senha" placeholder="Digite sua senha" isPassword
-            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.password?.message} />
+            variant="light" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.password?.message} />
         )} />
 
         <Controller control={control} name="confirmPassword" render={({ field: { onChange, value } }) => (
           <FormField label="Confirmar Senha" placeholder="Confirme sua senha" isPassword
-            containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.confirmPassword?.message} />
+            variant="light" containerStyle={fieldStyle} value={value} onChangeText={onChange} errorMessage={errors.confirmPassword?.message} />
         )} />
 
         {/* Termos */}

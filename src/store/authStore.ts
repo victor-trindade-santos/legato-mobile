@@ -9,6 +9,7 @@
  */
 
 import { create } from 'zustand';
+import type { MusicGenre } from '@/constants/genres';
 
 export interface AuthUser {
   id: number;
@@ -22,8 +23,19 @@ export interface AuthUser {
   bio?: string;
   objective?: string;
   skills?: string[];
-  musicGenres?: string[];
-  location?: string;
+  musicGenres?: MusicGenre[];
+  sex?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+  // Localização estruturada
+  city?: string;
+  state?: string;
+  country?: string;
+  // Links sociais
+  instagram?: string;
+  spotify?: string;
+  youtube?: string;
+  soundcloud?: string;
+  website?: string;
+  // Mídia
   photos?: string[];
 }
 

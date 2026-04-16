@@ -28,6 +28,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useUIStore } from '@/store/uiStore';
+import { useColors } from '@/hooks/useColors';
 import type { SelectFieldProps, SelectOption } from './SelectField.types';
 
 const THEME = {
@@ -50,10 +52,13 @@ export function SelectField({
   onChange,
   placeholder = 'Selecione...',
   errorMessage,
-  variant = 'dark',
+  variant,
 }: SelectFieldProps) {
   const [open, setOpen] = useState(false);
-  const theme = THEME[variant];
+  const storeTheme = useUIStore((s) => s.theme);
+  const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
+  const theme = THEME[resolvedVariant];
+  const colors = useColors();
 
   const selected = options.find((o) => o.value === value);
 
@@ -64,7 +69,7 @@ export function SelectField({
 
   return (
     <View style={styles.wrapper}>
-      <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.label}>
+      <LegatoText variant="label" color={colors.textSecondary} style={styles.label}>
         {label}
       </LegatoText>
 
@@ -100,12 +105,12 @@ export function SelectField({
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
-          <Pressable style={styles.sheet} onPress={() => {}}>
+          <Pressable style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => {}}>
             <View style={styles.sheetHeader}>
               <LegatoText variant="sectionTitle" color={Colors.white}>
                 {label}
               </LegatoText>
-              <TouchableOpacity onPress={() => setOpen(false)} style={styles.closeBtn}>
+              <TouchableOpacity onPress={() => setOpen(false)} style={[styles.closeBtn, { backgroundColor: colors.background }]}>
                 <Ionicons name="close" size={Spacing.iconMd} color={Colors.white} />
               </TouchableOpacity>
             </View>
@@ -180,10 +185,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.screenPaddingH,
   },
   sheet: {
-    backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.lg,
@@ -201,7 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.backgroundDark,
   },
   option: {
     flexDirection: 'row',

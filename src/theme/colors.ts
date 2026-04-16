@@ -22,7 +22,7 @@ export const Colors = {
 
   // ─── Background ──────────────────────────────────────────────────
   backgroundDark: '#0E0F12',  // Fundo principal dark (var --background dark)
-  backgroundLight: '#FAFAFA', // Fundo principal light (var --background light)
+  backgroundLight: '#f9f9f9', // Fundo principal light (var --background light)
 
   // ─── Surface / Cards ─────────────────────────────────────────────
   surfaceDark: '#1B1825',    // Fundo de cards dark (var --secondary-color dark)

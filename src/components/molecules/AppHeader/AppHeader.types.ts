@@ -19,4 +19,7 @@ export interface AppHeaderProps {
 
   /** Callback extra ao pressionar configurações (além da navegação padrão) */
   onSettingsPress?: () => void;
+
+  /** Callback extra ao pressionar notificações (além da navegação padrão) */
+  onNotificationsPress?: () => void;
 }

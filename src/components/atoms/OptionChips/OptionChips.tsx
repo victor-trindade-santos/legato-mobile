@@ -2,13 +2,16 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { OptionChipsProps } from './OptionChips.types';
 
 export function OptionChips({ options, value, onChange, label }: OptionChipsProps) {
+  const colors = useColors();
+
   return (
     <View style={styles.wrapper}>
       {label && (
-        <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.label}>
+        <LegatoText variant="label" color={colors.textSecondary} style={styles.label}>
           {label}
         </LegatoText>
       )}
@@ -18,7 +21,11 @@ export function OptionChips({ options, value, onChange, label }: OptionChipsProp
           return (
             <TouchableOpacity
               key={opt.value}
-              style={[styles.chip, active && styles.chipActive]}
+              style={[
+                styles.chip,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+                active && styles.chipActive,
+              ]}
               onPress={() => onChange(opt.value)}
               activeOpacity={0.75}
             >
@@ -54,8 +61,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.pill,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surfaceDark,
   },
   chipActive: {
     backgroundColor: Colors.primary,

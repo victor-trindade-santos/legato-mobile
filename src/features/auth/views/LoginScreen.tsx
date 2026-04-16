@@ -49,6 +49,7 @@ export default function LoginScreen() {
               placeholder="Digite seu e-mail"
               keyboardType="email-address"
               autoCapitalize="none"
+              variant="light"
               value={value}
               onChangeText={onChange}
               errorMessage={errors.email?.message}
@@ -64,6 +65,7 @@ export default function LoginScreen() {
               label="Senha"
               placeholder="Digite sua senha"
               isPassword
+              variant="light"
               value={value}
               onChangeText={onChange}
               errorMessage={errors.password?.message}

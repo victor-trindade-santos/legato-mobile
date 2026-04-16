@@ -14,6 +14,7 @@ import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import { MOCK_MUSICIANS } from '@/features/discovery/mocks/musicians.mock';
+import { normalizeMusicGenres } from '@/constants/genres';
 import type { MusicianProfileDTO, FavoriteArtist } from '../models/MusicianProfile';
 
 /** Envelope padrão do backend */
@@ -62,7 +63,7 @@ function mapBackendUser(raw: BackendUserDTO): MusicianProfileDTO {
     objective: raw.objective ?? undefined,
     location: locationStr,
     skills: raw.instruments ?? [],
-    musicGenres: raw.genres ?? [],
+    musicGenres: normalizeMusicGenres(raw.genres ?? []),
     photos: raw.photosCard ?? [],
     connectionsCount: raw.connectionsCount ?? 0,
     followersCount: raw.followersCount ?? 0,
@@ -83,7 +84,7 @@ export async function getMyProfile(): Promise<MusicianProfileDTO | null> {
       bio: mock.bio,
       location: mock.location,
       skills: mock.skills,
-      musicGenres: mock.musicGenres,
+      musicGenres: normalizeMusicGenres(mock.musicGenres),
       photos: mock.photos,
       connectionsCount: 0,
       followersCount: 0,
@@ -113,7 +114,7 @@ export async function getMusicianByUsername(username: string): Promise<MusicianP
       bio: mock.bio,
       location: mock.location,
       skills: mock.skills,
-      musicGenres: mock.musicGenres,
+      musicGenres: normalizeMusicGenres(mock.musicGenres),
       photos: mock.photos,
     };
   }
@@ -143,8 +144,21 @@ export async function getFavoriteArtists(musicianId: number): Promise<FavoriteAr
   }
 
   try {
-    const res = await api.get<FavoriteArtist[]>(Endpoints.musicians.favoriteArtists(musicianId));
-    return res.data;
+    const res = await api.get<{ success: boolean; data: unknown[] }>(
+      Endpoints.musicians.favoriteArtists(musicianId),
+    );
+    const raw = res.data.data ?? [];
+    if (!Array.isArray(raw)) return [];
+    // Backend retorna string[] com nomes dos artistas — adapta para o modelo interno
+    if (raw.length > 0 && typeof raw[0] === 'string') {
+      return (raw as string[]).map((name, index) => ({
+        id: index,
+        displayName: name,
+        username: name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+        avatarUrl: undefined,
+      }));
+    }
+    return raw as FavoriteArtist[];
   } catch {
     return [];
   }

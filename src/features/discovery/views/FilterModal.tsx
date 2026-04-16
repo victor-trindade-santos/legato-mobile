@@ -4,7 +4,7 @@
  * Usa ModalTemplate como container (bottom sheet).
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ModalTemplate } from '@/components/templates/ModalTemplate/ModalTemplate';
@@ -14,8 +14,9 @@ import { RangeSlider } from '@/components/molecules/RangeSlider/RangeSlider';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { SKILLS } from '@/constants/skills';
-import { MUSIC_GENRES } from '@/constants/genres';
+import { MUSIC_GENRES, getMusicGenreLabel, normalizeMusicGenres } from '@/constants/genres';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
 import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
 
@@ -29,9 +30,20 @@ interface FilterModalProps {
 const GENDERS = ['Todos', 'Masculino', 'Feminino', 'Outro'] as const;
 
 export function FilterModal({ visible, filters, onApply, onClose }: FilterModalProps) {
-  const [local, setLocal] = useState<DiscoveryFilters>(filters);
+  const colors = useColors();
+  const [local, setLocal] = useState<DiscoveryFilters>({
+    ...filters,
+    musicGenres: normalizeMusicGenres(filters.musicGenres),
+  });
   const [showSkillsModal, setShowSkillsModal] = useState(false);
   const [showGenresModal, setShowGenresModal] = useState(false);
+
+  useEffect(() => {
+    setLocal({
+      ...filters,
+      musicGenres: normalizeMusicGenres(filters.musicGenres),
+    });
+  }, [filters]);
 
   const removeSkill = (skill: string) =>
     setLocal(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
@@ -43,7 +55,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
     setLocal(prev => ({ ...prev, skills: items }));
 
   const confirmGenres = (items: string[]) =>
-    setLocal(prev => ({ ...prev, musicGenres: items }));
+    setLocal(prev => ({ ...prev, musicGenres: normalizeMusicGenres(items) }));
 
   const handleReset = () => setLocal(DEFAULT_FILTERS);
   const handleApply = () => onApply(local);
@@ -53,9 +65,9 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
       <ModalTemplate visible={visible} onClose={onClose}>
         {/* Cabeçalho */}
         <View style={styles.header}>
-          <LegatoText variant="sectionTitle" color={Colors.white}>Filtrar Músicos</LegatoText>
+          <LegatoText variant="sectionTitle" color={colors.textPrimary}>Filtrar Músicos</LegatoText>
           <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
+            <Ionicons name="close" size={Spacing.iconLg} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -81,10 +93,11 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
             tagVariant="outline"
             tagColor={Colors.primaryLight}
             emptyMessage="Nenhum gênero selecionado"
+            getItemLabel={getMusicGenreLabel}
           />
 
           {/* Gênero */}
-          <LegatoText style={styles.sectionLabel}>Gênero</LegatoText>
+          <LegatoText style={[styles.sectionLabel, { color: colors.textSecondary }]}>Gênero</LegatoText>
           <View style={styles.genderRow}>
             {GENDERS.map((g) => (
               <Button
@@ -142,6 +155,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
         visible={showGenresModal} title="Gêneros Musicais"
         items={MUSIC_GENRES} selected={local.musicGenres}
         onConfirm={confirmGenres} onClose={() => setShowGenresModal(false)}
+        getItemLabel={getMusicGenreLabel}
       />
     </>
   );
@@ -158,7 +172,6 @@ const styles = StyleSheet.create({
     maxHeight: 440,
   },
   sectionLabel: {
-    color: Colors.textSecondaryDark,
     fontSize: 11,
     fontWeight: '600',
     letterSpacing: 1,

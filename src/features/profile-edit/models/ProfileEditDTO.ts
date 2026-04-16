@@ -1,3 +1,5 @@
+import type { MusicGenre } from '@/constants/genres';
+
 /**
  * ProfileEditDTO — Contratos com o backend
  *
@@ -21,6 +23,7 @@ export interface ProfileLinksDTO {
   instagram: string;
   spotify: string;
   youtube: string;
+  soundcloud: string;
   website: string;
 }
 
@@ -33,7 +36,7 @@ export interface UpdateProfileDTO {
   bio: string;
   objective?: string;  // opcional — não enviar se vazio
   instruments: string[];
-  genres: string[];
+  genres: MusicGenre[];
   location: ProfileLocationDTO;
   links: ProfileLinksDTO;
 }
@@ -50,6 +53,8 @@ export interface BackendEnvelope<T> {
  * Apenas os campos relevantes para extração de URL são listados.
  */
 export interface UploadedUserData {
+  displayName?: string;
+  username?: string;
   profilePicture?: string | null;
   profileBanner?: string | null;
   photosCard?: string[];
@@ -57,3 +62,31 @@ export interface UploadedUserData {
 
 /** Resposta de /users/upload-image e /users/card-file */
 export type UploadImageResponse = BackendEnvelope<UploadedUserData>;
+
+/** Perfil completo retornado pelo GET /users/me */
+export interface UserProfileDTO {
+  id: number;
+  displayName: string;
+  username: string;
+  email: string;
+  profilePicture?: string | null;
+  profileBanner?: string | null;
+  photosCard?: string[];
+  bio?: string | null;
+  objective?: string | null;
+  instruments?: string[];   // skills
+  genres?: string[];        // musicGenres
+  sex?: 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY' | null;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  } | null;
+  links?: {
+    instagram?: string;
+    spotify?: string;
+    youtube?: string;
+    soundcloud?: string;
+    website?: string;
+  } | null;
+}

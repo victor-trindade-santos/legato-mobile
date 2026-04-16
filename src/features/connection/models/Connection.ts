@@ -1,3 +1,5 @@
+import type { MusicGenre } from '@/constants/genres';
+
 export type ConnectionStatus = 'pending' | 'accepted' | 'declined';
 
 export interface Connection {
@@ -8,7 +10,7 @@ export interface Connection {
     displayName: string;
     avatarUrl?: string;
     skills: string[];
-    musicGenres: string[];
+    musicGenres: MusicGenre[];
   };
   status: ConnectionStatus;
   createdAt: string;

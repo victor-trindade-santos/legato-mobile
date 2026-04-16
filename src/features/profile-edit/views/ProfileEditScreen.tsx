@@ -14,6 +14,7 @@ import { View, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-nat
 import { Controller } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
+import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { TabBar } from '@/components/molecules/TabBar/TabBar';
 import { ProfileBanner } from '@/components/molecules/ProfileBanner/ProfileBanner';
 import { TagSelectorModal } from '@/components/molecules/TagSelectorModal/TagSelectorModal';
@@ -26,8 +27,9 @@ import { Divider } from '@/components/atoms/Divider/Divider';
 import { SelectField } from '@/components/molecules/SelectField/SelectField';
 import { ModalTriggerField } from '@/components/molecules/ModalTriggerField/ModalTriggerField';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { SKILLS } from '@/constants/skills';
-import { MUSIC_GENRES } from '@/constants/genres';
+import { MUSIC_GENRES, getMusicGenreLabel } from '@/constants/genres';
 import { useProfileEditViewModel } from '../viewmodels/useProfileEditViewModel';
 import { BioObjectiveModal } from './BioObjectiveModal';
 
@@ -47,8 +49,11 @@ export default function ProfileEditScreen() {
     handleSave,
     handleSkip,
     isLoading,
+    isProfileLoading,
     errorMessage,
     isOnboarding,
+    handleHeaderSettings,
+    handleHeaderNotifications,
     displayName,
     avatarUri,
     bioValue,
@@ -83,9 +88,22 @@ export default function ProfileEditScreen() {
   } = useProfileEditViewModel();
 
   const { control, formState: { errors } } = form;
+  const colors = useColors();
+
+  if (isProfileLoading) return <Spinner fullScreen />;
 
   return (
-    <AppTemplate noPadding>
+    <AppTemplate
+      noPadding
+      headerProps={{
+        title: isOnboarding ? 'Configurar Perfil' : undefined,
+        hideSearch: isOnboarding,
+        hideNotifications: isOnboarding,
+        hideSettings: isOnboarding,
+        onSettingsPress: isOnboarding ? undefined : handleHeaderSettings,
+        onNotificationsPress: isOnboarding ? undefined : handleHeaderNotifications,
+      }}
+    >
 
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -107,7 +125,7 @@ export default function ProfileEditScreen() {
             />
 
             {/* ── Informações Básicas ─────────────────────────── */}
-            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelBasics}>
+            <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelBasics}>
               INFORMAÇÕES BÁSICAS
             </LegatoText>
 
@@ -115,7 +133,7 @@ export default function ProfileEditScreen() {
               control={control}
               name="displayName"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="Nome Artístico"
+                <FormField label="Nome Artístico"
                   placeholder="Como você quer aparecer?"
                   value={value} onChangeText={onChange}
                   errorMessage={errors.displayName?.message} />
@@ -126,7 +144,7 @@ export default function ProfileEditScreen() {
               control={control}
               name="username"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="Username"
+                <FormField label="Username"
                   placeholder="@seu_username" autoCapitalize="none"
                   value={value} onChangeText={onChange}
                   errorMessage={errors.username?.message} />
@@ -143,7 +161,6 @@ export default function ProfileEditScreen() {
                   value={value}
                   onChange={onChange}
                   placeholder="Selecione seu gênero..."
-                  variant="dark"
                 />
               )}
             />
@@ -154,13 +171,12 @@ export default function ProfileEditScreen() {
               value={bioValue || objectiveValue ? `${bioValue ?? ''}${objectiveValue ? ` · ${objectiveValue}` : ''}` : undefined}
               placeholder="Toque para adicionar sua bio..."
               onPress={openBioObjectiveModal}
-              variant="dark"
             />
 
-            <Divider marginV={Spacing.md} color={Colors.border} />
+            <Divider marginV={Spacing.md} />
 
             {/* ── Localização ─────────────────────────────────── */}
-            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+            <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelOthers}>
               LOCALIZAÇÃO
             </LegatoText>
 
@@ -168,7 +184,7 @@ export default function ProfileEditScreen() {
               control={control}
               name="city"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="Cidade"
+                <FormField label="Cidade"
                   placeholder="Ex: São Paulo"
                   value={value ?? ''} onChangeText={onChange} />
               )}
@@ -178,7 +194,7 @@ export default function ProfileEditScreen() {
               control={control}
               name="state"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="Estado"
+                <FormField label="Estado"
                   placeholder="Ex: SP"
                   value={value ?? ''} onChangeText={onChange} />
               )}
@@ -188,16 +204,16 @@ export default function ProfileEditScreen() {
               control={control}
               name="country"
               render={({ field: { onChange, value } }) => (
-                <FormField variant="dark" label="País"
+                <FormField label="País"
                   placeholder="Ex: Brasil"
                   value={value ?? ''} onChangeText={onChange} />
               )}
             />
             
-            <Divider marginV={Spacing.md} color={Colors.border} />
+            <Divider marginV={Spacing.md} />
 
             {/* ── Fotos do Perfil ─────────────────────────────── */}
-            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+            <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelOthers}>
               FOTOS DO PERFIL
             </LegatoText>
 
@@ -224,10 +240,10 @@ export default function ProfileEditScreen() {
               )}
             </View>
 
-            <Divider marginV={Spacing.md} color={Colors.border} />
+            <Divider marginV={Spacing.md} />
 
             {/* ── Interesses Musicais ─────────────────────────── */}
-            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+            <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelOthers}>
               INTERESSES MUSICAIS
             </LegatoText>
 
@@ -249,14 +265,15 @@ export default function ProfileEditScreen() {
               tagVariant="outline"
               tagColor={Colors.primaryLight}
               emptyMessage="Nenhum gênero selecionado"
+              getItemLabel={getMusicGenreLabel}
             />
 
             
 
-            <Divider marginV={Spacing.md} color={Colors.border} />
+            <Divider marginV={Spacing.md} />
 
             {/* ── Links e Redes Sociais ───────────────────────── */}
-            <LegatoText variant="label" color={Colors.textSecondaryDark} style={styles.sectionLabelOthers}>
+            <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelOthers}>
               LINKS E REDES SOCIAIS
             </LegatoText>
 
@@ -331,6 +348,7 @@ export default function ProfileEditScreen() {
         visible={showGenresModal} title="Gêneros Musicais"
         items={MUSIC_GENRES} selected={selectedGenres}
         onConfirm={confirmGenres} onClose={closeGenresModal}
+        getItemLabel={getMusicGenreLabel}
       />
       <BioObjectiveModal
         visible={showBioObjectiveModal}

@@ -13,6 +13,7 @@
 import React from 'react';
 import { Modal, View, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 interface ModalTemplateProps {
   visible: boolean;
@@ -21,10 +22,11 @@ interface ModalTemplateProps {
 }
 
 export function ModalTemplate({ visible, onClose, children }: ModalTemplateProps) {
+  const colors = useColors();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.sheet}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.sheet, { backgroundColor: colors.surface }]}>
         <View style={styles.handle} />
         <View style={styles.content}>
           {children}
@@ -40,7 +42,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.overlay,
   },
   sheet: {
-    backgroundColor: Colors.surfaceDark,
     //borderRadius: BorderRadius.xxl,
     borderBottomEndRadius: BorderRadius.xxl,
     marginHorizontal: Spacing.screenPaddingH,

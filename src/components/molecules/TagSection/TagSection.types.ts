@@ -13,4 +13,6 @@ export interface TagSectionProps {
   tagColor?: string;
   /** Mensagem quando não há itens selecionados */
   emptyMessage?: string;
+  /** Converte o valor salvo em label de exibição */
+  getItemLabel?: (item: string) => string;
 }

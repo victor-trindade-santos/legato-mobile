@@ -12,6 +12,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { Tag } from '@/components/atoms/Tag/Tag';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { formatDistance } from '@/utils/formatters';
 import type { Musician } from '../models/Musician';
 
@@ -25,6 +26,7 @@ interface HistoryModalProps {
 }
 
 export function HistoryModal({ visible, history, onClose }: HistoryModalProps) {
+  const colors = useColors();
   const [order, setOrder] = useState<SortOrder>('newest');
 
   const sorted = order === 'newest' ? [...history].reverse() : history;
@@ -37,7 +39,7 @@ export function HistoryModal({ visible, history, onClose }: HistoryModalProps) {
       <View style={styles.item}>
         <Avatar uri={item.musician.avatarUrl} size="md" fallbackInitials={item.musician.displayName} />
         <View style={styles.itemInfo}>
-          <LegatoText style={styles.itemName}>
+          <LegatoText style={[styles.itemName, { color: colors.textPrimary }]}>
             {item.musician.displayName}, {item.musician.age}
           </LegatoText>
           <LegatoText style={styles.itemSub}>
@@ -64,9 +66,9 @@ export function HistoryModal({ visible, history, onClose }: HistoryModalProps) {
     <ModalTemplate visible={visible} onClose={onClose}>
       {/* Cabeçalho */}
       <View style={styles.header}>
-        <LegatoText variant="sectionTitle" color={Colors.white}>Histórico de Descoberta</LegatoText>
+        <LegatoText variant="sectionTitle" color={colors.textPrimary}>Histórico de Descoberta</LegatoText>
         <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="close" size={Spacing.iconLg} color={Colors.textSecondaryDark} />
+          <Ionicons name="close" size={Spacing.iconLg} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -97,7 +99,7 @@ export function HistoryModal({ visible, history, onClose }: HistoryModalProps) {
           renderItem={renderItem}
           style={styles.list}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
         />
       )}
     </ModalTemplate>
@@ -142,7 +144,6 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   itemName: {
-    color: Colors.white,
     fontSize: Typography.FontSize.sm,
     fontWeight: Typography.FontWeight.semiBold,
   },
@@ -170,7 +171,6 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: Colors.border,
     marginVertical: Spacing.xs,
   },
   empty: {

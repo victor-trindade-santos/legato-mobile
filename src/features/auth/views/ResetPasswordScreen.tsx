@@ -50,7 +50,7 @@ export default function ResetPasswordScreen() {
             </LegatoText>
             <Controller control={control} name="email" render={({ field: { onChange, value } }) => (
               <FormField label="E-mail" placeholder="Digite seu e-mail" keyboardType="email-address"
-                autoCapitalize="none" value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
+                autoCapitalize="none" variant="light" value={value} onChangeText={onChange} errorMessage={errors.email?.message} />
             )} />
             {errorMessage && (
               <LegatoText variant="caption" color={Colors.error} style={styles.errorMsg}>{errorMessage}</LegatoText>

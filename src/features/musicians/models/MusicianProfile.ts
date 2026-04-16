@@ -1,3 +1,5 @@
+import type { MusicGenre } from '@/constants/genres';
+
 /**
  * MusicianProfile — Model (perfil público de músico)
  *
@@ -26,7 +28,7 @@ export interface MusicianProfileDTO {
   objective?: string;         // backend: objective (nullable)
   location?: string;          // montado como "city, state" pelo service
   skills: string[];           // backend: instruments
-  musicGenres: string[];      // backend: genres
+  musicGenres: MusicGenre[];      // backend: genres
   photos?: string[];          // backend: photosCard
   // Stats — disponíveis em /users/me e /users/{username}
   connectionsCount?: number;
@@ -62,7 +64,7 @@ export interface PublicMusicianProfile {
   bio: string;
   location?: string;
   skills: string[];
-  musicGenres: string[];
+  musicGenres: MusicGenre[];
   objective: string;
   photos: string[];
   stats: ProfileStats;
