@@ -13,7 +13,6 @@
  *
  * Template visual:
  *
- *  João está digitando...
  *  ●  ●  ●
  */
 
@@ -26,8 +25,9 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Spacer } from '@/components/atoms/Spacer/Spacer';
 
 import type { TypingIndicatorProps } from './TypingIndicator.types';
+import { MessageBubbleContainer } from '@/components/atoms/MessageBubbleContainer/MessageBubbleContainer';
 
-export function TypingIndicator({ userName }: TypingIndicatorProps) {
+export function TypingIndicator({ userName, showUserName = true }: TypingIndicatorProps) {
   const opacity1 = useRef(new Animated.Value(0.3)).current;
   const opacity2 = useRef(new Animated.Value(0.3)).current;
   const opacity3 = useRef(new Animated.Value(0.3)).current;
@@ -56,31 +56,42 @@ export function TypingIndicator({ userName }: TypingIndicatorProps) {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <LegatoText variant="caption" color={Colors.textMuted}>
-        {userName} está digitando...
-      </LegatoText>
+    <View style={styles.wrapper}>
+      <MessageBubbleContainer backgroundColor={Colors.textSecondaryLight}>
+        <View style={styles.container}>
+          {showUserName && (
+            <>
+              <LegatoText variant="caption" color={Colors.textMuted}>
+                {userName} está digitando...
+              </LegatoText>
+              <Spacer size={Spacing.xs} />
+            </>
+          )}
 
-      <Spacer size={Spacing.xs} />
-
-      <View style={styles.dots}>
-        <Animated.View style={{ opacity: opacity1 }}>
-          <StatusDot size={8} variant="online" />
-        </Animated.View>
-        <Spacer horizontal size={Spacing.xs} />
-        <Animated.View style={{ opacity: opacity2 }}>
-          <StatusDot size={8} variant="online" />
-        </Animated.View>
-        <Spacer horizontal size={Spacing.xs} />
-        <Animated.View style={{ opacity: opacity3 }}>
-          <StatusDot size={8} variant="online" />
-        </Animated.View>
-      </View>
+          <View style={styles.dots}>
+            <Animated.View style={{ opacity: opacity1 }}>
+              <StatusDot size={8} variant="offline" />
+            </Animated.View>
+            <Spacer horizontal size={Spacing.xs} />
+            <Animated.View style={{ opacity: opacity2 }}>
+              <StatusDot size={8} variant="offline" />
+            </Animated.View>
+            <Spacer horizontal size={Spacing.xs} />
+            <Animated.View style={{ opacity: opacity3 }}>
+              <StatusDot size={8} variant="offline" />
+            </Animated.View>
+          </View>
+        </View>
+      </MessageBubbleContainer>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    alignItems: 'flex-start',
+    marginVertical: Spacing.xs,
+  },
   container: {
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,

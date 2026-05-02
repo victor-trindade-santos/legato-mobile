@@ -1,12 +1,11 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { fetchMessages } from "../services/ChatService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
 import { useAuthStore } from "@/store/authStore";
 import { extractDateKey, extractDateLabel, formatNowToBackendFormat } from "@/utils/dateUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { set } from "react-hook-form";
-import { MessageHandler } from "@/types/WebSocket.types";
+import type { MessageHandler, TypingHandler } from "@/types/WebSocket.types";
 
 
 export type ChatListItem =
@@ -52,12 +51,19 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+
+  // Timer para parar de enviar "digitando" após 2s sem digitar
+  const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Timer de segurança no receptor: reseta se o "parou de digitar" nunca chegar
+  const typingResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentUserEmail = useAuthStore((state) => state.user?.email);
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const currentUserName = useAuthStore((state) => state.user?.displayName);
   const token = useAuthStore((state) => state.token);
 
-  // ── 1. Define o handler ANTES do useWebSocket ──────────────
+  // ── 1a. Handler de mensagens recebidas ─────────────────────
   const handleIncomingMessage = useCallback<MessageHandler>((message) => {
     /**
        *  O WebSocket já entrega apenas mensagens destinadas ao usuário atual.
@@ -95,12 +101,37 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
         result.push({ type: 'message', data: newMessage });
         return result;
       })
-  }, [currentUserEmail]); // Só é recriado se o email mudar
+  }, [currentUserEmail]);
 
-    // ── 2. Passa o handler estável para o hook ─────────────────
-  const { sendMessage: wsSendMessage } = useWebSocket({
+  // ── 1b. Handler de eventos de typing recebidos ─────────────
+  const handleIncomingTyping = useCallback<TypingHandler>((dto) => {
+    console.log('[ViewModel] handleIncomingTyping ←', dto, '| meuId=', currentUserId);
+
+    if (dto.userId === currentUserId) {
+      console.log('[ViewModel] typing ignorado (evento próprio)');
+      return;
+    }
+
+    console.log('[ViewModel] isOtherUserTyping →', dto.typing);
+    setIsOtherUserTyping(dto.typing);
+
+    if (dto.typing) {
+      if (typingResetRef.current) clearTimeout(typingResetRef.current);
+      typingResetRef.current = setTimeout(() => {
+        console.log('[ViewModel] typing reset por timeout de segurança (5s)');
+        setIsOtherUserTyping(false);
+      }, 5000);
+    } else {
+      if (typingResetRef.current) clearTimeout(typingResetRef.current);
+    }
+  }, [currentUserId]);
+
+  // ── 2. Passa os handlers estáveis para o hook ──────────────
+  const { sendMessage: wsSendMessage, sendTyping: wsSendTyping } = useWebSocket({
     token: token ?? '',
     onMessage: handleIncomingMessage,
+    chatId: conversationId,
+    onTyping: handleIncomingTyping,
   });
     
 
@@ -123,10 +154,37 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
     loadMessages();
   }, [conversationId]);
 
+  // ── Lida com mudança no input + debounce de typing ────────
+  const handleInputChange = useCallback((text: string) => {
+    console.log('[ViewModel] handleInputChange | text=', text, '| currentUserId=', currentUserId);
+    setInputText(text);
+
+    if (currentUserId == null) return;
+
+    if (text.trim().length > 0) {
+      console.log('[ViewModel] handleInputChange → enviando isTyping=true');
+      wsSendTyping(conversationId, currentUserId, true);
+
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+      typingDebounceRef.current = setTimeout(() => {
+        console.log('[ViewModel] debounce expirou → enviando isTyping=false');
+        wsSendTyping(conversationId, currentUserId, false);
+      }, 2000);
+    } else {
+      console.log('[ViewModel] input vazio → enviando isTyping=false');
+      if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+      wsSendTyping(conversationId, currentUserId, false);
+    }
+  }, [currentUserId, conversationId, wsSendTyping]);
+
   // ── Envia mensagem ─────────────────────────────────────────
   const handleSend = useCallback(() => {
     const text = inputText.trim();
     if (!text) return;
+
+    // Para o indicador de typing imediatamente ao enviar
+    if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
+    if (currentUserId != null) wsSendTyping(conversationId, currentUserId, false);
 
     /**
      * Otimismo de UI: adicionamos a mensagem na lista
@@ -173,14 +231,15 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
     //Limpa o input
     setInputText('');
-  }, [inputText, receiverId, wsSendMessage, currentUserName]);
+  }, [inputText, receiverId, wsSendMessage, wsSendTyping, currentUserName, currentUserId, conversationId]);
 
   return {
     chatItems,
     inputText,
-    setInputText,
+    setInputText: handleInputChange,
     handleSend,
     isLoading,
     error,
+    isOtherUserTyping,
   };
 }

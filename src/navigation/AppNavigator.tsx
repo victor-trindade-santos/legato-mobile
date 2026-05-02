@@ -13,6 +13,8 @@ import { View, ActivityIndicator } from 'react-native';
 import { Config } from '@/constants/config';
 import { isTokenValid } from '@/utils/tokenUtils';
 import { useAuthStore } from '@/store/authStore';
+import api from '@/services/api/axios';
+import { Endpoints } from '@/services/api/endpoints';
 import { Colors } from '@/theme';
 
 import AuthNavigator from './AuthNavigator';
@@ -45,14 +47,15 @@ export default function AppNavigator() {
 
         const token = await storage.getItem(Config.TOKEN_KEY);
         if (token && isTokenValid(token)) {
-          // Token válido — restaura sessão
-          // user será carregado pelo useQuery('me') na primeira tela
+          const res = await api.get(Endpoints.users.me);
+          const u = res.data.data;
           setAuth(token, {
-            id: 0,
-            username: '',
-            displayName: '',
-            email: '',
-            role: 'USER',
+            id: u.id,
+            username: u.username,
+            displayName: u.displayName,
+            email: u.email,
+            avatarUrl: u.profilePicture ?? undefined,
+            role: u.role ?? 'USER',
           });
         }
       } catch {

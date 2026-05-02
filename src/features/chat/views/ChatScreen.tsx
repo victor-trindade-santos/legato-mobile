@@ -64,7 +64,7 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend } = useChatViewModel(conversationId, receiverId);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, isOtherUserTyping } = useChatViewModel(conversationId, receiverId);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -78,6 +78,13 @@ export default function ChatScreen() {
   //   }
   //   markAsRead();
   // }, [conversationId, markAsRead]);
+
+  // ════════════════════════════════════════════════════════════════════
+  // DEBUG — TYPING
+  // ════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    console.log('[ChatScreen] isOtherUserTyping →', isOtherUserTyping);
+  }, [isOtherUserTyping]);
 
   // ════════════════════════════════════════════════════════════════════
   // SCROLL AUTOMÁTICO
@@ -156,6 +163,9 @@ export default function ChatScreen() {
               <Text style={styles.emptyText}>Sem mensagens ainda</Text>
             </View>
           }
+          ListFooterComponent={
+            isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
+          }
         />
 {/* 
         ── Connection Status Badge ──────────────────────–
@@ -195,7 +205,6 @@ export default function ChatScreen() {
           </View>
         )} */}
 
-       
         <ChatInputBar
           value={inputText}
           onChangeText={setInputText}
