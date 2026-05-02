@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { View, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { View, Image, ScrollView, StyleSheet, KeyboardAvoidingView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Spacing } from '@/theme';
@@ -62,7 +62,7 @@ export function AuthTemplate({ children, variant = 'form', header }: AuthTemplat
       <SafeAreaView style={styles.fill}>
         {header && <View>{header}</View>}
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior="padding"
           style={styles.fill}
         >
           <ScrollView
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
+    paddingTop: Spacing.lg,
   },
 });
