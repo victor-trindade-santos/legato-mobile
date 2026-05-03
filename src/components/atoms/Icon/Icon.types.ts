@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { ImageSourcePropType, StyleProp, ViewStyle, ImageStyle } from 'react-native';
 
 /**
@@ -27,7 +28,7 @@ export type IconProps =
   | {
       /** Asset local (PNG, JPG) — logos e ícones de marca */
       variant: 'image';
-      source: ImageSourcePropType;
+      source: ImageSourcePropType | ComponentType<{ width?: number; height?: number; style?: any }>;
       /** Largura em px. Se omitido, usa height como referência. */
       width?: number;
       /** Altura em px. Se omitido, é calculada via aspectRatio. */

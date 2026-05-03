@@ -37,6 +37,13 @@ const FAMILY_MAP: Record<IconFamily, React.ComponentType<any>> = {
 export function Icon(props: IconProps) {
   if (props.variant === 'image') {
     const { source, width, height, aspectRatio, resizeMode = 'contain', style } = props;
+
+    if (typeof source === 'function') {
+      const SvgComponent = source as React.FC<{ width?: number; height?: number; style?: any }>;
+      const computedHeight = height ?? (width && aspectRatio ? width / aspectRatio : undefined);
+      return <SvgComponent width={width} height={computedHeight} style={style} />;
+    }
+
     return (
       <Image
         source={source}

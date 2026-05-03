@@ -27,11 +27,7 @@ export default function LoginScreen() {
   const { control, formState: { errors } } = form;
 
   return (
-    <AuthTemplate
-      variant="form"
-      header={<AuthHeader subtitle="Sua música em qualquer lugar" />}
-    >
-      {/* Card branco */}
+    <AuthTemplate variant="form" header={<AuthHeader subtitle="Sua música em qualquer lugar" logoVariant="vertical" />}>
       <View style={styles.card}>
         <View style={styles.titleRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
@@ -116,9 +112,8 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surfaceLight,
-    borderRadius: BorderRadius.xxl,
-    marginHorizontal: Spacing.screenPaddingH,
-    marginBottom: Spacing.xl,
+    borderTopRightRadius: BorderRadius.xxxl,
+    borderTopLeftRadius: BorderRadius.xxxl,
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl,
   },
