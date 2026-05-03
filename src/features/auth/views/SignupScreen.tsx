@@ -31,8 +31,7 @@ export default function SignupScreen() {
   const acceptTerms = watch('acceptTerms');
 
   return (
-    <AuthTemplate variant="form" 
-    header={<AuthHeader subtitle="Crie sua conta para começar" />}>
+    <AuthTemplate variant="form" scrollOverHeader header={<AuthHeader subtitle="Crie sua conta para começar" />}>
       {/* Card */}
       <View style={styles.card}>
         <View style={styles.titleRow}>
@@ -121,9 +120,10 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surfaceLight,
-    borderRadius: BorderRadius.xxl,
-    marginHorizontal: Spacing.screenPaddingH,
-    marginBottom: Spacing.xl,
+    borderTopLeftRadius: BorderRadius.xxxl,
+    borderTopRightRadius: BorderRadius.xxxl,
+    // marginHorizontal: Spacing.screenPaddingH,
+    // marginBottom: Spacing.xl,
     padding: Spacing.lg,
     paddingBottom: Spacing.xxl,
   },

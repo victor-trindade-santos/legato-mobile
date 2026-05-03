@@ -15,20 +15,32 @@ import { Icon } from '@/components/atoms/Icon/Icon';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
 import type { AuthHeaderProps } from './AuthHeader.types';
+import LegatoIconVertical from '@/assets/icons/LEGATO_ICON_VERTICAL.svg';
 
 const LOGO_SOURCES = {
-  dark: require('@/assets/icons/LEGATO_logo_horizontal_dark_version.svg'),
+  dark: require('@/assets/icons/legato_logo_horizontal_dark_version.png'),
   light: require('@/assets/icons/legato_logo_horizontal_light_version.png'),
+  vertical: LegatoIconVertical,
+  verticalForgotPassword: LegatoIconVertical
+};
+
+const LOGO_ASPECT_RATIO = {  
+  dark: 208 / 63,
+  light: 208 / 63,
+  vertical: 1.5/1,
+  verticalForgotPassword: 1,
 };
 
 export function AuthHeader({ subtitle, logoVariant = 'dark' }: AuthHeaderProps) {
+  const aspectRatio = LOGO_ASPECT_RATIO[logoVariant];
+
   return (
     <View style={styles.container}>
       <Icon
         variant="image"
         source={LOGO_SOURCES[logoVariant]}
-        width={Spacing.logoXxl}
-        aspectRatio={0.6}
+        width={Spacing.logoXl}
+        aspectRatio={aspectRatio}
         resizeMode="contain"
       />
       <LegatoText variant="bodySmall" color={Colors.white} align="center">
@@ -41,8 +53,7 @@ export function AuthHeader({ subtitle, logoVariant = 'dark' }: AuthHeaderProps) 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingTop: Spacing.xxl,
-    paddingBottom: Spacing.md,
-    gap: Spacing.sm,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xxl,
   },
 });

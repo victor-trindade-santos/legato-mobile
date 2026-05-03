@@ -14,6 +14,7 @@ export const BorderRadius = {
   lg: 12,   // Cards de post, cards padrão (web: 12px)
   xl: 16,   // Cards de colaboração, cards grandes (web: 16px)
   xxl: 24,  // Bottom sheets, modais grandes
+  xxxl: 42, // Modais maiores, containers de destaque
   pill: 999, // Botões pill, toggle, avatares circulares (web: 50px / 50%)
 } as const;
 

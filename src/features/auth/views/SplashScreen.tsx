@@ -20,6 +20,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing } from '@/theme';
 import type { AuthStackParamList } from '@/navigation/types';
+import LegatoIconVertical from '@/assets/icons/LEGATO_ICON_VERTICAL.svg';
 
 type Nav = StackNavigationProp<AuthStackParamList, 'Splash'>;
 
@@ -32,7 +33,7 @@ export default function SplashScreen() {
       <View style={styles.logoContainer}>
         <Icon
           variant="image"
-          source={require('@/assets/icons/LEGATO_ICON_VERTICAL.svg')}
+          source={LegatoIconVertical}
           width={Spacing.logoMd}
           aspectRatio={0.6}
           resizeMode="contain"

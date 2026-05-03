@@ -23,7 +23,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <AuthTemplate variant="form" 
-    header={<AuthHeader subtitle="Recuperar senha" />}>
+    header={<AuthHeader subtitle="Recuperar senha" logoVariant='verticalForgotPassword'/>}>
 
       <View style={styles.card}>
         <View style={styles.titleRow}>
@@ -67,9 +67,8 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.surfaceLight,
-    borderRadius: BorderRadius.xxl,
-    marginHorizontal: Spacing.screenPaddingH,
-    marginBottom: Spacing.xl,
+    borderTopLeftRadius: BorderRadius.xxxl,
+    borderTopRightRadius: BorderRadius.xxxl,
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl,
   },

@@ -26,6 +26,7 @@ export const Spacing = {
   xl: 32,
   xxl: 48,
   xxxl: 64,
+  xxxxl: 80,
 
   // Aliases semânticos — fixos intencionalmente
   inputPaddingH: 12,
