@@ -13,13 +13,13 @@ export const Config = {
    * DEV: define true para pular a autenticação e entrar direto no app.
    * Lembre de voltar para false antes de commitar.
    */
-  DEV_BYPASS_AUTH: false,
+  DEV_BYPASS_AUTH: true,
 
   /**
    * DEV: define true para usar dados mock na tela de Chat List (sem backend).
    * Lembre de voltar para false antes de commitar.
    */
-  DEV_USE_MOCK: false,
+  DEV_USE_MOCK: true,
 
   /**
    * DEV: define true para desabilitar WebSocket durante desenvolvimento.

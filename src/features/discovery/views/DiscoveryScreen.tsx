@@ -104,10 +104,6 @@ export default function DiscoveryScreen() {
                   isTop={index === arr.length - 1}
                   onSwipeLeft={() => handleSwipe(musician, 'dislike')}
                   onSwipeRight={() => handleSwipe(musician, 'like')}
-                  onSwipeDown={index === arr.length - 1 ? () => navigation.navigate('MusicianProfile', {
-                    musicianId: musician.id,
-                    displayName: musician.displayName,
-                  }) : undefined}
                 />
               </View>
             ))
@@ -117,7 +113,7 @@ export default function DiscoveryScreen() {
         {/* Hint */}
         {cards.length > 0 && (
           <LegatoText variant="caption" color={Colors.textMuted} align="center" style={styles.hint}>
-            Arraste o card para a esquerda para ignorar, ou para a direita para conversar
+            Arraste para a esquerda para ignorar, direita para conversar, ou para baixo para ver o perfil
           </LegatoText>
         )}
       </View>
