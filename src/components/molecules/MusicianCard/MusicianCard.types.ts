@@ -19,6 +19,24 @@ export interface MusicianCardProps {
   musician: MusicianCardData;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
-  onSwipeDown?: () => void;  // Abre perfil completo do músico
   isTop?: boolean;           // Card no topo do stack — ativa gestos de swipe
+  // Perfil completo para seção de rolagem interna (opcional)
+  profile?: {
+    username: string;
+    bio: string;
+    objective: string;
+    skills: string[];
+    musicGenres: MusicGenre[];
+    stats: {
+      connections: number;
+      followers: number;
+      posts: number;
+    };
+    favoriteArtists: Array<{
+      id: number;
+      displayName: string;
+      username: string;
+      avatarUrl?: string;
+    }>;
+  };
 }
