@@ -223,7 +223,7 @@ export default function ProfileEditScreen() {
                 <View key={index} style={styles.photoSlot}>
                   <Image source={{ uri }} style={styles.photoImage} />
                   <TouchableOpacity
-                    style={styles.photoRemove}
+                    style={[styles.photoRemove, { backgroundColor: colors.background }]}
                     onPress={() => removePhoto(index)}
                     hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
                   >
@@ -234,7 +234,7 @@ export default function ProfileEditScreen() {
 
               {/* Slot de adição — visível enquanto houver espaço */}
               {photos.length < MAX_PHOTOS && (
-                <TouchableOpacity style={styles.photoAdd} onPress={handlePickPhoto} activeOpacity={0.7}>
+                <TouchableOpacity style={[styles.photoAdd, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={handlePickPhoto} activeOpacity={0.7}>
                   <Ionicons name="add" size={28} color={Colors.textMuted} />
                 </TouchableOpacity>
               )}
@@ -401,7 +401,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.pill,
   },
   photoAdd: {
@@ -409,11 +408,9 @@ const styles = StyleSheet.create({
     height: PHOTO_SIZE,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceDark,
   },
 
   globalError: {

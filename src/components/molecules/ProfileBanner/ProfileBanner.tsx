@@ -14,6 +14,7 @@ import { View, ImageBackground, TouchableOpacity, StyleSheet } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { Colors, Spacing, BorderRadius, Shadows } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { ProfileBannerProps } from './ProfileBanner.types';
 
 const BANNER_HEIGHT = 160;
@@ -30,6 +31,7 @@ export function ProfileBanner({
   onAvatarPress,
   editable = false,
 }: ProfileBannerProps) {
+  const colors = useColors();
   return (
     <View style={styles.root}>
       {/* Banner */}
@@ -57,11 +59,11 @@ export function ProfileBanner({
         <TouchableOpacity
           activeOpacity={editable ? 0.7 : 1}
           onPress={editable ? onAvatarPress : undefined}
-          style={[styles.avatarFrame, Shadows.md]}
+          style={[styles.avatarFrame, Shadows.md, { borderColor: colors.background }]}
         >
           <Avatar uri={avatarUri} size="xl" fallbackInitials={displayName} />
           {editable && (
-            <View style={styles.avatarCamera}>
+            <View style={[styles.avatarCamera, { borderColor: colors.background }]}>
               <Ionicons name="camera" size={14} color={Colors.white} />
             </View>
           )}
@@ -97,7 +99,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: BorderRadius.pill,
-    backgroundColor: `${Colors.backgroundDark}99`,
+    backgroundColor: Colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -108,7 +110,6 @@ const styles = StyleSheet.create({
   },
   avatarFrame: {
     borderWidth: 3,
-    borderColor: Colors.backgroundDark,
     borderRadius: BorderRadius.pill,
   },
   avatarCamera: {
@@ -122,6 +123,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: Colors.backgroundDark,
   },
 });

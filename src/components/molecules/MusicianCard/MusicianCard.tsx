@@ -32,6 +32,7 @@ import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Tag } from '@/components/atoms/Tag/Tag';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { formatDistance } from '@/utils/formatters';
 import type { MusicianCardProps } from './MusicianCard.types';
 
@@ -42,6 +43,7 @@ const MAX_PHOTOS = 4;
 
 export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight, onSwipeDown }: MusicianCardProps) {
   // ── Carrossel ─────────────────────────────────────────────────────────
+  const colors = useColors();
   const photos = (musician.photos?.slice(0, MAX_PHOTOS) ?? []).filter(Boolean);
   if (musician.avatarUrl && !photos.includes(musician.avatarUrl)) {
     photos.unshift(musician.avatarUrl);
@@ -116,7 +118,7 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight, onSwi
 
   // ── Render ────────────────────────────────────────────────────────────
   const cardContent = (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.surface }]}>
       {/* Foto de fundo */}
       {currentPhoto ? (
         <ImageBackground
@@ -125,7 +127,7 @@ export function MusicianCard({ musician, isTop, onSwipeLeft, onSwipeRight, onSwi
           imageStyle={{ borderRadius: BorderRadius.xl }}
         />
       ) : (
-        <View style={[StyleSheet.absoluteFill, styles.fallbackBg]}>
+        <View style={[StyleSheet.absoluteFill, styles.fallbackBg, { backgroundColor: colors.surface }]}>
           <Avatar uri={null} size="xl" fallbackInitials={musician.displayName} />
         </View>
       )}
@@ -199,12 +201,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
-    backgroundColor: Colors.surfaceDark,
   },
   fallbackBg: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.xl,
   },
 

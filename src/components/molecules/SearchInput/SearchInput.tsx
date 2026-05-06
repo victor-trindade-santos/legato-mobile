@@ -29,7 +29,7 @@ export function SearchInput({
     return (
         <View style={[styles.mainContainer, { backgroundColor: colors.surface }]}>
             <Input containerStyle={styles.searchContainer} inputStyle={styles.searchInput} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={Colors.textMuted} value={value} themeOverride={inputThemeOverride} {...inputProps} />
-            <Button label="" rightIcon={<Ionicons name="search" size={Spacing.md} color={Colors.textSecondaryDark} />}  style={styles.searchButton} containerStyle={styles.searchButton} onPress={handleSearch} />
+            <Button label="" rightIcon={<Ionicons name="search" size={Spacing.md} color={colors.textSecondary} />}  style={styles.searchButton} containerStyle={styles.searchButton} onPress={handleSearch} />
         </View>
     );
 }

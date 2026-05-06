@@ -42,6 +42,7 @@ export const Endpoints = {
     markRead: (id: number) => `/notifications/${id}/read`,
     markAllRead: '/notifications/read-all',
     unreadCount: '/notifications/unread-count',
+    delete: (id: number) => `/notifications/${id}`,
   },
 
   // Feed / Posts

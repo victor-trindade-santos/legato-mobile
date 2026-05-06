@@ -19,6 +19,7 @@ import React, { useRef, useState } from 'react';
 import { View, PanResponder, StyleSheet } from 'react-native';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { RangeSliderProps } from './RangeSlider.types';
 
 const THUMB = 22;
@@ -35,6 +36,7 @@ export function RangeSlider({
   label,
   unit = '',
 }: RangeSliderProps) {
+  const colors = useColors();
   const [trackWidth, setTrackWidth] = useState(0);
 
   // Refs evitam closures stale nos PanResponders
@@ -96,8 +98,8 @@ export function RangeSlider({
     <View style={styles.container}>
       {/* Rótulo e valores */}
       <View style={styles.labelRow}>
-        <LegatoText style={styles.label}>{label}</LegatoText>
-        <LegatoText style={styles.values}>
+        <LegatoText style={[styles.label, { color: colors.textSecondary }]}>{label}</LegatoText>
+        <LegatoText style={[styles.values, { color: colors.textPrimary }]}>
           {minValue} — {maxValue} {unit}
         </LegatoText>
       </View>
@@ -156,14 +158,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   label: {
-    color: Colors.textSecondaryDark,
     fontSize: Typography.FontSize.xs,
     fontWeight: Typography.FontWeight.semiBold,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   values: {
-    color: Colors.white,
     fontSize: Typography.FontSize.xs,
     fontWeight: Typography.FontWeight.semiBold,
   },

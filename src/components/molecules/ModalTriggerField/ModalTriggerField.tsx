@@ -22,33 +22,16 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
-import { useUIStore } from '@/store/uiStore';
 import { useColors } from '@/hooks/useColors';
 import type { ModalTriggerFieldProps } from './ModalTriggerField.types';
-
-const THEME = {
-  light: {
-    background: Colors.surfaceLight,
-    border: Colors.borderLight,
-    text: Colors.textPrimaryLight,
-  },
-  dark: {
-    background: Colors.surfaceDark,
-    border: Colors.border,
-    text: Colors.white,
-  },
-};
 
 export function ModalTriggerField({
   label,
   value,
   placeholder = 'Toque para editar...',
   onPress,
-  variant,
+  variant: _variant,
 }: ModalTriggerFieldProps) {
-  const storeTheme = useUIStore((s) => s.theme);
-  const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
-  const theme = THEME[resolvedVariant];
   const colors = useColors();
   const hasValue = !!value?.trim();
 
@@ -61,14 +44,14 @@ export function ModalTriggerField({
       <TouchableOpacity
         style={[
           styles.field,
-          { backgroundColor: theme.background, borderColor: theme.border },
+          { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
         onPress={onPress}
         activeOpacity={0.75}
       >
         <LegatoText
           variant="bodySmall"
-          color={hasValue ? theme.text : Colors.textMuted}
+          color={hasValue ? colors.textPrimary : Colors.textMuted}
           style={styles.text}
           numberOfLines={1}
         >

@@ -7,14 +7,15 @@
  * - Sincroniza badge da tab bar via Zustand
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
+  deleteNotification,
 } from '../services/notificationService';
 import { useNotificationStore } from '@/store/notificationStore';
 import { NOTIFICATION_REGISTRY } from '../config/notificationRegistry';
@@ -43,6 +44,13 @@ export function useNotificationsViewModel() {
     refetchOnWindowFocus: false,
   });
 
+  // Refetch ao focar na aba — garante que notificações novas aparecem sem polling global
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
   // Sincroniza badge: dependência é o número (primitivo), não o array — evita loop infinito
   const unreadCount = notifications.filter((n) => !n.read).length;
   useEffect(() => {
@@ -61,6 +69,11 @@ export function useNotificationsViewModel() {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       setUnreadCount(0);
     },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteNotification,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
   // ── Handlers ───────────────────────────────────────────────
@@ -108,6 +121,7 @@ export function useNotificationsViewModel() {
     hasUnread: notifications.some((n) => !n.read),
     handlePress,
     handleAction,
+    handleDelete: (id: number) => deleteMutation.mutate(id),
     markAllAsRead: () => markAllReadMutation.mutate(),
     refetch,
   };

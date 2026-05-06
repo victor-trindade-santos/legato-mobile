@@ -11,8 +11,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
 import { SearchInput } from '@/components/molecules/SearchInput/SearchInput';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
-import { Colors } from '@/theme/colors';
 import { LegatoText } from '@/components/atoms/Text/Text';
+import { useColors } from '@/hooks/useColors';
 import { ChatListItem } from '@/components/molecules/ChatListItem/ChatListItem';
 import { useChatListViewModel } from '../viewmodels/useChatListViewModel';
 import { FlatList } from 'react-native-gesture-handler';
@@ -22,6 +22,7 @@ type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
 export default function ChatListScreen() {
     const navigation = useNavigation<ChatListNav>();
+    const colors = useColors();
     const {
         chatItems,
         isLoading,
@@ -45,9 +46,9 @@ export default function ChatListScreen() {
                             onChangeText={setSearchQuery}
                             onSearchPress={handleSearch}
                             inputThemeOverride={{
-                                background: styles.searchContainer.backgroundColor,
-                                text: styles.searchContainer.color,
-                                border: styles.searchContainer.borderColor,
+                                background: colors.background,
+                                text: colors.textPrimary,
+                                border: colors.border,
                             }}
                         />
                     </View>
@@ -84,9 +85,6 @@ const styles = StyleSheet.create({
     searchContainer: {
         marginTop: Spacing.sm,
         marginBottom: Spacing.md,
-        backgroundColor: Colors.transparent,
-        borderColor: Colors.transparent,
-        color: Colors.textPrimaryDark,  
     },
     chatListContainer: {
         flexDirection: 'column',
@@ -96,7 +94,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    noChatsText: {
-        color: Colors.textSecondaryDark,
-    }
+    noChatsText: {},
 });

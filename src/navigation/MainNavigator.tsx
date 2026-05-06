@@ -4,7 +4,7 @@
    * Badge de notificações via notificationStore (Zustand).
    */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import type { MainTabParamList } from './types';
@@ -12,6 +12,7 @@ import { Colors, Spacing, Typography } from '@/theme';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
+import { getUnreadCount } from '@/features/notifications/services/notificationService';
 
   // Screens
   import DiscoveryScreen from '@/features/discovery/views/DiscoveryScreen';
@@ -27,9 +28,13 @@ import { useAuthStore } from '@/store/authStore';
   const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainNavigator() {
-  const { unreadCount } = useNotificationStore();
+  const { unreadCount, setUnreadCount } = useNotificationStore();
   const { theme } = useUIStore();
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    getUnreadCount().then(setUnreadCount).catch(() => {});
+  }, []);
 
     const isDark = theme === 'dark';
     const bgColor = isDark ? Colors.surfaceDark : Colors.surfaceLight;

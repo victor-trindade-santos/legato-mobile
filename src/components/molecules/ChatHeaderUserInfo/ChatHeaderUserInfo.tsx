@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -16,6 +17,7 @@ export function ChatHeaderUserInfo({
   // statusText,
   // statusVariant = 'offline',
 }: ChatHeaderUserInfoProps) {
+  const colors = useColors();
   return (
     <View style={styles.container}>
       <Avatar
@@ -27,7 +29,7 @@ export function ChatHeaderUserInfo({
       <Spacer horizontal size={Spacing.sm} />
 
       <View style={styles.info}>
-        <LegatoText variant="subtitle" color={Colors.textPrimaryDark}>
+        <LegatoText variant="subtitle" color={colors.textPrimary}>
           {name}
         </LegatoText>
 

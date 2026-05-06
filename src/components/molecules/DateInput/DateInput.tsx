@@ -22,22 +22,8 @@ import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { DateInputProps } from './DateInput.types';
-
-const THEME = {
-  light: {
-    background: Colors.surfaceLight,
-    border: Colors.borderLight,
-    text: Colors.textPrimaryLight,
-    label: Colors.textSecondaryLight,
-  },
-  dark: {
-    background: Colors.surfaceDark,
-    border: Colors.border,
-    text: Colors.white,
-    label: Colors.textSecondaryDark,
-  },
-};
 
 /** Aplica a máscara MM/DD/AAAA mantendo apenas dígitos */
 function maskDate(raw: string): string {
@@ -52,11 +38,11 @@ export function DateInput({
   value,
   onChange,
   errorMessage,
-  variant = 'light',
+  variant: _variant,
   containerStyle,
 }: DateInputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const theme = THEME[variant];
+  const colors = useColors();
 
   const handleChange = (text: string) => {
     onChange(maskDate(text));
@@ -64,20 +50,20 @@ export function DateInput({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <LegatoText variant="label" color={theme.label} style={styles.label}>
+      <LegatoText variant="label" color={colors.textSecondary} style={styles.label}>
         {label}
       </LegatoText>
 
       <View
         style={[
           styles.inputWrapper,
-          { backgroundColor: theme.background, borderColor: theme.border },
+          { backgroundColor: colors.surface, borderColor: colors.border },
           isFocused && styles.focused,
           !!errorMessage && styles.hasError,
         ]}
       >
         <TextInput
-          style={[styles.input, { color: theme.text }, { outline: 'none' } as any]}
+          style={[styles.input, { color: colors.textPrimary }, { outline: 'none' } as any]}
           value={value}
           onChangeText={handleChange}
           placeholder="MÊS/DIA/ANO"

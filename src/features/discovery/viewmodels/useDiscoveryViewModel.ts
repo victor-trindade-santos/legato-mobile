@@ -8,8 +8,9 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchMusicians, likeMusician, dislikeMusician } from '../services/discoveryService';
+import { useNotificationStore } from '@/store/notificationStore';
 import type { Musician } from '../models/Musician';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
 import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
@@ -17,6 +18,8 @@ import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
 type SwipeHistoryEntry = { musician: Musician; direction: 'like' | 'dislike' };
 
 export function useDiscoveryViewModel() {
+  const queryClient = useQueryClient();
+  const { incrementUnread } = useNotificationStore();
   const [filters, setFilters] = useState<DiscoveryFilters>(DEFAULT_FILTERS);
   const [cards, setCards] = useState<Musician[]>([]);
   const [history, setHistory] = useState<SwipeHistoryEntry[]>([]);
@@ -48,6 +51,8 @@ export function useDiscoveryViewModel() {
         const musician = cards.find(c => c.id === musicianId);
         if (musician) setMatchedMusician(musician);
         setMatchConversationId(result.conversationId);
+        incrementUnread();
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
       }
     },
   });

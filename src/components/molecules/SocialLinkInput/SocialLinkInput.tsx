@@ -19,6 +19,7 @@ import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import type { SocialLinkInputProps } from './SocialLinkInput.types';
 
 export function SocialLinkInput({
@@ -28,13 +29,14 @@ export function SocialLinkInput({
   value,
   onChangeText,
 }: SocialLinkInputProps) {
+  const colors = useColors();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={[styles.iconWrapper, { backgroundColor: `${iconColor}22` }]}>
         <Ionicons name={iconName} size={Spacing.iconMd} color={iconColor} />
       </View>
       <TextInput
-        style={[styles.input, { outline: 'none' } as any]}
+        style={[styles.input, { color: colors.textPrimary }, { outline: 'none' } as any]}
         placeholder={placeholder}
         placeholderTextColor={Colors.textMuted}
         value={value}
@@ -52,10 +54,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.surfaceDark,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     paddingRight: Spacing.md,
     marginBottom: Spacing.sm,
   },
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: Colors.white,
     fontSize: Typography.FontSize.sm,
     paddingVertical: Spacing.sm,
   },

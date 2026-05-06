@@ -28,22 +28,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
-import { useUIStore } from '@/store/uiStore';
 import { useColors } from '@/hooks/useColors';
 import type { SelectFieldProps, SelectOption } from './SelectField.types';
-
-const THEME = {
-  light: {
-    background: Colors.surfaceLight,
-    border: Colors.borderLight,
-    text: Colors.textPrimaryLight,
-  },
-  dark: {
-    background: Colors.surfaceDark,
-    border: Colors.border,
-    text: Colors.white,
-  },
-};
 
 export function SelectField({
   label,
@@ -52,12 +38,9 @@ export function SelectField({
   onChange,
   placeholder = 'Selecione...',
   errorMessage,
-  variant,
+  variant: _variant,
 }: SelectFieldProps) {
   const [open, setOpen] = useState(false);
-  const storeTheme = useUIStore((s) => s.theme);
-  const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
-  const theme = THEME[resolvedVariant];
   const colors = useColors();
 
   const selected = options.find((o) => o.value === value);
@@ -76,7 +59,7 @@ export function SelectField({
       <TouchableOpacity
         style={[
           styles.field,
-          { backgroundColor: theme.background, borderColor: theme.border },
+          { backgroundColor: colors.surface, borderColor: colors.border },
           open && styles.fieldOpen,
           !!errorMessage && styles.fieldError,
         ]}
@@ -85,7 +68,7 @@ export function SelectField({
       >
         <LegatoText
           variant="bodySmall"
-          color={selected ? theme.text : Colors.textMuted}
+          color={selected ? colors.textPrimary : Colors.textMuted}
           style={styles.fieldText}
         >
           {selected ? selected.label : placeholder}
@@ -107,11 +90,11 @@ export function SelectField({
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => {}}>
             <View style={styles.sheetHeader}>
-              <LegatoText variant="sectionTitle" color={Colors.white}>
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>
                 {label}
               </LegatoText>
               <TouchableOpacity onPress={() => setOpen(false)} style={[styles.closeBtn, { backgroundColor: colors.background }]}>
-                <Ionicons name="close" size={Spacing.iconMd} color={Colors.white} />
+                <Ionicons name="close" size={Spacing.iconMd} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -128,7 +111,7 @@ export function SelectField({
                   >
                     <LegatoText
                       variant="bodySmall"
-                      color={isActive ? Colors.primary : Colors.white}
+                      color={isActive ? Colors.primary : colors.textPrimary}
                     >
                       {item.label}
                     </LegatoText>

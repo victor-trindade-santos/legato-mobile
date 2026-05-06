@@ -22,7 +22,8 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { TimestampText } from '@/components/atoms/TimestampText/TimestampText';
@@ -35,10 +36,11 @@ export function MessageContent({
   timestamp,
   statusElement,
 }: MessageContentProps) {
+  const colors = useColors();
   return (
     <View style={styles.container}>
       {/* Texto da mensagem */}
-      <LegatoText variant="body" color={Colors.textPrimaryDark}>
+      <LegatoText variant="body" color={colors.textPrimary}>
         {message}
       </LegatoText>
 

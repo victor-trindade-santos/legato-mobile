@@ -37,8 +37,12 @@ export function Button({
   const textColor =
     variant === 'primary' || variant === 'danger'
       ? Colors.white
-      : variant === 'outline' || variant === 'ghost' || variant === 'outline_gray'
-      ? Colors.grayBorder
+      : variant === 'outline'
+      ? Colors.primary
+      : variant === 'outline_gray'
+      ? colors.textSecondary
+      : variant === 'ghost'
+      ? colors.textPrimary
       : colors.textPrimary; // secondary adapta ao tema
 
   return (
