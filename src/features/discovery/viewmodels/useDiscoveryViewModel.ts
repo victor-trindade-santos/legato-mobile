@@ -26,7 +26,7 @@ export function useDiscoveryViewModel() {
   const [matchConversationId, setMatchConversationId] = useState<number | null>(null);
 
   // TanStack Query v5: onSuccess removido de useQuery — usar useEffect
-  const { isLoading, data, refetch } = useQuery({
+  const { isLoading, data, refetch, isError, error } = useQuery({
     queryKey: ['musicians', filters],
     queryFn: () => fetchMusicians(filters),
     retry: false,
@@ -38,6 +38,10 @@ export function useDiscoveryViewModel() {
   useEffect(() => {
     if (data) setCards(data);
   }, [data]);
+
+  useEffect(() => {
+    if (isError) console.error("[Discovery] fetchMusicians falhou:", error);
+  }, [isError, error]);
 
   // ── Mutations ────────────────────────────────────────────────────────────────
 

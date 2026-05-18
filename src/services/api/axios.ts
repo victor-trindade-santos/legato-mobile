@@ -11,7 +11,7 @@ import { Config } from '@/constants/config';
 
 const api = axios.create({
   baseURL: Config.API_URL,
-  timeout: 10000,
+  timeout: 120000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -39,7 +39,7 @@ api.interceptors.response.use(
       // Token expirado — limpa sessão (authStore vai redirecionar)
       await storage.deleteItem(Config.TOKEN_KEY);
     }
-    return Promise.reject(error);
+    throw error;
   }
 );
 

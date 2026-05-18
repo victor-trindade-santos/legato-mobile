@@ -112,7 +112,9 @@ export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promi
     return result;
   }
 
-  const res = await api.get<BackendDiscoveryEnvelope>(Endpoints.discovery.musicians);
+  const res = await api.get<BackendDiscoveryEnvelope>(Endpoints.discovery.musicians, {
+    params: { limit: 20 },
+  });
   const list = res.data.data ?? [];
   return list.map(mapBackendUserToMusician);
 }
