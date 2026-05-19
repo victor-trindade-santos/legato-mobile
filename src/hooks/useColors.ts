@@ -50,7 +50,7 @@ const dark: SemanticColors = {
 
   switchTrackTrue: Colors.primary,
   switchTrackFalse: Colors.grayBorder,
-  switchThumb: Colors.white,
+  switchThumb: Colors.primaryHover,
 
   iconDefault: Colors.textSecondaryDark,
   iconDestructive: Colors.error,

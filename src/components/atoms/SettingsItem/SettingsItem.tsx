@@ -81,6 +81,8 @@ export function SettingsItem({
           trackColor={{ false: colors.switchTrackFalse, true: colors.switchTrackTrue }}
           thumbColor={colors.switchThumb}
           ios_backgroundColor={colors.switchTrackFalse}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          {...({ activeThumbColor: colors.switchThumb } as any)}
         />
       )}
 
