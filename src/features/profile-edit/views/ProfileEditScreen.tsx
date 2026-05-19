@@ -9,8 +9,8 @@
  * aplica min-height:auto em flex children e o ScrollView nunca scrolla no web.
  */
 
-import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Image, Pressable } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
@@ -89,6 +89,7 @@ export default function ProfileEditScreen() {
 
   const { control, formState: { errors } } = form;
   const colors = useColors();
+  const [readonlyHint, setReadonlyHint] = useState<'displayName' | 'username' | null>(null);
 
   if (isProfileLoading) return <Spinner fullScreen />;
 
@@ -129,27 +130,44 @@ export default function ProfileEditScreen() {
               INFORMAÇÕES BÁSICAS
             </LegatoText>
 
-            <Controller
-              control={control}
-              name="displayName"
-              render={({ field: { onChange, value } }) => (
-                <FormField label="Nome Artístico"
-                  placeholder="Como você quer aparecer?"
-                  value={value} onChangeText={onChange}
-                  errorMessage={errors.displayName?.message} />
-              )}
-            />
+            <Pressable onPress={() => setReadonlyHint('displayName')}>
+              <View pointerEvents="none">
+                <Controller
+                  control={control}
+                  name="displayName"
+                  render={({ field: { value } }) => (
+                    <FormField
+                      label="Nome Artístico"
+                      placeholder="Como você quer aparecer?"
+                      value={value}
+                      onChangeText={() => {}}
+                      editable={false}
+                      hintMessage={readonlyHint === 'displayName' ? 'Não é possível alterar o seu nome artístico.' : undefined}
+                    />
+                  )}
+                />
+              </View>
+            </Pressable>
 
-            <Controller
-              control={control}
-              name="username"
-              render={({ field: { onChange, value } }) => (
-                <FormField label="Username"
-                  placeholder="@seu_username" autoCapitalize="none"
-                  value={value} onChangeText={onChange}
-                  errorMessage={errors.username?.message} />
-              )}
-            />
+            <Pressable onPress={() => setReadonlyHint('username')}>
+              <View pointerEvents="none">
+                <Controller
+                  control={control}
+                  name="username"
+                  render={({ field: { value } }) => (
+                    <FormField
+                      label="Username"
+                      placeholder="@seu_username"
+                      autoCapitalize="none"
+                      value={value}
+                      onChangeText={() => {}}
+                      editable={false}
+                      hintMessage={readonlyHint === 'username' ? 'Não é possível alterar o seu username.' : undefined}
+                    />
+                  )}
+                />
+              </View>
+            </Pressable>
 
             <Controller
               control={control}

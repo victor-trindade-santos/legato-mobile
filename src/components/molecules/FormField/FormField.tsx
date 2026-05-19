@@ -18,12 +18,15 @@ import type { FormFieldProps } from './FormField.types';
 export function FormField({
   label,
   errorMessage,
+  hintMessage,
   isRequired,
   style,
   containerStyle,
   variant,
+  editable,
   ...inputProps }: FormFieldProps) {
   const colors = useColors();
+  const isDisabled = editable === false;
   const labelColor = colors.textSecondary;
 
   return (
@@ -31,9 +34,17 @@ export function FormField({
       <LegatoText variant="label" color={labelColor} style={styles.label}>
         {label}{isRequired && ' *'}
       </LegatoText>
-      <Input hasError={!!errorMessage} variant={variant} style={style} {...inputProps} />
+      <Input
+        hasError={!!errorMessage}
+        variant={variant}
+        editable={editable}
+        {...inputProps}
+      />
       {errorMessage && (
         <LegatoText style={styles.error}>{errorMessage}</LegatoText>
+      )}
+      {hintMessage && !errorMessage && (
+        <LegatoText style={styles.hint}>{hintMessage}</LegatoText>
       )}
     </View>
   );
@@ -50,5 +61,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: Typography.FontSize.xs,
     color: Colors.error,
+  },
+  hint: {
+    marginTop: 4,
+    fontSize: Typography.FontSize.xs,
+    color: Colors.textMuted,
   },
 });

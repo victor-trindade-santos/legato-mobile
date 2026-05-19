@@ -61,36 +61,58 @@ async function uploadProfileImage(
   uri: string,
   type: 'profile' | 'banner',
 ): Promise<string> {
+  console.log(`[ProfileEdit] uploadProfileImage → type="${type}" | localUri="${uri.substring(0, 80)}..."`);
   const formData = await buildImageFormData(uri);
-  const res = await api.put<UploadImageResponse>(
-    `${Endpoints.users.uploadImage}?type=${type}`,
-    formData,
-    { headers: { 'Content-Type': undefined } as any },
-  );
+  const endpoint = `${Endpoints.users.uploadImage}?type=${type}`;
+  let res;
+  try {
+    res = await api.put<UploadImageResponse>(endpoint, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      transformRequest: [(data: any) => data],
+    });
+  } catch (err: any) {
+    console.error(`[ProfileEdit] uploadProfileImage FALHOU (${type}) | code:`, (err as any)?.code, '| status:', err?.response?.status, '| body:', JSON.stringify(err?.response?.data));
+    throw err;
+  }
+  console.log(`[ProfileEdit] uploadProfileImage ← (${type}) status:`, res.status, '| success:', res.data.success, '| message:', res.data.message);
   if (!res.data.success) {
+    console.error(`[ProfileEdit] uploadProfileImage rejeitado pelo backend (${type}):`, res.data.message);
     throw new Error(res.data.message ?? 'Falha no upload da imagem');
   }
-  // Backend retorna o usuário atualizado — extrai o campo correto por tipo
   const url = type === 'profile'
     ? res.data.data?.profilePicture
     : res.data.data?.profileBanner;
+  console.log(`[ProfileEdit] uploadProfileImage ← URL resultante (${type}):`, url);
   return url ?? '';
 }
 
 /** Envia uma foto do carrossel; retorna a URL pública do Cloudinary */
 async function uploadCardPhoto(uri: string, index: number): Promise<string> {
+  console.log(`[ProfileEdit] uploadCardPhoto → index=${index} | localUri="${uri.substring(0, 80)}..."`);
   const formData = await buildImageFormData(uri);
-  const res = await api.put<UploadImageResponse>(
-    `${Endpoints.users.cardFile}?index=${index}`,
-    formData,
-    { headers: { 'Content-Type': undefined } as any },
-  );
+  let res;
+  try {
+    res = await api.put<UploadImageResponse>(
+      `${Endpoints.users.cardFile}?index=${index}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        transformRequest: [(data: any) => data],
+      },
+    );
+  } catch (err: any) {
+    console.error(`[ProfileEdit] uploadCardPhoto FALHOU index=${index} | code:`, (err as any)?.code, '| status:', err?.response?.status, '| body:', JSON.stringify(err?.response?.data));
+    throw err;
+  }
+  console.log(`[ProfileEdit] uploadCardPhoto ← index=${index} | success:`, res.data.success, '| message:', res.data.message);
   if (!res.data.success) {
+    console.error(`[ProfileEdit] uploadCardPhoto rejeitado pelo backend index=${index}:`, res.data.message);
     throw new Error(res.data.message ?? 'Falha no upload da foto');
   }
-  // Backend retorna o usuário atualizado — pega a última URL do array photosCard
   const photos = res.data.data?.photosCard ?? [];
-  return photos[photos.length - 1] ?? '';
+  const resultUrl = photos[photos.length - 1] ?? '';
+  console.log(`[ProfileEdit] uploadCardPhoto ← URL resultante index=${index}:`, resultUrl);
+  return resultUrl;
 }
 
 // ─── fetch ────────────────────────────────────────────────────────────────────
@@ -104,7 +126,9 @@ export async function fetchMyProfile(): Promise<UserProfileDTO> {
       email: 'dev@legato.com',
     };
   }
+  console.log('[ProfileEdit] fetchMyProfile → GET', Endpoints.users.me);
   const res = await api.get<BackendEnvelope<UserProfileDTO>>(Endpoints.users.me);
+  console.log('[ProfileEdit] fetchMyProfile ← status', res.status, '| success:', res.data.success, '| data:', JSON.stringify(res.data.data, null, 2));
   if (!res.data.success || !res.data.data) throw new Error('Perfil não encontrado');
   return res.data.data;
 }
@@ -148,6 +172,10 @@ export async function saveProfile(
     };
   }
 
+  console.log('[ProfileEdit] saveProfile → iniciando | avatarUri:', media.avatarUri ? (isLocalUri(media.avatarUri) ? 'LOCAL' : 'REMOTA') : 'nenhuma');
+  console.log('[ProfileEdit] saveProfile → bannerUri:', media.bannerUri ? (isLocalUri(media.bannerUri) ? 'LOCAL' : 'REMOTA') : 'nenhuma');
+  console.log('[ProfileEdit] saveProfile → photos count:', media.photoUris.length, '| locais:', media.photoUris.filter(isLocalUri).length);
+
   // 1-3. Upload de imagens (só se forem URIs locais)
   const profilePicture =
     media.avatarUri && isLocalUri(media.avatarUri)
@@ -165,12 +193,17 @@ export async function saveProfile(
       .filter(Boolean)
       .map((uri, index) =>
         isLocalUri(uri)
-          ? uploadCardPhoto(uri, index).catch(() => uri)  // mantém URI local se upload falhar
+          ? uploadCardPhoto(uri, index).catch((err: any) => {
+              console.warn(`[ProfileEdit] uploadCardPhoto silenciado index=${index} | mantendo URI local | erro:`, err?.response?.status ?? err?.message);
+              return uri;
+            })
           : uri,
       ),
   );
 
-  // 4. Atualiza o perfil com as URLs já públicas
+  // ⚠️ NOTA: displayName e username NÃO são suportados pelo endpoint PUT /users.
+  // A API aceita apenas: profilePicture, profileBanner, photosCard, sex, bio,
+  // objective, instruments, genres, location, links.
   const dto: UpdateProfileDTO = {
     profilePicture,
     profileBanner,
@@ -196,7 +229,20 @@ export async function saveProfile(
     ...(data.sex ? { sex: data.sex } : {}),
   };
 
-  const res = await api.put<BackendEnvelope<UploadedUserData>>(Endpoints.users.update, dto);
+  console.log('[ProfileEdit] saveProfile → DTO enviado ao backend:', JSON.stringify(dto, null, 2));
+  console.log('[ProfileEdit] ⚠️ Campos NÃO enviados (sem suporte na API):', { displayName: data.displayName, username: data.username });
+
+  let res;
+  try {
+    res = await api.put<BackendEnvelope<UploadedUserData>>(Endpoints.users.update, dto);
+  } catch (err: any) {
+    console.error('[ProfileEdit] saveProfile PUT FALHOU | status:', err?.response?.status, '| body:', JSON.stringify(err?.response?.data));
+    throw err;
+  }
+
+  console.log('[ProfileEdit] saveProfile ← status:', res.status, '| success:', res.data.success, '| message:', res.data.message);
+  console.log('[ProfileEdit] saveProfile ← data retornada:', JSON.stringify(res.data.data, null, 2));
+
   const saved = res.data.data;
 
   return {

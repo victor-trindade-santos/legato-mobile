@@ -50,10 +50,13 @@ export function Input({
   style,
   containerStyle,
   inputStyle,
+  editable,
   ...rest
 }: InputProps & { themeOverride?: InputThemeOverride }) {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const isDisabled = editable === false;
 
   const storeTheme = useUIStore((s) => s.theme);
   const resolvedVariant = variant ?? (storeTheme === 'dark' ? 'dark' : 'light');
@@ -65,13 +68,16 @@ export function Input({
     text: themeOverride?.text || baseTheme.text,
   };
 
+  // Cores de disabled variam por tema — calculadas no render, não no StyleSheet
+  const disabledBg   = resolvedVariant === 'dark' ? Colors.backgroundDark : Colors.backgroundLight;
+  const disabledText = Colors.textMuted;
+
   return (
     <View
       style={[
-
         styles.container,
         containerStyle,
-        { backgroundColor: theme.background, borderColor: theme.border },
+        { backgroundColor: isDisabled ? disabledBg : theme.background, borderColor: theme.border },
         multiline && styles.containerMultiline,
         isFocused && styles.focused,
         hasError && styles.error,
@@ -84,7 +90,10 @@ export function Input({
           multiline && styles.inputMultiline,
           { outline: 'none' } as any,
           style,
+          inputStyle,
+          isDisabled ? { color: disabledText } : null,
         ]}
+        editable={editable}
         multiline={multiline}
         numberOfLines={numberOfLines}
         textAlignVertical={multiline ? 'top' : 'center'}

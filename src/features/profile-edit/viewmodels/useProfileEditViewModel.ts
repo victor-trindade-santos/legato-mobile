@@ -171,53 +171,93 @@ export function useProfileEditViewModel() {
   const removePhoto = (index: number) =>
     setPhotos((prev) => prev.filter((_, i) => i !== index));
 
-  const handleSave = form.handleSubmit(async (data) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      const saved = await saveProfile(data, {
-        avatarUri: localAvatarUri,
-        bannerUri,
-        photoUris: photos,
+  const handleSave = form.handleSubmit(
+    async (data) => {
+      console.log('[ProfileEdit] handleSave → form válido | dados do formulário:', JSON.stringify({
+        displayName: data.displayName,
+        username: data.username,
+        bio: data.bio,
+        objective: data.objective,
+        sex: data.sex,
+        city: data.city,
+        state: data.state,
+        country: data.country,
+        skills: data.skills,
+        musicGenres: data.musicGenres,
+        instagram: data.instagram,
+        spotify: data.spotify,
+        youtube: data.youtube,
+        soundcloud: data.soundcloud,
+        website: data.website,
+      }, null, 2));
+      console.log('[ProfileEdit] handleSave → mídias:', {
+        avatarUri: localAvatarUri ? (localAvatarUri.startsWith('http') ? 'REMOTA' : 'LOCAL') : 'nenhuma',
+        bannerUri: bannerUri ? (bannerUri.startsWith('http') ? 'REMOTA' : 'LOCAL') : 'nenhuma',
+        photosCount: photos.length,
       });
-      // Persiste os dados do perfil no authStore para o perfil público usar como fallback
-      if (user) {
-        setUser({
-          ...user,
-          displayName: saved.displayName  || user.displayName,
-          username:    saved.username     || user.username,
-          avatarUrl:   saved.avatarUrl    ?? user.avatarUrl,
-          bannerUrl:   saved.bannerUrl,
-          bio:         saved.bio,
-          objective:   saved.objective,
-          skills:      normalizeSkills(saved.skills ?? []),
-          musicGenres: normalizeMusicGenres(saved.musicGenres ?? []),
-          sex:         saved.sex,
-          city:        saved.city,
-          state:       saved.state,
-          country:     saved.country,
-          instagram:   saved.instagram,
-          spotify:     saved.spotify,
-          youtube:     saved.youtube,
-          soundcloud:  saved.soundcloud,
-          website:     saved.website,
-          photos:      saved.photos,
+
+      setIsLoading(true);
+      setErrorMessage(null);
+      try {
+        const saved = await saveProfile(data, {
+          avatarUri: localAvatarUri,
+          bannerUri,
+          photoUris: photos,
         });
+        console.log('[ProfileEdit] handleSave ← perfil salvo com sucesso:', JSON.stringify(saved, null, 2));
+
+        // Persiste os dados do perfil no authStore para o perfil público usar como fallback
+        if (user) {
+          setUser({
+            ...user,
+            displayName: saved.displayName  || user.displayName,
+            username:    saved.username     || user.username,
+            avatarUrl:   saved.avatarUrl    ?? user.avatarUrl,
+            bannerUrl:   saved.bannerUrl,
+            bio:         saved.bio,
+            objective:   saved.objective,
+            skills:      normalizeSkills(saved.skills ?? []),
+            musicGenres: normalizeMusicGenres(saved.musicGenres ?? []),
+            sex:         saved.sex,
+            city:        saved.city,
+            state:       saved.state,
+            country:     saved.country,
+            instagram:   saved.instagram,
+            spotify:     saved.spotify,
+            youtube:     saved.youtube,
+            soundcloud:  saved.soundcloud,
+            website:     saved.website,
+            photos:      saved.photos,
+          });
+        }
+        // Invalida caches para garantir dados frescos nas próximas aberturas
+        queryClient.invalidateQueries({ queryKey: ['my-profile-edit'] });
+        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+        if (needsOnboarding) {
+          setNeedsOnboarding(false);
+        } else {
+          navigation.goBack();
+        }
+      } catch (err: any) {
+        const httpStatus = err?.response?.status;
+        const backendBody = err?.response?.data;
+        const message = err?.message ?? 'desconhecido';
+        const code = err?.code ?? 'sem code';
+        console.error('[ProfileEdit] handleSave ERRO | code:', code, '| status HTTP:', httpStatus ?? 'N/A');
+        console.error('[ProfileEdit] handleSave ERRO | mensagem:', message);
+        console.error('[ProfileEdit] handleSave ERRO | corpo do backend:', JSON.stringify(backendBody, null, 2));
+        const userMessage = httpStatus
+          ? `Erro ${httpStatus} ao salvar perfil. Tente novamente.`
+          : `Erro ao salvar perfil: ${message}`;
+        setErrorMessage(userMessage);
+      } finally {
+        setIsLoading(false);
       }
-      // Invalida caches para garantir dados frescos nas próximas aberturas
-      queryClient.invalidateQueries({ queryKey: ['my-profile-edit'] });
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
-      if (needsOnboarding) {
-        setNeedsOnboarding(false);
-      } else {
-        navigation.goBack();
-      }
-    } catch {
-      setErrorMessage('Erro ao salvar perfil. Tente novamente.');
-    } finally {
-      setIsLoading(false);
-    }
-  });
+    },
+    (validationErrors) => {
+      console.warn('[ProfileEdit] handleSave → formulário inválido | erros de validação:', JSON.stringify(validationErrors, null, 2));
+    },
+  );
 
   const handleSkip = () => {
     if (needsOnboarding) setNeedsOnboarding(false);
