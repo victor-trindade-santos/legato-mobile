@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, Image, Pressable } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Image, Pressable, Switch } from 'react-native';
 import { Controller } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
@@ -30,6 +30,7 @@ import { Colors, Spacing, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { SKILLS, getSkillLabel } from '@/constants/skills';
 import { MUSIC_GENRES, getMusicGenreLabel } from '@/constants/genres';
+import { useUIStore } from '@/store/uiStore';
 import { useProfileEditViewModel } from '../viewmodels/useProfileEditViewModel';
 import { BioObjectiveModal } from './BioObjectiveModal';
 
@@ -89,6 +90,7 @@ export default function ProfileEditScreen() {
 
   const { control, formState: { errors } } = form;
   const colors = useColors();
+  const { theme, setTheme } = useUIStore();
   const [readonlyHint, setReadonlyHint] = useState<'displayName' | 'username' | null>(null);
 
   if (isProfileLoading) return <Spinner fullScreen />;
@@ -325,6 +327,7 @@ export default function ProfileEditScreen() {
                 platform="Site Pessoal" placeholder="seusite.com"
                 value={value ?? ''} onChangeText={onChange} />
             )} />
+
 
             {errorMessage && (
               <LegatoText variant="caption" color={Colors.error} style={styles.globalError}>
