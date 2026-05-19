@@ -3,19 +3,27 @@
  * Altere API_URL conforme ambiente (dev/prod).
  */
 
+import { Platform } from 'react-native';
+
 /**
- * DEV_USE_LOCAL_BACKEND: true  → usa EXPO_PUBLIC_LOCAL_API_URL (localhost — browser/web)
- *                        false → usa EXPO_PUBLIC_API_URL          (rede local / Render)
+ * DEV_USE_LOCAL_BACKEND: true  → backend local no PC
+ *   • web/browser  → localhost (EXPO_PUBLIC_LOCAL_API_URL)
+ *   • celular/emu  → IP da rede local (EXPO_PUBLIC_API_URL, ex: 192.168.x.x)
+ *                        false → Render/produção (EXPO_PUBLIC_API_URL)
  */
 const DEV_USE_LOCAL_BACKEND = true;
 
 const API_URL = DEV_USE_LOCAL_BACKEND
-  ? (process.env.EXPO_PUBLIC_LOCAL_API_URL ?? 'http://localhost:8082')
-  : (process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8082');
+  ? Platform.OS === 'web'
+    ? (process.env.EXPO_PUBLIC_LOCAL_API_URL ?? 'http://localhost:8082')
+    : (process.env.EXPO_PUBLIC_API_URL        ?? 'http://10.0.2.2:8082')
+  : (process.env.EXPO_PUBLIC_API_URL          ?? 'http://10.0.2.2:8082');
 
 const WS_URL = DEV_USE_LOCAL_BACKEND
-  ? (process.env.EXPO_PUBLIC_LOCAL_WS_URL ?? 'ws://localhost:8082/ws-chat')
-  : (process.env.EXPO_PUBLIC_WS_URL ?? 'ws://10.0.2.2:8082/ws-chat');
+  ? Platform.OS === 'web'
+    ? (process.env.EXPO_PUBLIC_LOCAL_WS_URL ?? 'ws://localhost:8082/ws-chat')
+    : (process.env.EXPO_PUBLIC_WS_URL        ?? 'ws://10.0.2.2:8082/ws-chat')
+  : (process.env.EXPO_PUBLIC_WS_URL          ?? 'ws://10.0.2.2:8082/ws-chat');
 
 export const Config = {
   API_URL,

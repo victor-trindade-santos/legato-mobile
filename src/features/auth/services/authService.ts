@@ -1,6 +1,6 @@
 import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
-import type { LoginDTO, RegisterDTO, ResetPasswordDTO, AuthResponse, AuthResponseEnvelope } from '../models/AuthDTO';
+import type { LoginDTO, RegisterDTO, ResetPasswordDTO, AuthResponse, AuthResponseEnvelope, RegisterResponse } from '../models/AuthDTO';
 
 /**
  * Mapeia a resposta do backend para AuthResponse.
@@ -37,9 +37,13 @@ export async function loginUser(data: LoginDTO): Promise<AuthResponse> {
   return mapEnvelope(res.data);
 }
 
-export async function registerUser(data: RegisterDTO): Promise<AuthResponse> {
+export async function registerUser(data: RegisterDTO): Promise<RegisterResponse> {
   const res = await api.post<AuthResponseEnvelope>(Endpoints.auth.register, data);
-  return mapEnvelope(res.data);
+  return {
+    message:
+      res.data?.message ??
+      'Usuário cadastrado! Verifique seu e-mail para confirmar a conta antes de logar.',
+  };
 }
 
 export async function resetPassword(data: ResetPasswordDTO): Promise<void> {

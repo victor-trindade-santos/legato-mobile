@@ -50,3 +50,8 @@ export interface AuthResponse {
     user: AuthUser;
   };
 }
+
+/** Resposta do /register — sem token, pois exige verificação de e-mail antes do login */
+export interface RegisterResponse {
+  message: string;
+}

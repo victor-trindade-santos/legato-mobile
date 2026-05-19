@@ -16,6 +16,7 @@ import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
 import { Config } from '@/constants/config';
 import { normalizeMusicGenres, type MusicGenre } from '@/constants/genres';
+import { normalizeSkills } from '@/constants/skills';
 import type { ProfileEditFormData } from '../viewmodels/useProfileEditViewModel';
 import type { UpdateProfileDTO, UploadImageResponse, BackendEnvelope, UploadedUserData, UserProfileDTO } from '../models/ProfileEditDTO';
 
@@ -141,7 +142,7 @@ export async function saveProfile(
       displayName: data.displayName,
       username: data.username,
       bio: data.bio,
-      skills: data.skills,
+      skills: normalizeSkills(data.skills),
       musicGenres: normalizeMusicGenres(data.musicGenres),
       photos: media.photoUris,
     };
@@ -176,7 +177,7 @@ export async function saveProfile(
     photosCard,
     bio: data.bio ?? '',
     ...(data.objective ? { objective: data.objective } : {}),
-    instruments: data.skills,
+    instruments: normalizeSkills(data.skills),
     genres: normalizeMusicGenres(data.musicGenres),
     location: {
       latitude: 0,
@@ -205,7 +206,7 @@ export async function saveProfile(
     bannerUrl: saved?.profileBanner ?? profileBanner ?? undefined,
     bio: data.bio,
     objective: data.objective,
-    skills: data.skills,
+    skills: normalizeSkills(data.skills),
     musicGenres: normalizeMusicGenres(data.musicGenres),
     sex: data.sex,
     city: data.city,

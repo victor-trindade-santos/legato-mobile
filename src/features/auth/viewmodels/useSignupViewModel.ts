@@ -7,10 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { storage } from '@/utils/storage';
 import { registerUser } from '../services/authService';
-import { useAuthStore } from '@/store/authStore';
-import { Config } from '@/constants/config';
 
 const signupSchema = z.object({
   username: z
@@ -51,7 +48,6 @@ const signupSchema = z.object({
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export function useSignupViewModel() {
-  const { setAuth, setNeedsOnboarding } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -72,6 +68,7 @@ export function useSignupViewModel() {
   const handleSignup = form.handleSubmit(async (data) => {
     setIsLoading(true);
     setErrorMessage(null);
+    setSuccessMessage(null);
     try {
       // Converte MM/DD/YYYY (input do usuário) → YYYY-MM-DD (formato esperado pelo backend)
       const [mm, dd, yyyy] = data.birthDate.split('/');
@@ -86,12 +83,20 @@ export function useSignupViewModel() {
         role: 'USER',
         recaptchaToken: '',
       });
-      await storage.setItem(Config.TOKEN_KEY, response.data.token);
-      setNeedsOnboarding(true);
-      setAuth(response.data.token, response.data.user);
+
+      setSuccessMessage(response.message);
     } catch (error: any) {
-      const msg = error?.response?.data?.message;
-      setErrorMessage(msg ?? 'Erro ao criar conta. Este e-mail já pode estar em uso.');
+      const backendMsg: string | undefined = error?.response?.data?.message;
+
+      if (backendMsg?.includes('Email already exists')) {
+        setErrorMessage('Este e-mail já está em uso.');
+      } else if (backendMsg?.includes('18 anos')) {
+        setErrorMessage('Você precisa ter pelo menos 18 anos para se cadastrar.');
+      } else if (backendMsg?.includes('Erro ao registrar usuário')) {
+        setErrorMessage(backendMsg);
+      } else {
+        setErrorMessage(backendMsg ?? 'Erro ao criar conta. Tente novamente.');
+      }
     } finally {
       setIsLoading(false);
     }

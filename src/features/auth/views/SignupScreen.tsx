@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthTemplate } from '@/components/templates/AuthTemplate/AuthTemplate';
+import { ModalTemplate } from '@/components/templates/ModalTemplate/ModalTemplate';
 import { AuthHeader } from '@/components/molecules/AuthHeader/AuthHeader';
 import { FormField } from '@/components/molecules/FormField/FormField';
 import { DateInput } from '@/components/molecules/DateInput/DateInput';
@@ -26,11 +27,27 @@ const fieldStyle = { marginBottom: Spacing.sm };
 
 export default function SignupScreen() {
   const navigation = useNavigation<Nav>();
-  const { form, handleSignup, isLoading, errorMessage } = useSignupViewModel();
+  const { form, handleSignup, isLoading, errorMessage, successMessage } = useSignupViewModel();
   const { control, formState: { errors }, watch, setValue } = form;
   const acceptTerms = watch('acceptTerms');
 
   return (
+    <>
+    <ModalTemplate visible={!!successMessage} onClose={() => {}}>
+      <LegatoText variant="subtitle" color={Colors.textPrimaryLight} align="center" style={{ marginBottom: Spacing.md }}>
+        Quase lá!
+      </LegatoText>
+      <LegatoText variant="bodySmall" color={Colors.textSecondaryLight} align="center" style={{ marginBottom: Spacing.lg }}>
+        {successMessage}
+      </LegatoText>
+      <Button
+        label="Ir para Login"
+        variant="primary"
+        size="md"
+        fullWidth
+        onPress={() => navigation.navigate('Login')}
+      />
+    </ModalTemplate>
     <AuthTemplate variant="form" scrollOverHeader header={<AuthHeader subtitle="Crie sua conta para começar" />}>
       {/* Card */}
       <View style={styles.card}>
@@ -114,6 +131,7 @@ export default function SignupScreen() {
         <LegatoText variant="caption" color={Colors.textMuted} align="center">OU</LegatoText>
       </View>
     </AuthTemplate>
+    </>
   );
 }
 

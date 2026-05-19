@@ -18,6 +18,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
 import type { RootStackParamList } from '@/navigation/types';
 import { normalizeMusicGenres } from '@/constants/genres';
+import { normalizeSkills } from '@/constants/skills';
 import { saveProfile, fetchMyProfile } from '../services/profileEditService';
 import { mediaUpload } from '@/utils/mediaUpload';
 import type { TabItem } from '@/components/molecules/TabBar/TabBar.types';
@@ -79,7 +80,7 @@ export function useProfileEditViewModel() {
       username:    user?.username     ?? '',
       bio:         user?.bio          ?? '',
       objective:   user?.objective    ?? '',
-      skills:      user?.skills       ?? [],
+      skills:      normalizeSkills(user?.skills ?? []),
       musicGenres: normalizeMusicGenres(user?.musicGenres ?? []),
       sex:         user?.sex          ?? undefined,
       city:        user?.city         ?? '',
@@ -110,7 +111,7 @@ export function useProfileEditViewModel() {
       username:    profileData.username               || user?.username     || '',
       bio:         profileData.bio                    || user?.bio          || '',
       objective:   profileData.objective              || user?.objective    || '',
-      skills:      profileData.instruments?.length    ? profileData.instruments    : (user?.skills      ?? []),
+      skills:      profileData.instruments?.length    ? normalizeSkills(profileData.instruments)    : normalizeSkills(user?.skills      ?? []),
       musicGenres: profileData.genres?.length         ? normalizeMusicGenres(profileData.genres)         : normalizeMusicGenres(user?.musicGenres ?? []),
       sex:         profileData.sex                    ?? user?.sex          ?? undefined,
       city:        profileData.location?.city         || user?.city         || '',
@@ -144,7 +145,7 @@ export function useProfileEditViewModel() {
     setValue('musicGenres', selectedGenres.filter((g) => g !== genre), { shouldValidate: true });
 
   const confirmSkills = (items: string[]) =>
-    setValue('skills', items, { shouldValidate: true });
+    setValue('skills', normalizeSkills(items), { shouldValidate: true });
 
   const confirmGenres = (items: string[]) =>
     setValue('musicGenres', normalizeMusicGenres(items), { shouldValidate: true });
@@ -189,7 +190,7 @@ export function useProfileEditViewModel() {
           bannerUrl:   saved.bannerUrl,
           bio:         saved.bio,
           objective:   saved.objective,
-          skills:      saved.skills,
+          skills:      normalizeSkills(saved.skills ?? []),
           musicGenres: normalizeMusicGenres(saved.musicGenres ?? []),
           sex:         saved.sex,
           city:        saved.city,

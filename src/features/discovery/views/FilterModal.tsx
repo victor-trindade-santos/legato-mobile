@@ -15,7 +15,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Button } from '@/components/atoms/Button/Button';
 import { Colors, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
-import { SKILLS } from '@/constants/skills';
+import { SKILLS, getSkillLabel, normalizeSkills } from '@/constants/skills';
 import { MUSIC_GENRES, getMusicGenreLabel, normalizeMusicGenres } from '@/constants/genres';
 import type { DiscoveryFilters } from '../models/DiscoveryFilters';
 import { DEFAULT_FILTERS } from '../models/DiscoveryFilters';
@@ -52,7 +52,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
     setLocal(prev => ({ ...prev, musicGenres: prev.musicGenres.filter(g => g !== genre) }));
 
   const confirmSkills = (items: string[]) =>
-    setLocal(prev => ({ ...prev, skills: items }));
+    setLocal(prev => ({ ...prev, skills: normalizeSkills(items) }));
 
   const confirmGenres = (items: string[]) =>
     setLocal(prev => ({ ...prev, musicGenres: normalizeMusicGenres(items) }));
@@ -82,6 +82,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
             tagVariant="filled"
             tagColor={Colors.primary}
             emptyMessage="Nenhuma habilidade selecionada"
+            getItemLabel={getSkillLabel}
           />
 
           {/* Gêneros musicais */}
@@ -150,6 +151,7 @@ export function FilterModal({ visible, filters, onApply, onClose }: FilterModalP
         visible={showSkillsModal} title="Habilidades"
         items={SKILLS} selected={local.skills}
         onConfirm={confirmSkills} onClose={() => setShowSkillsModal(false)}
+        getItemLabel={getSkillLabel}
       />
       <TagSelectorModal
         visible={showGenresModal} title="Gêneros Musicais"

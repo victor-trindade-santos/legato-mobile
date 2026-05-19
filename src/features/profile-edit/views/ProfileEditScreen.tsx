@@ -28,7 +28,7 @@ import { SelectField } from '@/components/molecules/SelectField/SelectField';
 import { ModalTriggerField } from '@/components/molecules/ModalTriggerField/ModalTriggerField';
 import { Colors, Spacing, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
-import { SKILLS } from '@/constants/skills';
+import { SKILLS, getSkillLabel } from '@/constants/skills';
 import { MUSIC_GENRES, getMusicGenreLabel } from '@/constants/genres';
 import { useProfileEditViewModel } from '../viewmodels/useProfileEditViewModel';
 import { BioObjectiveModal } from './BioObjectiveModal';
@@ -255,6 +255,7 @@ export default function ProfileEditScreen() {
               tagVariant="filled"
               tagColor={Colors.primary}
               emptyMessage="Nenhuma habilidade selecionada"
+              getItemLabel={getSkillLabel}
             />
 
             <TagSection
@@ -343,6 +344,7 @@ export default function ProfileEditScreen() {
         visible={showSkillsModal} title="Habilidades"
         items={SKILLS} selected={selectedSkills}
         onConfirm={confirmSkills} onClose={closeSkillsModal}
+        getItemLabel={getSkillLabel}
       />
       <TagSelectorModal
         visible={showGenresModal} title="Gêneros Musicais"
