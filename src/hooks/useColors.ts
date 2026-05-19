@@ -10,8 +10,11 @@
  *   <View style={{ backgroundColor: colors.background }}>
  */
 
+import { useContext, createContext } from 'react';
 import { useUIStore } from '@/store/uiStore';
 import { Colors } from '@/theme';
+
+export const ThemeOverrideContext = createContext<'light' | 'dark' | null>(null);
 
 export interface SemanticColors {
   // Fundos
@@ -37,7 +40,7 @@ export interface SemanticColors {
   iconDestructive: string;
 }
 
-const dark: SemanticColors = {
+export const dark: SemanticColors = {
   background: Colors.backgroundDark,
   surface: Colors.surfaceDark,
   surfaceAlt: '#141318',
@@ -56,7 +59,7 @@ const dark: SemanticColors = {
   iconDestructive: Colors.error,
 };
 
-const light: SemanticColors = {
+export const light: SemanticColors = {
   background: Colors.backgroundLight,
   surface: Colors.surfaceLight,
   surfaceAlt: Colors.surfaceLightAlt,
@@ -76,6 +79,8 @@ const light: SemanticColors = {
 };
 
 export function useColors(): SemanticColors {
+  const override = useContext(ThemeOverrideContext);
   const theme = useUIStore((s) => s.theme);
-  return theme === 'dark' ? dark : light;
+  const resolved = override ?? theme;
+  return resolved === 'dark' ? dark : light;
 }

@@ -33,12 +33,12 @@ export default function SignupScreen() {
 
   return (
     <>
-    <ModalTemplate visible={!!successMessage} onClose={() => {}}>
-      <LegatoText variant="subtitle" color={Colors.textPrimaryLight} align="center" style={{ marginBottom: Spacing.md }}>
+    <ModalTemplate visible={!!successMessage} onClose={() => {}} forceLightTheme>
+      <LegatoText variant="subtitle" align="center" style={{ marginBottom: Spacing.md }}>
         Quase lá!
       </LegatoText>
-      <LegatoText variant="bodySmall" color={Colors.textSecondaryLight} align="center" style={{ marginBottom: Spacing.lg }}>
-        {successMessage}
+      <LegatoText variant="bodySmall" align="center" style={{ marginBottom: Spacing.lg }}>
+        {successMessage || 'Verifique seu e-mail para confirmar o cadastro.'}
       </LegatoText>
       <Button
         label="Ir para Login"
@@ -119,6 +119,7 @@ export default function SignupScreen() {
 
         <Button label="Inscrever-se" variant="primary" size="md" fullWidth
           isLoading={isLoading} onPress={handleSignup} style={styles.submitBtn} />
+
 
         <LegatoText variant="bodySmall" color={Colors.textSecondaryLight} align="center">
           Já tem conta?{' '}

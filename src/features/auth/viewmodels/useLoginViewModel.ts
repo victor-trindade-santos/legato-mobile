@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import axios from 'axios';
 import { storage } from '@/utils/storage';
 import { loginUser } from '../services/authService';
 import { useAuthStore } from '@/store/authStore';
@@ -38,8 +39,12 @@ export function useLoginViewModel() {
       const response = await loginUser(data);
       await storage.setItem(Config.TOKEN_KEY, response.data.token);
       setAuth(response.data.token, response.data.user);
-    } catch {
-      setErrorMessage('Usuário ou senha inválidos.');
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : 'Erro ao realizar login. Tente novamente.';
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
