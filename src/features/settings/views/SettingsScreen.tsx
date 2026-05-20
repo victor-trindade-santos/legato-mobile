@@ -159,6 +159,13 @@ export default function SettingsScreen() {
             onPress={() => setChangePasswordVisible(true)}
             colors={colors}
           />
+          <SettingsItem
+            icon="trash-outline"
+            label="Excluir conta"
+            control="chevron"
+            onPress={() => setChangePasswordVisible(true)}
+            colors={colors}
+          />
         </View>
 
         <View style={styles.sectionGap} />
