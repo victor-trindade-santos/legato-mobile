@@ -99,13 +99,19 @@ export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationConfig>
     icon: 'musical-notes-outline',
     iconColor: Colors.success,
     actions: ['accept', 'decline'],
-    getNavTarget: undefined, // Collaborations ainda não implementado
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Collaborations' },
+    }),
   },
 
   COLLABORATION_ACCEPTED: {
     icon: 'musical-notes-outline',
     iconColor: Colors.success,
     actions: [],
-    getNavTarget: undefined, // Collaborations ainda não implementado
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Collaborations' },
+    }),
   },
 };

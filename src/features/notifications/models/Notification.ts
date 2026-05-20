@@ -25,6 +25,7 @@ export interface NotificationDTO {
   id: number;
   senderName: string;
   recipientName: string;
+  title: string;
   message: string;
   read: boolean;
   timeAgo: string;
@@ -45,6 +46,7 @@ export interface Notification {
   id: number;
   type: NotificationType;
   senderName: string;
+  title: string;
   message: string;
   read: boolean;
   timeAgo: string;
