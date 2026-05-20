@@ -12,7 +12,7 @@
  *  5. Sair — logout
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -31,6 +31,7 @@ import { SettingsItem } from '@/components/atoms/SettingsItem/SettingsItem';
 import { Spacing, Typography, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { useSettingsViewModel } from '../viewmodels/useSettingsViewModel';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
 
 export default function SettingsScreen() {
   const {
@@ -45,6 +46,7 @@ export default function SettingsScreen() {
   } = useSettingsViewModel();
 
   const colors = useColors();
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
 
   const confirmLogout = () => {
     if (Platform.OS === 'web') {
@@ -153,8 +155,8 @@ export default function SettingsScreen() {
           <SettingsItem
             icon="lock-closed-outline"
             label="Alterar senha"
-            sublabel="Em breve"
             control="chevron"
+            onPress={() => setChangePasswordVisible(true)}
             colors={colors}
           />
         </View>
@@ -196,6 +198,10 @@ export default function SettingsScreen() {
 
         <View style={styles.bottomPad} />
       </ScrollView>
+      <ChangePasswordModal
+        visible={changePasswordVisible}
+        onClose={() => setChangePasswordVisible(false)}
+      />
     </AppTemplate>
   );
 }
