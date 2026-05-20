@@ -1,6 +1,6 @@
 import api from '@/services/api/axios';
 import { Endpoints } from '@/services/api/endpoints';
-import type { LoginDTO, RegisterDTO, ResetPasswordDTO, AuthResponse, AuthResponseEnvelope, RegisterResponse } from '../models/AuthDTO';
+import type { AuthResponse, AuthResponseEnvelope, ForgotPasswordDTO, LoginDTO, RegisterDTO, RegisterResponse } from '../models/AuthDTO';
 
 /**
  * Mapeia a resposta do backend para AuthResponse.
@@ -46,6 +46,6 @@ export async function registerUser(data: RegisterDTO): Promise<RegisterResponse>
   };
 }
 
-export async function resetPassword(data: ResetPasswordDTO): Promise<void> {
-  await api.post(Endpoints.auth.resetPassword, data);
+export async function requestPasswordReset(data: ForgotPasswordDTO): Promise<void> {
+  await api.post(Endpoints.auth.forgotPassword, null, { params: data });
 }
