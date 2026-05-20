@@ -69,7 +69,7 @@ export default function LoginScreen() {
           )}
         />
 
-        <TouchableOpacity onPress={() => navigation.navigate('ResetPassword')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
           <LegatoText variant="caption" color={Colors.textLink} style={styles.forgotPassword}>
             Esqueceu a senha?
           </LegatoText>

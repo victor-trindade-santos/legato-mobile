@@ -5,7 +5,7 @@ export const Endpoints = {
   auth: {
     login: '/auth/login',
     register: '/auth/register',
-    resetPassword: '/auth/reset-password',
+    forgotPassword: '/auth/forgot-password',
     me: '/auth/me',
   },
 

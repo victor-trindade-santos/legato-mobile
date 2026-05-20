@@ -1,6 +1,6 @@
 /**
  * LEGATO — AuthNavigator
- * Stack de telas não autenticadas: Splash → Login → Signup → ResetPassword
+ * Stack de telas não autenticadas: Splash → Login → Signup → ForgotPassword
  */
 
 import React from 'react';
@@ -10,7 +10,7 @@ import type { AuthStackParamList } from './types';
 import SplashScreen from '@/features/auth/views/SplashScreen';
 import LoginScreen from '@/features/auth/views/LoginScreen';
 import SignupScreen from '@/features/auth/views/SignupScreen';
-import ResetPasswordScreen from '@/features/auth/views/ResetPasswordScreen';
+import ForgotPasswordScreen from '@/features/auth/views/ForgotPasswordScreen';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -20,7 +20,7 @@ export default function AuthNavigator() {
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
-      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }

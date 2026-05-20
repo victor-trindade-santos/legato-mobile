@@ -16,7 +16,7 @@ const api = axios.create({
 });
 
 // Rotas públicas que não precisam de token
-const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/reset-password'];
+const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 
 // Interceptor de Request — injeta token JWT
 api.interceptors.request.use(async (config) => {

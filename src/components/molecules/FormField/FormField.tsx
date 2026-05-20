@@ -1,7 +1,7 @@
 /**
  * FormField — Molecule
  * Label + Input + Mensagem de erro.
- * Usado em LoginScreen, SignupScreen, ResetPasswordScreen.
+ * Usado em LoginScreen, SignupScreen, ForgotPasswordScreen.
  *
  * USO:
  *   <FormField label="Email" errorMessage={errors.email?.message} {...register('email')} />

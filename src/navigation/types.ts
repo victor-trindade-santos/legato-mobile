@@ -9,7 +9,7 @@ export type AuthStackParamList = {
   Splash: undefined;
   Login: undefined;
   Signup: undefined;
-  ResetPassword: undefined;
+  ForgotPassword: undefined;
 };
 
 export type MainTabParamList = {
