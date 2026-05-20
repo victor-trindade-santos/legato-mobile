@@ -11,20 +11,18 @@
  */
 
 // Formato da mensagem recebida via WebSocket (STOMP)
+// Espelha o ChatMessageDTO do backend
 export interface IncomingWSMessage {
   id: number;
+  chatId: number;
   senderName: string;
   senderEmail: string;
   content: string;
   timestamp: string; // "DD/MM/YYYY HH:MM"
-}
-
-// Formato do payload enviado para o servidor
-export interface OutgoingWSMessage {
-  receiver: {
-    id: number;
-  };
-  content: string;
+  typeMedia?: 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+  mediaUrl?: string;
+  status?: 'SENT' | 'DELIVERED' | 'READ';
+  repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;
 }
 
 // Callback chamado quando uma nova mensagem é recebida via WebSocket

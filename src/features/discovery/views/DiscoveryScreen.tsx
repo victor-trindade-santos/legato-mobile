@@ -37,6 +37,7 @@ export default function DiscoveryScreen() {
     cards,
     history,
     isLoading,
+    hasMore,
     filters,
     isFilterModalOpen,
     isHistoryModalOpen,
@@ -47,6 +48,52 @@ export default function DiscoveryScreen() {
   } = useDiscoveryViewModel();
 
   if (isLoading) return <Spinner fullScreen />;
+
+  const renderCardArea = () => {
+    if (cards.length === 0 && hasMore) {
+      return <Spinner fullScreen />;
+    }
+    if (cards.length === 0 && !hasMore) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
+          <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
+            Não há mais músicos disponíveis
+          </LegatoText>
+          <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
+            Tente ajustar os filtros ou volte mais tarde.
+          </LegatoText>
+        </View>
+      );
+    }
+    return cards.slice(0, 3).reverse().map((musician, index, arr) => {
+      const isTop = index === arr.length - 1;
+      const onSwipeDown = isTop
+        ? () => navigation.navigate('MusicianProfile', { musicianId: musician.id, displayName: musician.displayName })
+        : undefined;
+      return (
+        <View
+          key={musician.id}
+          style={[
+            styles.cardWrapper,
+            {
+              zIndex: index,
+              transform: [{ scale: 1 - (2 - index) * 0.03 }],
+              top: (2 - index) * 6,
+            },
+          ]}
+        >
+          <MusicianCard
+            musician={musician}
+            isTop={isTop}
+            onSwipeLeft={() => handleSwipe(musician, 'dislike')}
+            onSwipeRight={() => handleSwipe(musician, 'like')}
+            onSwipeDown={onSwipeDown}
+          />
+        </View>
+      );
+    });
+  };
 
   return (
     <AppTemplate noPadding>
@@ -76,42 +123,7 @@ export default function DiscoveryScreen() {
 
         {/* Stack de cards */}
         <View style={[styles.cardArea, CARD_AREA_STYLE]}>
-          {cards.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={64} color={Colors.textMuted} />
-              <LegatoText variant="sectionTitle" color={Colors.textSecondaryDark} align="center">
-                Não há mais músicos disponíveis
-              </LegatoText>
-              <LegatoText variant="bodySmall" color={Colors.textMuted} align="center">
-                Tente ajustar os filtros ou volte mais tarde.
-              </LegatoText>
-            </View>
-          ) : (
-            cards.slice(0, 3).reverse().map((musician, index, arr) => (
-              <View
-                key={musician.id}
-                style={[
-                  styles.cardWrapper,
-                  {
-                    zIndex: index,
-                    transform: [{ scale: 1 - (2 - index) * 0.03 }],
-                    top: (2 - index) * 6,
-                  },
-                ]}
-              >
-                <MusicianCard
-                  musician={musician}
-                  isTop={index === arr.length - 1}
-                  onSwipeLeft={() => handleSwipe(musician, 'dislike')}
-                  onSwipeRight={() => handleSwipe(musician, 'like')}
-                  onSwipeDown={index === arr.length - 1 ? () => navigation.navigate('MusicianProfile', {
-                    musicianId: musician.id,
-                    displayName: musician.displayName,
-                  }) : undefined}
-                />
-              </View>
-            ))
-          )}
+          {renderCardArea()}
         </View>
 
         {/* Hint */}

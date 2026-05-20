@@ -71,7 +71,8 @@ function calculateAge(birthDate: string): number {
 function mapBackendUserToMusician(raw: BackendDiscoveryUserDTO): Musician {
   const city = raw.location?.city ?? '';
   const state = raw.location?.state ?? '';
-  const location = city ? `${city}${state ? `, ${state}` : ''}` : undefined;
+  const cityState = state ? city + ', ' + state : city;
+  const location = city ? cityState : undefined;
 
   return {
     id: raw.id,
@@ -116,7 +117,9 @@ export async function fetchMusicians(filters?: Partial<DiscoveryFilters>): Promi
     params: { limit: 20 },
   });
   const list = res.data.data ?? [];
-  return list.map(mapBackendUserToMusician);
+  console.log(`[Discovery] API → ${list.length} usuário(s) retornado(s) pelo backend`);
+  const mapped = list.map(mapBackendUserToMusician);
+  return mapped;
 }
 
 /** Registra like e retorna se houve match e o conversationId */
