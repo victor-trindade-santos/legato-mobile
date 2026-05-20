@@ -13,12 +13,13 @@ export type NotificationType =
   | 'LIKE'
   | 'COMMENT'
   | 'MESSAGE'
+  | 'MESSAGE_RECEIVED'
   | 'MATCH'
   | 'COLLABORATION_INVITE'
   | 'COLLABORATION_ACCEPTED';
 
 /** Entidade-alvo da notificação — direciona a navegação */
-export type TargetType = 'USER' | 'POST' | 'CHAT' | 'COLLABORATION';
+export type TargetType = 'USER' | 'POST' | 'CHAT' | 'COLLABORATION' | 'MESSAGE';
 
 /** DTO bruto retornado pelo backend em GET /notifications */
 export interface NotificationDTO {

@@ -1,15 +1,7 @@
-/**
- * useNotificationsViewModel — ViewModel (Notificações)
- *
- * - Busca e expõe notificações enriquecidas com config do registry
- * - handlePress: marca como lida + navega para a tela certa
- * - handleAction: aceita/recusa conexão/colaboração
- * - Sincroniza badge da tab bar via Zustand
- */
-
 import { useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import {
   getNotifications,
@@ -30,7 +22,7 @@ type RootNav = StackNavigationProp<RootStackParamList>;
 export function useNotificationsViewModel() {
   const navigation = useNavigation<RootNav>();
   const queryClient = useQueryClient();
-  const { setUnreadCount } = useNotificationStore();
+  const { unreadCount, setUnreadCount } = useNotificationStore();
 
   // ── Query ──────────────────────────────────────────────────
   const {
@@ -44,18 +36,18 @@ export function useNotificationsViewModel() {
     refetchOnWindowFocus: false,
   });
 
-  // Refetch ao focar na aba — garante que notificações novas aparecem sem polling global
+  // Refetch ao focar na aba — badge sempre sincronizado ao entrar na tela
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch]),
   );
 
-  // Sincroniza badge: dependência é o número (primitivo), não o array — evita loop infinito
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Sincroniza badge com a contagem real vinda do servidor após cada refetch
+  const serverUnreadCount = notifications.filter((n) => !n.read).length;
   useEffect(() => {
-    setUnreadCount(unreadCount);
-  }, [unreadCount, setUnreadCount]);
+    setUnreadCount(serverUnreadCount);
+  }, [serverUnreadCount, setUnreadCount]);
 
   // ── Mutations ──────────────────────────────────────────────
   const markReadMutation = useMutation({
@@ -78,19 +70,37 @@ export function useNotificationsViewModel() {
 
   // ── Handlers ───────────────────────────────────────────────
 
-  /** Toca numa notificação: marca como lida e navega conforme o registry */
+  /** Toca numa notificação: atualiza badge na hora + marca lida + navega */
   const handlePress = (notification: Notification) => {
-    if (!notification.read) markReadMutation.mutate(notification.id);
+    if (!notification.read) {
+      setUnreadCount(Math.max(0, unreadCount - 1));
+      markReadMutation.mutate(notification.id);
+    }
 
     const config = NOTIFICATION_REGISTRY[notification.type];
     const target = config?.getNavTarget?.(notification);
+
     if (target) {
-      navigation.navigate(target.screen as keyof RootStackParamList, target.params as any);
+      navigation.dispatch(
+        CommonActions.navigate({ name: target.screen, params: target.params }),
+      );
     }
+  };
+
+  /** Exclui notificação: se não lida, já desconta do badge na hora */
+  const handleDelete = (id: number) => {
+    const notif = notifications.find((n) => n.id === id);
+    if (notif && !notif.read) {
+      setUnreadCount(Math.max(0, unreadCount - 1));
+    }
+    deleteMutation.mutate(id);
   };
 
   /** Ação inline (aceitar / recusar) em CONNECTION_REQUEST ou COLLABORATION_INVITE */
   const handleAction = (notification: Notification, action: NotificationAction) => {
+    if (!notification.read) {
+      setUnreadCount(Math.max(0, unreadCount - 1));
+    }
     markReadMutation.mutate(notification.id);
 
     if (notification.type === 'CONNECTION_REQUEST') {
@@ -102,7 +112,6 @@ export function useNotificationsViewModel() {
         queryClient.invalidateQueries({ queryKey: ['notifications'] }),
       );
     }
-    // COLLABORATION_INVITE: adicionar aqui quando o endpoint existir
   };
 
   // ── Enriquece cada notificação com a config do registry ────
@@ -118,11 +127,14 @@ export function useNotificationsViewModel() {
   return {
     enrichedNotifications,
     isLoading,
-    hasUnread: notifications.some((n) => !n.read),
+    hasUnread: unreadCount > 0,
     handlePress,
     handleAction,
-    handleDelete: (id: number) => deleteMutation.mutate(id),
-    markAllAsRead: () => markAllReadMutation.mutate(),
+    handleDelete,
+    markAllAsRead: () => {
+      setUnreadCount(0); // otimista
+      markAllReadMutation.mutate();
+    },
     refetch,
   };
 }

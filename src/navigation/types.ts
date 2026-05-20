@@ -14,7 +14,7 @@ export type AuthStackParamList = {
 
 export type MainTabParamList = {
   Discovery: undefined;
-  ChatTab: undefined;
+  ChatTab: NavigatorScreenParams<ChatStackParamList> | undefined;
   Feed: undefined;
   Collaborations: undefined;
   Notifications: undefined;

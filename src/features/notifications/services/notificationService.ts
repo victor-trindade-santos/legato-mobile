@@ -40,9 +40,9 @@ export async function markNotificationRead(id: number): Promise<void> {
   await api.patch(Endpoints.notifications.markRead(id));
 }
 
-/** PATCH /notifications/read-all */
+/** POST /notifications/read-all */
 export async function markAllNotificationsRead(): Promise<void> {
-  await api.patch(Endpoints.notifications.markAllRead);
+  await api.post(Endpoints.notifications.markAllRead);
 }
 
 /** DELETE /notifications/:id */
