@@ -6,7 +6,7 @@ import { LegatoText } from '@/components/atoms/Text/Text';
 import { Colors, Spacing } from '@/theme';
 import type { NotificationListProps, EnrichedNotification } from './NotificationList.types';
 
-export function NotificationList({ items, onPress, onAction }: NotificationListProps) {
+export function NotificationList({ items, onPress, onAction, onDelete }: NotificationListProps) {
   return (
     <FlatList
       data={items}
@@ -19,6 +19,7 @@ export function NotificationList({ items, onPress, onAction }: NotificationListP
           actions={item.config.actions}
           onPress={onPress}
           onAction={onAction}
+          onDelete={onDelete}
         />
       )}
       contentContainerStyle={styles.list}

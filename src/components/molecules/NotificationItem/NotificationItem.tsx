@@ -23,6 +23,7 @@ export function NotificationItem({
   actions,
   onPress,
   onAction,
+  onDelete,
 }: NotificationItemProps) {
   const colors = useColors();
   const { read, senderName, message, timeAgo } = notification;
@@ -75,7 +76,9 @@ export function NotificationItem({
         )}
       </View>
 
-      {!read && <View style={styles.dot} />}
+      <TouchableOpacity onPress={() => onDelete(notification.id)} hitSlop={8}>
+        <Ionicons name="trash-outline" size={20} color={Colors.textMuted} />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 }
@@ -87,9 +90,12 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.md,
     borderRadius: BorderRadius.lg,
+    borderLeftWidth: 5,
+    borderLeftColor: Colors.textMuted,
   },
   unread: {
     backgroundColor: Colors.primaryMuted,
+    borderLeftColor: Colors.success,
   },
   avatarWrapper: {
     position: 'relative',
@@ -119,12 +125,5 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: BorderRadius.pill,
-    backgroundColor: Colors.primary,
-    marginTop: Spacing.xs,
   },
 });
