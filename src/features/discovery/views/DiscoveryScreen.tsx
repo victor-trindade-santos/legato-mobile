@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     paddingHorizontal: Spacing.screenPaddingH,
     paddingBottom: Spacing.sm,
+    marginTop: Spacing.sm,
   },
   controlBtn: {
     borderRadius: BorderRadius.pill,

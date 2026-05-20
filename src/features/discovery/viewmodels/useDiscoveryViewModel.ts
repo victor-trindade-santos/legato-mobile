@@ -30,7 +30,7 @@ export function useDiscoveryViewModel() {
 
   // ── Carga inicial ─────────────────────────────────────────────────────────────
 
-  const { isLoading, data, refetch, isError, error } = useQuery({
+  const { isLoading, data, refetch } = useQuery({
     queryKey: ['musicians', filters],
     queryFn: () => fetchMusicians(filters),
     retry: false,
@@ -42,13 +42,8 @@ export function useDiscoveryViewModel() {
   useEffect(() => {
     if (data) {
       hasLoadedOnceRef.current = true;
-      const duplicates = data.filter(m => seenIdsRef.current.has(m.id));
-      if (duplicates.length > 0) {
-        console.warn('[Discovery] ⚠️ Carga inicial — backend retornou IDs já vistos:', duplicates.map(m => `${m.id}(${m.displayName})`).join(', '));
-      }
       data.forEach(m => seenIdsRef.current.add(m.id));
       setHasMore(data.length >= PAGE_SIZE);
-      console.log(`[Discovery] Carga inicial — ${data.length} cards: ${data.map(m => `${m.id}(${m.displayName})`).join(' | ')}`);
       setCards(data);
     }
   }, [data]);
@@ -62,20 +57,16 @@ export function useDiscoveryViewModel() {
     seenIdsRef.current = new Set();
     setCards([]);
     try {
-      console.log('[Discovery] Reiniciando busca — todos os usuários foram avaliados...');
       const newData = await fetchMusicians(filters);
       if (newData.length === 0) {
-        console.log('[Discovery] Nenhum músico disponível após reinício.');
         hasExhaustedAllRef.current = true;
         setHasMore(false);
       } else {
-        console.log(`[Discovery] Reinício — ${newData.length} cards: ${newData.map(m => `${m.id}(${m.displayName})`).join(' | ')}`);
         newData.forEach(m => seenIdsRef.current.add(m.id));
         setHasMore(newData.length >= PAGE_SIZE);
         setCards(newData);
       }
     } catch (err) {
-      console.error('[Discovery] resetAndRefresh falhou:', err);
       hasExhaustedAllRef.current = true;
       setHasMore(false);
     } finally {
@@ -98,9 +89,6 @@ export function useDiscoveryViewModel() {
     }
   }, [cards.length, isLoading, hasMore, resetAndRefresh]);
 
-  useEffect(() => {
-    if (isError) console.error('[Discovery] fetchMusicians falhou:', error);
-  }, [isError, error]);
 
   // ── Fetch do próximo lote (só quando a fila zera) ─────────────────────────────
 
@@ -108,25 +96,17 @@ export function useDiscoveryViewModel() {
     if (isFetchingMoreRef.current) return;
     isFetchingMoreRef.current = true;
     setIsFetchingMore(true);
-    console.log('[Discovery] Fila zerou — buscando próximo lote...');
     try {
       const newData = await fetchMusicians(filters);
-      const duplicates = newData.filter(m => seenIdsRef.current.has(m.id));
-      if (duplicates.length > 0) {
-        console.warn('[Discovery] ⚠️ Backend retornou IDs já vistos no fetchMore:', duplicates.map(m => `${m.id}(${m.displayName})`).join(', '));
-      }
       if (newData.length === 0) {
-        console.log('[Discovery] Backend não retornou novos cards (fila global esgotada).');
         setHasMore(false);
       } else {
-        console.log(`[Discovery] Novo lote — ${newData.length} cards: ${newData.map(m => `${m.id}(${m.displayName})`).join(' | ')}`);
         newData.forEach(m => seenIdsRef.current.add(m.id));
         setHasMore(newData.length >= PAGE_SIZE);
-        // Usa atualização funcional para preservar qualquer card restaurado via undo durante o fetch
         setCards(prev => [...prev, ...newData]);
       }
     } catch (err) {
-      console.error('[Discovery] fetchMore falhou:', err);
+      // silently handled — UI already shows empty state
     } finally {
       isFetchingMoreRef.current = false;
       setIsFetchingMore(false);
@@ -161,13 +141,8 @@ export function useDiscoveryViewModel() {
   // ── Handlers ──────────────────────────────────────────────────────────────────
 
   const handleSwipe = useCallback((musician: Musician, direction: 'like' | 'dislike') => {
-    console.log(`[Discovery] ${direction === 'like' ? 'Like ❤️ ' : 'Dislike ✗ '} → ID ${musician.id} (${musician.displayName})`);
     setHistory(prev => [...prev, { musician, direction }]);
-    setCards(prev => {
-      const next = prev.filter(c => c.id !== musician.id);
-      console.log(`[Discovery] Fila: ${next.length} card(s) restante(s)`);
-      return next;
-    });
+    setCards(prev => prev.filter(c => c.id !== musician.id));
     if (direction === 'like') {
       likeMutation.mutate(musician.id);
     } else {
@@ -178,7 +153,6 @@ export function useDiscoveryViewModel() {
   const handleUndo = useCallback(() => {
     const lastEntry = history[history.length - 1];
     if (!lastEntry) return;
-    console.log(`[Discovery] Undo → ID ${lastEntry.musician.id} (${lastEntry.musician.displayName}) restaurado | ação desfeita: ${lastEntry.direction}`);
     setHistory(prev => prev.slice(0, -1));
     setCards(prev => [lastEntry.musician, ...prev]);
   }, [history]);
