@@ -10,4 +10,5 @@ export interface NotificationItemProps {
   actions: NotificationAction[];
   onPress: (notification: Notification) => void;
   onAction: (notification: Notification, action: NotificationAction) => void;
+  onDelete: (id: number) => void;
 }

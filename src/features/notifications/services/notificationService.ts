@@ -14,6 +14,7 @@ function mapDTO(dto: NotificationDTO): Notification {
     id: dto.id,
     type: dto.type,
     senderName: dto.senderName,
+    title: dto.title,
     message: dto.message,
     read: dto.read,
     timeAgo: dto.timeAgo,
@@ -39,9 +40,14 @@ export async function markNotificationRead(id: number): Promise<void> {
   await api.patch(Endpoints.notifications.markRead(id));
 }
 
-/** PATCH /notifications/read-all */
+/** POST /notifications/read-all */
 export async function markAllNotificationsRead(): Promise<void> {
-  await api.patch(Endpoints.notifications.markAllRead);
+  await api.post(Endpoints.notifications.markAllRead);
+}
+
+/** DELETE /notifications/:id */
+export async function deleteNotification(id: number): Promise<void> {
+  await api.delete(Endpoints.notifications.delete(id));
 }
 
 /** GET /notifications/unread-count */

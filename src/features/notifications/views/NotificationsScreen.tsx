@@ -26,6 +26,7 @@ export default function NotificationsScreen() {
     hasUnread,
     handlePress,
     handleAction,
+    handleDelete,
     markAllAsRead,
   } = useNotificationsViewModel();
 
@@ -62,6 +63,7 @@ export default function NotificationsScreen() {
               items={enrichedNotifications}
               onPress={handlePress}
               onAction={handleAction}
+              onDelete={handleDelete}
             />
           )}
         </>

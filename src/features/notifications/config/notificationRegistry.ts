@@ -63,7 +63,26 @@ export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationConfig>
       screen: 'Main',
       params: {
         screen: 'ChatTab',
-        params: { screen: 'Chat', params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId } },
+        params: {
+          screen: 'Chat',
+          params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId },
+        },
+      },
+    }),
+  },
+
+  MESSAGE_RECEIVED: {
+    icon: 'chatbubble-outline',
+    iconColor: Colors.info,
+    actions: [],
+    getNavTarget: (n) => ({
+      screen: 'Main',
+      params: {
+        screen: 'ChatTab',
+        params: {
+          screen: 'Chat',
+          params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId },
+        },
       },
     }),
   },
@@ -76,7 +95,10 @@ export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationConfig>
       screen: 'Main',
       params: {
         screen: 'ChatTab',
-        params: { screen: 'Chat', params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId } },
+        params: {
+          screen: 'Chat',
+          params: { conversationId: n.targetId, userName: n.senderName, receiverId: n.targetId },
+        },
       },
     }),
   },
@@ -85,27 +107,41 @@ export const NOTIFICATION_REGISTRY: Record<NotificationType, NotificationConfig>
     icon: 'heart-outline',
     iconColor: Colors.error,
     actions: [],
-    getNavTarget: undefined, // Feed ainda não implementado
+    // Navega para a aba Feed — scroll até o post específico não disponível nesta versão
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Feed' },
+    }),
   },
 
   COMMENT: {
     icon: 'chatbox-outline',
     iconColor: Colors.warning,
     actions: [],
-    getNavTarget: undefined, // Feed ainda não implementado
+    // Navega para a aba Feed — scroll até o post específico não disponível nesta versão
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Feed' },
+    }),
   },
 
   COLLABORATION_INVITE: {
     icon: 'musical-notes-outline',
     iconColor: Colors.success,
     actions: ['accept', 'decline'],
-    getNavTarget: undefined, // Collaborations ainda não implementado
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Collaborations' },
+    }),
   },
 
   COLLABORATION_ACCEPTED: {
     icon: 'musical-notes-outline',
     iconColor: Colors.success,
     actions: [],
-    getNavTarget: undefined, // Collaborations ainda não implementado
+    getNavTarget: () => ({
+      screen: 'Main',
+      params: { screen: 'Collaborations' },
+    }),
   },
 };
