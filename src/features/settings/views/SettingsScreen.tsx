@@ -32,6 +32,7 @@ import { Spacing, Typography, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { useSettingsViewModel } from '../viewmodels/useSettingsViewModel';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { DeleteAccountModal } from '../components/DeleteAccountModal';
 
 export default function SettingsScreen() {
   const {
@@ -47,6 +48,7 @@ export default function SettingsScreen() {
 
   const colors = useColors();
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [deleteAccountVisible, setDeleteAccountVisible] = useState(false);
 
   const confirmLogout = () => {
     if (Platform.OS === 'web') {
@@ -163,7 +165,7 @@ export default function SettingsScreen() {
             icon="trash-outline"
             label="Excluir conta"
             control="chevron"
-            onPress={() => setChangePasswordVisible(true)}
+            onPress={() => setDeleteAccountVisible(true)}
             colors={colors}
           />
         </View>
@@ -208,6 +210,11 @@ export default function SettingsScreen() {
       <ChangePasswordModal
         visible={changePasswordVisible}
         onClose={() => setChangePasswordVisible(false)}
+      />
+      <DeleteAccountModal
+        visible={deleteAccountVisible}
+        onClose={() => setDeleteAccountVisible(false)}
+        onDeleteSuccess={handleLogout}
       />
     </AppTemplate>
   );

@@ -19,6 +19,7 @@ export const Endpoints = {
     follow: (id: number) => `/users/${id}/follow`,
     unfollow: (id: number) => `/users/${id}/unfollow`,
     suggested: '/users/suggested',
+    delete: (email: string) => `/users/${email}`,
   },
 
   // Descoberta
