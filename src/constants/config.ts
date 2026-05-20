@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
  *   • celular/emu  → IP da rede local (EXPO_PUBLIC_API_URL, ex: 192.168.x.x)
  *                        false → Render/produção (EXPO_PUBLIC_API_URL)
  */
-const DEV_USE_LOCAL_BACKEND = true;
+const DEV_USE_LOCAL_BACKEND = false;
 
 const API_URL = DEV_USE_LOCAL_BACKEND
   ? Platform.OS === 'web'

@@ -16,11 +16,13 @@ import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
 import { storage } from '@/utils/storage';
 import { Config } from '@/constants/config';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SettingsNav = StackNavigationProp<RootStackParamList, 'Settings'>;
 
 export function useSettingsViewModel() {
   const navigation = useNavigation<SettingsNav>();
+  const queryClient = useQueryClient();
 
   const { theme, toggleTheme } = useUIStore();
   const { user, logout } = useAuthStore();
@@ -42,6 +44,7 @@ export function useSettingsViewModel() {
     } catch {
       // ignora erros de storage — logout prossegue de qualquer forma
     } finally {
+      queryClient.clear();
       logout();
     }
   };

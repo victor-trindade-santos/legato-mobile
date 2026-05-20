@@ -26,7 +26,9 @@ export async function fetchChatItemsList(): Promise<ChatItemDTO[]> {
     }
     
     const res = await api.get<any[]>(Endpoints.chat.list);
-    
+
+    console.log('[chatListService] raw response[0]:', JSON.stringify(res.data[0], null, 2));
+
     // Mapeia cada item da resposta do backend
     const mappedItems = res.data.map(mapBackendResponse);
     

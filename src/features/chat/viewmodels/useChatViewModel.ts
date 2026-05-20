@@ -163,17 +163,17 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
     if (text.trim().length > 0) {
       console.log('[ViewModel] handleInputChange → enviando isTyping=true');
-      wsSendTyping(conversationId, currentUserId, true);
+      wsSendTyping(currentUserId, true);
 
       if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
       typingDebounceRef.current = setTimeout(() => {
         console.log('[ViewModel] debounce expirou → enviando isTyping=false');
-        wsSendTyping(conversationId, currentUserId, false);
+        wsSendTyping(currentUserId, false);
       }, 2000);
     } else {
       console.log('[ViewModel] input vazio → enviando isTyping=false');
       if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
-      wsSendTyping(conversationId, currentUserId, false);
+      wsSendTyping(currentUserId, false);
     }
   }, [currentUserId, conversationId, wsSendTyping]);
 
@@ -184,7 +184,7 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
 
     // Para o indicador de typing imediatamente ao enviar
     if (typingDebounceRef.current) clearTimeout(typingDebounceRef.current);
-    if (currentUserId != null) wsSendTyping(conversationId, currentUserId, false);
+    if (currentUserId != null) wsSendTyping(currentUserId, false);
 
     /**
      * Otimismo de UI: adicionamos a mensagem na lista
