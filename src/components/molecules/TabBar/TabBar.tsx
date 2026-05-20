@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderBottomWidth: 2,
     borderBottomColor: Colors.transparent,
+    paddingBottom: Spacing.sm - 2,
   },
   tabActive: {
     borderBottomColor: Colors.primary,
