@@ -25,7 +25,7 @@ const { width: PHYS_W, height: PHYS_H } = Dimensions.get('screen');
 // Margem extra para que as bordas da imagem não fiquem com artefato de blur cortado
 const BLEED = 30;
 
-const bgUri = Image.resolveAssetSource(bgImage).uri;
+const bgUri = Image.resolveAssetSource?.(bgImage)?.uri ?? (bgImage as unknown as string);
 
 type AuthTemplateVariant = 'splash' | 'form';
 
