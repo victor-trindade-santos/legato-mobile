@@ -241,7 +241,7 @@ export default function MusicianProfileScreen() {
               </View>
 
               {/* Artistas favoritos */}
-              <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              {/* <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.sectionHeaderRow}>
                   <LegatoText variant="sectionTitle" color={colors.textPrimary}>Artistas Favoritos</LegatoText>
                   <TouchableOpacity onPress={openFavoritesPanel}>
@@ -261,7 +261,7 @@ export default function MusicianProfileScreen() {
                     </View>
                   ))}
                 </View>
-              </View>
+              </View> */}
             </>
           ) : (
             <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -274,7 +274,7 @@ export default function MusicianProfileScreen() {
       </ScrollView>
 
       {/* ── Painel de todos os artistas favoritos ─────────── */}
-      <Modal
+      {/* <Modal
         visible={isFavoritesPanelOpen}
         transparent
         animationType="fade"
@@ -301,7 +301,7 @@ export default function MusicianProfileScreen() {
             </ScrollView>
           </Pressable>
         </Pressable>
-      </Modal>
+      </Modal> */}
     </AppTemplate>
   );
 }

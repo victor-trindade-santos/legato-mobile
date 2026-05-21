@@ -27,7 +27,7 @@ export default function LoginScreen() {
   const { control, formState: { errors } } = form;
 
   return (
-    <AuthTemplate variant="form" header={<AuthHeader subtitle="Sua música em qualquer lugar" logoVariant="vertical" />}>
+    <AuthTemplate variant="form" headerCentered header={<AuthHeader subtitle="Sua música em qualquer lugar" logoVariant="vertical" />}>
       <View style={styles.card}>
         <View style={styles.titleRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
@@ -102,8 +102,8 @@ export default function LoginScreen() {
           </LegatoText>
         </LegatoText>
 
-        <Divider marginV={Spacing.md} color={Colors.borderLight} />
-        <LegatoText variant="caption" color={Colors.textMuted} align="center">OU</LegatoText>
+        {/* <Divider marginV={Spacing.md} color={Colors.borderLight} />
+        <LegatoText variant="caption" color={Colors.textMuted} align="center">OU</LegatoText> */}
       </View>
     </AuthTemplate>
   );

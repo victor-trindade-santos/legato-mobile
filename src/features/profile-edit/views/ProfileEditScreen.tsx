@@ -114,7 +114,7 @@ export default function ProfileEditScreen() {
         {activeTab === 'tudo' ? (
           <ScrollView
             style={{ height: scrollAreaHeight }}
-            contentContainerStyle={styles.scrollContent}
+            
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -126,7 +126,7 @@ export default function ProfileEditScreen() {
               onBannerPress={handlePickBanner}
               onAvatarPress={handlePickAvatar}
             />
-
+            <ScrollView contentContainerStyle={styles.scrollContent} >
             {/* ── Informações Básicas ─────────────────────────── */}
             <LegatoText variant="label" color={colors.textSecondary} style={styles.sectionLabelBasics}>
               INFORMAÇÕES BÁSICAS
@@ -243,7 +243,7 @@ export default function ProfileEditScreen() {
                 <View key={index} style={styles.photoSlot}>
                   <Image source={{ uri }} style={styles.photoImage} />
                   <TouchableOpacity
-                    style={styles.photoRemove}
+                    style={[styles.photoRemove, { backgroundColor: colors.background }]}
                     onPress={() => removePhoto(index)}
                     hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
                   >
@@ -254,8 +254,12 @@ export default function ProfileEditScreen() {
 
               {/* Slot de adição — visível enquanto houver espaço */}
               {photos.length < MAX_PHOTOS && (
-                <TouchableOpacity style={styles.photoAdd} onPress={handlePickPhoto} activeOpacity={0.7}>
-                  <Ionicons name="add" size={28} color={Colors.textMuted} />
+                <TouchableOpacity
+                  style={[styles.photoAdd, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                  onPress={handlePickPhoto}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="add" size={28} color={colors.textMuted} />
                 </TouchableOpacity>
               )}
             </View>
@@ -345,6 +349,7 @@ export default function ProfileEditScreen() {
                 </LegatoText>
               </TouchableOpacity>
             )}
+            </ScrollView>
           </ScrollView>
         ) : (
           <View style={styles.stubContainer}>
@@ -424,7 +429,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.pill,
   },
   photoAdd: {
@@ -432,11 +436,9 @@ const styles = StyleSheet.create({
     height: PHOTO_SIZE,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceDark,
   },
 
   globalError: {

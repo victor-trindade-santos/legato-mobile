@@ -69,11 +69,11 @@ export function AppHeader({
 
       {/* Ações */}
       <View style={styles.actions}>
-        {!hideSearch && (
+        {/* {!hideSearch && (
           <TouchableOpacity style={styles.iconBtn} onPress={handleSearch}>
             <Ionicons name="search-outline" size={Spacing.iconLg} color={colors.textPrimary} />
           </TouchableOpacity>
-        )}
+        )} */}
 
         {!hideNotifications && (
           <TouchableOpacity style={styles.iconBtn} onPress={handleNotifications}>

@@ -23,9 +23,9 @@ export type { ProfileTab } from '../models/MusicianProfile';
 
 const PROFILE_TABS: Array<{ key: ProfileTab; label: string }> = [
   { key: 'overview', label: 'Visão Geral' },
-  { key: 'activity', label: 'Atividade' },
-  { key: 'music', label: 'Músicas' },
-  { key: 'collaborations', label: 'Colaborações' },
+  // { key: 'activity', label: 'Atividade' },
+  // { key: 'music', label: 'Músicas' },
+  // { key: 'collaborations', label: 'Colaborações' },
 ];
 
 export function useMusicianProfileViewModel(musicianId: number, username?: string) {

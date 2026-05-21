@@ -22,7 +22,7 @@ export default function ForgotPasswordScreen() {
   const { control, formState: { errors } } = form;
 
   return (
-    <AuthTemplate variant="form" header={<AuthHeader subtitle="Recuperar senha" logoVariant="verticalForgotPassword" />}>
+    <AuthTemplate variant="form" headerCentered header={<AuthHeader subtitle="Recuperar senha" logoVariant="verticalForgotPassword" />}>
       <View style={styles.card}>
         <View style={styles.titleRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>

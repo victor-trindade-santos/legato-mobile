@@ -128,8 +128,8 @@ export default function SignupScreen() {
           </LegatoText>
         </LegatoText>
 
-        <Divider marginV={Spacing.md} color={Colors.borderLight} />
-        <LegatoText variant="caption" color={Colors.textMuted} align="center">OU</LegatoText>
+        {/* <Divider marginV={Spacing.md} color={Colors.borderLight} />
+        <LegatoText variant="caption" color={Colors.textMuted} align="center">OU</LegatoText> */}
       </View>
     </AuthTemplate>
     </>

@@ -85,7 +85,7 @@ export default function MainNavigator() {
           component={DiscoveryScreen}
           options={{ tabBarLabel: 'Descoberta' }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Feed"
           component={FeedScreen}
           options={{ tabBarLabel: 'Feed' }}
@@ -94,7 +94,7 @@ export default function MainNavigator() {
           name="Collaborations"
           component={ConnectionScreen}
           options={{ tabBarLabel: 'Conexões' }}
-        />
+        /> */}
         <Tab.Screen
           name="ChatTab"
           component={ChatNavigator}

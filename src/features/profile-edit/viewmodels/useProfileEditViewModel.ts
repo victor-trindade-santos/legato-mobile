@@ -48,8 +48,8 @@ export type ProfileEditFormData = z.infer<typeof schema>;
 
 export const PROFILE_EDIT_TABS: TabItem[] = [
   { key: 'tudo', label: 'Tudo' },
-  { key: 'card', label: 'Card' },
-  { key: 'colaboracoes', label: 'Colaborações' },
+  // { key: 'card', label: 'Card' },
+  // { key: 'colaboracoes', label: 'Colaborações' },
 ];
 
 export function useProfileEditViewModel() {
