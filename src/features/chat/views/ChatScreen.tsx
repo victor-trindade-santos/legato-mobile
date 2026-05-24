@@ -51,14 +51,25 @@ export default function ChatScreen() {
   const route = useRoute<ChatScreenRouteParams>();
   const flatListRef = useRef<FlatList>(null);
   const isNearBottomRef = useRef<boolean>(true);
+  const isScrollingRef = useRef<boolean>(false);
 
   const scrollToBottomIfNear = useCallback(() => {
-    if (isNearBottomRef.current) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
+    if (!isNearBottomRef.current) return;
+    isScrollingRef.current = true;
+    flatListRef.current?.scrollToEnd({ animated: true });
+    // Fallback: if already at bottom, onMomentumScrollEnd won't fire
+    setTimeout(() => { isScrollingRef.current = false; }, 600);
   }, []);
 
   const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (isScrollingRef.current) return;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+    isNearBottomRef.current = distanceFromBottom < 150;
+  }, []);
+
+  const handleMomentumScrollEnd = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    isScrollingRef.current = false;
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
     isNearBottomRef.current = distanceFromBottom < 150;
@@ -173,6 +184,7 @@ export default function ChatScreen() {
           contentContainerStyle={styles.listContent}
           onContentSizeChange={scrollToBottomIfNear}
           onScroll={handleScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
           scrollEventThrottle={16}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>

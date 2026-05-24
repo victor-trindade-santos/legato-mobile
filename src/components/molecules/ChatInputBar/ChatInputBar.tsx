@@ -17,7 +17,7 @@
  *  [📎]  [  Input expansível............... ]  [😊]  [➤]
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '@/theme';
 import { useColors } from '@/hooks/useColors';
@@ -28,6 +28,9 @@ import { Spacer } from '@/components/atoms/Spacer/Spacer';
 
 import type { ChatInputBarProps } from './ChatInputBar.types';
 
+const MIN_HEIGHT = 30;
+const MAX_HEIGHT = 120;
+
 export function ChatInputBar({
   value,
   onChangeText,
@@ -37,6 +40,17 @@ export function ChatInputBar({
   placeholder = 'Digite uma mensagem...',
 }: ChatInputBarProps) {
   const colors = useColors();
+  const [inputHeight, setInputHeight] = useState(MIN_HEIGHT);
+
+  const handleContentSizeChange = (e: any) => {
+    const { height } = e.nativeEvent.contentSize;
+    setInputHeight(Math.min(Math.max(Math.ceil(height), MIN_HEIGHT), MAX_HEIGHT));
+  };
+
+  const handleSend = () => {
+    onSend();
+    setInputHeight(MIN_HEIGHT);
+  };
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
       {onAttach && (
@@ -60,9 +74,9 @@ export function ChatInputBar({
           onChangeText={onChangeText}
           placeholder={placeholder}
           multiline
-          numberOfLines={1}
-          containerStyle={styles.inputContainer}
-          inputStyle={styles.input}
+          onContentSizeChange={handleContentSizeChange}
+          containerStyle={[styles.inputContainer, { minHeight: inputHeight }]}
+          inputStyle={[styles.input, { height: inputHeight }]}
         />
       </View>
 
@@ -83,7 +97,7 @@ export function ChatInputBar({
         </>
       )}
 
-      <TouchableOpacity onPress={onSend} style={styles.sendButton}>
+      <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
         <Icon
           variant="vector"
           name="send"
