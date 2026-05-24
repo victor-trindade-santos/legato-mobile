@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     nameRow: {
-        marginBottom: Spacing.sm,
+        marginTop: Spacing.xs,
     },
     messageRow: {
         marginBottom: Spacing.sm,

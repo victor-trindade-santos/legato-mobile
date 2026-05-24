@@ -16,8 +16,8 @@
  * - WebSocketService (tempo real)
  */
 
-import React, { useRef, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text } from 'react-native';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -50,6 +50,19 @@ export default function ChatScreen() {
   const navigation = useNavigation();
   const route = useRoute<ChatScreenRouteParams>();
   const flatListRef = useRef<FlatList>(null);
+  const isNearBottomRef = useRef<boolean>(true);
+
+  const scrollToBottomIfNear = useCallback(() => {
+    if (isNearBottomRef.current) {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }
+  }, []);
+
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+    isNearBottomRef.current = distanceFromBottom < 150;
+  }, []);
 
   // ════════════════════════════════════════════════════════════════════
   // PROPS DA ROTA RECEBIDAS DE CHATLIST
@@ -87,13 +100,13 @@ export default function ChatScreen() {
   }, [isOtherUserTyping]);
 
   // ════════════════════════════════════════════════════════════════════
-  // SCROLL AUTOMÁTICO
+  // SCROLL AUTOMÁTICO — typing indicator
   // ════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (chatItems.length > 0) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
-  }, [chatItems]);
+    if (!isOtherUserTyping) return;
+    const timer = setTimeout(() => scrollToBottomIfNear(), 100);
+    return () => clearTimeout(timer);
+  }, [isOtherUserTyping, scrollToBottomIfNear]);
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZADOR DE MENSAGENS
@@ -158,6 +171,9 @@ export default function ChatScreen() {
           keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.listContent}
+          onContentSizeChange={scrollToBottomIfNear}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Sem mensagens ainda</Text>
