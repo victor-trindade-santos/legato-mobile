@@ -6,6 +6,8 @@
  * Contém informações resumidas + metadados da conversa.
  */
 
+import type { MediaType } from '@/types/WebSocket.types';
+
 export interface ChatItemDTO {
   chatId: number;
   otherUserId: number;
@@ -13,6 +15,7 @@ export interface ChatItemDTO {
   otherUserProfilePictureUrl?: string;
   lastMessageContent?: string;
   lastMessageTimestamp?: string;
+  lastMessageTypeMedia?: MediaType;
   isOnline: boolean;
   lastSeen: string | null;
 }

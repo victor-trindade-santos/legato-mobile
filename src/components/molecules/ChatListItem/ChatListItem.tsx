@@ -16,12 +16,25 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { StatusDot } from '@/components/atoms/StatusDot/StatusDot';
+import { Icon } from '@/components/atoms/Icon/Icon';
 import { BorderRadius, Colors, FontFamily, FontSize, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
+import type { MediaType } from '@/types/WebSocket.types';
 import type { ChatListItemProps } from './ChatListItem.types';
 
-export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, isOnline, isTyping, onPress }: ChatListItemProps) {
+const MEDIA_LABELS: Record<Exclude<MediaType, 'NONE' | 'FILE'>, { icon: string; label: string }> = {
+  IMAGE: { icon: 'image-outline', label: 'Foto' },
+  VIDEO: { icon: 'videocam-outline', label: 'Vídeo' },
+  AUDIO: { icon: 'mic-outline', label: 'Áudio de voz' },
+};
+
+export function ChatListItem({ userAvatar, userName, lastMessage, lastMessageType, timeStamp, isOnline, isTyping, onPress }: ChatListItemProps) {
     const colors = useColors();
+
+    const mediaInfo = lastMessageType && lastMessageType !== 'NONE' && lastMessageType !== 'FILE'
+        ? MEDIA_LABELS[lastMessageType]
+        : null;
+
     return (
         <TouchableOpacity style={styles.chatItemContainer} onPress={onPress}>
             <View style={styles.avatarContainer}>
@@ -49,6 +62,22 @@ export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, isO
                         >
                             digitando...
                         </LegatoText>
+                    ) : mediaInfo ? (
+                        <View style={styles.mediaPreviewRow}>
+                            <Icon
+                                variant="vector"
+                                family="Ionicons"
+                                name={mediaInfo.icon as any}
+                                size={13}
+                                color={colors.textSecondary}
+                            />
+                            <LegatoText
+                                style={[styles.lastMessage, styles.mediaLabel, { color: colors.textSecondary }]}
+                                numberOfLines={1}
+                            >
+                                {mediaInfo.label}
+                            </LegatoText>
+                        </View>
                     ) : (
                         <LegatoText
                             style={[styles.lastMessage, { color: colors.textSecondary }]}
@@ -102,6 +131,14 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     timeStamp: {
+        fontSize: FontSize.xs,
+    },
+    mediaPreviewRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    mediaLabel: {
         fontSize: FontSize.xs,
     },
 });

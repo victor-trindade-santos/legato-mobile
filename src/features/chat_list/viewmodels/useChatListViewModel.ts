@@ -50,6 +50,7 @@ export function useChatListViewModel() {
             lastSeen: presenceMap[item.otherUserId]?.lastSeen ?? item.lastSeen,
             lastMessageContent: messageMap[item.chatId]?.content ?? item.lastMessageContent,
             lastMessageTimestamp: messageMap[item.chatId]?.timestamp ?? item.lastMessageTimestamp,
+            lastMessageTypeMedia: messageMap[item.chatId]?.typeMedia ?? item.lastMessageTypeMedia,
             isTyping: typingMap[item.chatId] ?? false,
         })),
         [chatItems, presenceMap, messageMap, typingMap],

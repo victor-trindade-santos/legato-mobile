@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import { Config } from '@/constants/config';
-import type { IncomingWSMessage, TypingDTO } from '@/types/WebSocket.types';
+import type { IncomingWSMessage, MediaType, TypingDTO } from '@/types/WebSocket.types';
 
-type LastMessageUpdate = { content: string; timestamp: string };
+type LastMessageUpdate = { content: string; timestamp: string; typeMedia?: MediaType };
 type HookReturn = {
   messageMap: Record<number, LastMessageUpdate>;
   typingMap: Record<number, boolean>;
@@ -32,7 +32,7 @@ export function useChatListMessages(
               const msg: IncomingWSMessage = JSON.parse(frame.body);
               setMessageMap(prev => ({
                 ...prev,
-                [chatId]: { content: msg.content, timestamp: new Date().toISOString() },
+                [chatId]: { content: msg.content, timestamp: new Date().toISOString(), typeMedia: msg.typeMedia },
               }));
               // Mensagem nova limpa o "digitando..."
               setTypingMap(prev => ({ ...prev, [chatId]: false }));

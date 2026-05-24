@@ -62,6 +62,7 @@ export default function ChatListScreen() {
                                     userAvatar={item.otherUserProfilePictureUrl || ''}
                                     userName={item.otherUserName}
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
+                                    lastMessageType={item.lastMessageTypeMedia}
                                     timeStamp={formatChatTimestamp(item.lastMessageTimestamp)}
                                     isOnline={item.isOnline}
                                     isTyping={item.isTyping}
