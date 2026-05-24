@@ -13,4 +13,6 @@ export interface ChatItemDTO {
   otherUserProfilePictureUrl?: string;
   lastMessageContent?: string;
   lastMessageTimestamp?: string;
+  isOnline: boolean;
+  lastSeen: string | null;
 }

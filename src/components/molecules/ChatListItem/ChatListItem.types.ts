@@ -12,6 +12,7 @@ export interface ChatListItemProps {
     userName: string;
     lastMessage: string;
     timeStamp: string;
+    isOnline?: boolean;
 
     onPress: () => void;
 }

@@ -62,12 +62,16 @@ export default function ChatListScreen() {
                                     userName={item.otherUserName}
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
                                     timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
+                                    isOnline={item.isOnline}
                                     onPress={() => {
+                                        console.log('[ChatList] → navegando para chat | user=', item.otherUserName, '| isOnline=', item.isOnline, '| lastSeen=', item.lastSeen);
                                         navigation.navigate('Chat', {
                                             conversationId: item.chatId,
                                             userName: item.otherUserName,
                                             avatarUri: item.otherUserProfilePictureUrl,
                                             receiverId: item.otherUserId,
+                                            isOnline: item.isOnline,
+                                            lastSeen: item.lastSeen,
                                         });
                                     }}
                                 />

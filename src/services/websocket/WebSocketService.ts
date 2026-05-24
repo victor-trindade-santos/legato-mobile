@@ -1,21 +1,29 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
-import type { MessageHandler, TypingDTO, TypingHandler } from '@/types/WebSocket.types';
+import type { MessageHandler, PresenceHandler, TypingDTO, TypingHandler, UserPresenceDTO } from '@/types/WebSocket.types';
+import { Config } from '@/constants/config';
 
-const WS_URL = process.env.EXPO_PUBLIC_WS_URL ?? 'wss://legato-mobile-backend.onrender.com/ws-chat';
 const SEND_DESTINATION = '/app/sendMessage';
 
 export class WebSocketService {
-  private client: Client;
+  private readonly client: Client;
   private messageSubscription: StompSubscription | null = null;
   private typingSubscription: StompSubscription | null = null;
+  private presenceSubscription: StompSubscription | null = null;
   private isConnected: boolean = false;
   private readonly chatId: number;
+  private storedPresenceUserId?: number;
+  private storedPresenceHandler?: PresenceHandler;
 
-  constructor(token: string, chatId: number, onMessage: MessageHandler, onTyping?: TypingHandler) {
+  constructor(
+    token: string,
+    chatId: number,
+    onMessage: MessageHandler,
+    onTyping?: TypingHandler,
+  ) {
     this.chatId = chatId;
 
     this.client = new Client({
-      brokerURL: `${WS_URL}?token=${token}`,
+      brokerURL: `${Config.WS_URL}?token=${token}`,
       reconnectDelay: 5000,
 
       onConnect: () => {
@@ -47,6 +55,10 @@ export class WebSocketService {
             }
           );
         }
+
+        if (this.storedPresenceUserId != null && this.storedPresenceHandler) {
+          this.createPresenceSubscription(this.storedPresenceUserId, this.storedPresenceHandler);
+        }
       },
 
       onDisconnect: () => {
@@ -67,6 +79,33 @@ export class WebSocketService {
     });
   }
 
+  subscribeToPresence(otherUserId: number, handler: PresenceHandler): void {
+    this.storedPresenceUserId = otherUserId;
+    this.storedPresenceHandler = handler;
+    if (this.isConnected) {
+      this.createPresenceSubscription(otherUserId, handler);
+    }
+  }
+
+  private createPresenceSubscription(otherUserId: number, handler: PresenceHandler): void {
+    if (this.presenceSubscription) {
+      this.presenceSubscription.unsubscribe();
+    }
+    console.log('[WS] 🟢 Subscrevendo presença userId=', otherUserId);
+    this.presenceSubscription = this.client.subscribe(
+      `/topic/users/${otherUserId}/presence`,
+      (frame: IMessage) => {
+        try {
+          const dto: UserPresenceDTO = JSON.parse(frame.body);
+          console.log('[WS] 📡 Presença recebida:', dto);
+          handler(dto);
+        } catch (err) {
+          console.error('[WS] ❌ Erro ao ler presença:', err);
+        }
+      }
+    );
+  }
+
   connect(): void {
     if (!this.isConnected && !this.client.active) {
       this.client.activate();
@@ -81,6 +120,10 @@ export class WebSocketService {
     if (this.typingSubscription) {
       this.typingSubscription.unsubscribe();
       this.typingSubscription = null;
+    }
+    if (this.presenceSubscription) {
+      this.presenceSubscription.unsubscribe();
+      this.presenceSubscription = null;
     }
     this.client.deactivate();
     this.isConnected = false;

@@ -35,6 +35,8 @@ export type ChatStackParamList = {
     userName: string;
     avatarUri?: string;
     receiverId: number;
+    isOnline: boolean;
+    lastSeen: string | null;
   }
 };
 

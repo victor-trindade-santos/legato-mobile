@@ -13,8 +13,7 @@ export function ChatHeaderUserInfo({
   avatarUri,
   fallbackInitials,
   name,
-  // statusText,
-  // statusVariant = 'offline',
+  statusText,
 }: ChatHeaderUserInfoProps) {
   return (
     <View style={styles.container}>
@@ -31,17 +30,18 @@ export function ChatHeaderUserInfo({
           {name}
         </LegatoText>
 
-        <Spacer size={4} />
-
-        {/* <View style={styles.statusRow}>
-          <StatusDot variant={statusVariant} size={8} />
-
-          <Spacer horizontal size={6} />
-
-          <LegatoText variant="caption" color={Colors.textMuted}>
-            {statusText}
-          </LegatoText>
-        </View> */}
+        {statusText && (
+          <>
+            <Spacer size={4} />
+            <View style={styles.statusRow}>
+              <StatusDot variant={statusText === 'Online' ? 'online' : 'offline'} size={8} />
+              <Spacer horizontal size={6} />
+              <LegatoText variant="caption" color={Colors.textMuted}>
+                {statusText}
+              </LegatoText>
+            </View>
+          </>
+        )}
       </View>
     </View>
   );

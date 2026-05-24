@@ -1,11 +1,12 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { fetchMessages } from "../services/ChatService";
+import { fetchChatItemsList } from "@/features/chat_list/services/chatListService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
 import { useAuthStore } from "@/store/authStore";
 import { extractDateKey, extractDateLabel, formatNowToBackendFormat } from "@/utils/dateUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { MessageHandler, TypingHandler } from "@/types/WebSocket.types";
+import type { MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
 
 
 export type ChatListItem =
@@ -46,12 +47,21 @@ function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message
 }
 
 
-export function useChatViewModel(conversationId: number, receiverId: number) {
+export function useChatViewModel(
+  conversationId: number,
+  receiverId: number,
+  initialIsOnline: boolean,
+  initialLastSeen: string | null,
+) {
   const [chatItems, setChatItems] = useState<ChatListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState('');
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const [presenceStatus, setPresenceStatus] = useState({
+    isOnline: initialIsOnline,
+    lastSeen: initialLastSeen,
+  });
 
   // Timer para parar de enviar "digitando" após 2s sem digitar
   const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,6 +113,12 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
       })
   }, [currentUserEmail]);
 
+  // ── 1c. Handler de eventos de presença recebidos ───────────
+  const handlePresenceUpdate = useCallback<PresenceHandler>((dto) => {
+    console.log('[ViewModel] 📡 presença recebida via WS:', dto);
+    setPresenceStatus({ isOnline: dto.isOnline, lastSeen: dto.lastSeen });
+  }, []);
+
   // ── 1b. Handler de eventos de typing recebidos ─────────────
   const handleIncomingTyping = useCallback<TypingHandler>((dto) => {
     console.log('[ViewModel] handleIncomingTyping ←', dto, '| meuId=', currentUserId);
@@ -126,12 +142,33 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
     }
   }, [currentUserId]);
 
+  // ── 1d. Busca presença atual via REST ao abrir o chat ─────
+  // Necessário porque o snapshot de route.params pode estar stale:
+  // o outro usuário pode ter conectado depois da última carga da ChatListScreen.
+  useEffect(() => {
+    async function refreshPresence() {
+      try {
+        const items = await fetchChatItemsList();
+        const match = items.find((i) => i.otherUserId === receiverId);
+        console.log('[ViewModel] 🔍 refresh presença REST | receiverId=', receiverId, '| match=', match ? { isOnline: match.isOnline, lastSeen: match.lastSeen } : 'não encontrado');
+        if (match) {
+          setPresenceStatus({ isOnline: match.isOnline, lastSeen: match.lastSeen });
+        }
+      } catch (err) {
+        console.warn('[ViewModel] ⚠️ falha ao buscar presença via REST:', err);
+      }
+    }
+    refreshPresence();
+  }, [receiverId]);
+
   // ── 2. Passa os handlers estáveis para o hook ──────────────
   const { sendMessage: wsSendMessage, sendTyping: wsSendTyping } = useWebSocket({
     token: token ?? '',
     onMessage: handleIncomingMessage,
     chatId: conversationId,
     onTyping: handleIncomingTyping,
+    otherUserId: receiverId,
+    onPresence: handlePresenceUpdate,
   });
     
 
@@ -202,7 +239,6 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
     };
 
     setChatItems((prev) => {
-      const lastItem = prev[prev.length - 1];
       const todayKey = extractDateKey(newMessage.timestamp);
       const result = [...prev];
 
@@ -241,5 +277,6 @@ export function useChatViewModel(conversationId: number, receiverId: number) {
     isLoading,
     error,
     isOtherUserTyping,
+    presenceStatus,
   };
 }

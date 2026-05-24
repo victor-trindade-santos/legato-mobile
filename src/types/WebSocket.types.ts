@@ -37,3 +37,13 @@ export interface TypingDTO {
 
 // Callback chamado quando um evento de typing chega via WebSocket
 export type TypingHandler = (dto: TypingDTO) => void;
+
+// Payload de presença recebido via WebSocket quando o outro usuário conecta/desconecta
+export interface UserPresenceDTO {
+  userId: number;
+  isOnline: boolean;
+  lastSeen: string | null; // "dd/MM/yyyy HH:mm" ou null (nunca conectou)
+}
+
+// Callback chamado quando um evento de presença chega via WebSocket
+export type PresenceHandler = (dto: UserPresenceDTO) => void;

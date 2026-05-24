@@ -83,12 +83,14 @@ export default function ChatScreen() {
     userName,
     avatarUri,
     receiverId,
+    isOnline,
+    lastSeen,
   } = route.params || {};
 
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, isOtherUserTyping } = useChatViewModel(conversationId, receiverId);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -104,8 +106,16 @@ export default function ChatScreen() {
   // }, [conversationId, markAsRead]);
 
   // ════════════════════════════════════════════════════════════════════
-  // DEBUG — TYPING
+  // DEBUG — PARAMS + PRESENÇA
   // ════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    console.log('[ChatScreen] mount | receiverId=', receiverId, '| isOnline(snapshot)=', isOnline, '| lastSeen(snapshot)=', lastSeen);
+  }, []);
+
+  useEffect(() => {
+    console.log('[ChatScreen] presenceStatus →', presenceStatus);
+  }, [presenceStatus]);
+
   useEffect(() => {
     console.log('[ChatScreen] isOtherUserTyping →', isOtherUserTyping);
   }, [isOtherUserTyping]);
@@ -171,8 +181,13 @@ export default function ChatScreen() {
               .map((n) => n[0])
               .join('')}
             avatarUri={avatarUri}
-            // statusText={statusText}
-            // statusVariant={statusVariant}
+            statusText={
+              presenceStatus.isOnline
+                ? 'Online'
+                : presenceStatus.lastSeen
+                  ? `Visto por último em ${presenceStatus.lastSeen}`
+                  : undefined
+            }
           />
         </View>
         {/* ── Lista de Mensagens ─────────────────────────── */}
