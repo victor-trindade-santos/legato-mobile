@@ -8,7 +8,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch"
+    "type-check:watch": "tsc --noEmit --watch",
+    "build:preview": "node scripts/bump-version.js && eas build --profile preview --platform android",
+    "build:production": "node scripts/bump-version.js && eas build --profile production --platform android"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
