@@ -16,6 +16,7 @@ function mapBackendResponse(item: any): ChatItemDTO {
     otherUserProfilePictureUrl: item.otherUserProfilePictureUrl || item.otherUserProfilePicture,
     lastMessageContent: item.lastMessageContent,
     lastMessageTimestamp: item.lastMessageTimestamp,
+    lastMessageTypeMedia: item.lastMessageTypeMedia,
     isOnline: item.isOnline ?? false,
     lastSeen: item.lastSeen ?? null,
   };

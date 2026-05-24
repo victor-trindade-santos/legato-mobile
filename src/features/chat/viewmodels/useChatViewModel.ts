@@ -77,14 +77,8 @@ export function useChatViewModel(
 
   // ── 1a. Handler de mensagens recebidas ─────────────────────
   const handleIncomingMessage = useCallback<MessageHandler>((message) => {
-    /**
-       *  O WebSocket já entrega apenas mensagens destinadas ao usuário atual.
-       * Então qualquer mensagem que chegar aqui já é para esta conversa -
-       * desde que não seja do próprio usuário (eco)
-       */
       const isFromOtherUser = message.senderEmail !== currentUserEmail;
-
-      if (!isFromOtherUser) return; // Ignora mensagens enviadas por mim mesmo (eco)
+      if (!isFromOtherUser) return; // Ignora eco das próprias mensagens
 
       const newMessage: Message = {
         id: String(message.id),
@@ -97,6 +91,12 @@ export function useChatViewModel(
       };
 
       setChatItems((prev) => {
+        // Deduplicação: ignora se já existe mensagem com o mesmo id do servidor
+        const alreadyExists = prev.some(
+          (item) => item.type === 'message' && item.data.id === newMessage.id
+        );
+        if (alreadyExists) return prev;
+
         const todayKey = extractDateKey(newMessage.timestamp);
         const result = [...prev];
 
@@ -114,7 +114,7 @@ export function useChatViewModel(
 
         result.push({ type: 'message', data: newMessage });
         return result;
-      })
+      });
   }, [currentUserEmail]);
 
   // ── 1c. Handler de eventos de presença recebidos ───────────
@@ -352,10 +352,8 @@ export function useChatViewModel(
           : item
       )
     );
-
-    // Notifica o destinatário via WebSocket com a URL definitiva do servidor
-    console.log('[ViewModel] 📎 Enviando mídia via WS | typeMedia=', typeMedia, '| mediaUrl=', savedMessage.mediaUrl);
-    wsSendMessage(receiverId, 'Arquivo de mídia', undefined, typeMedia, savedMessage.mediaUrl);
+    // O backend já notifica todos os participantes via WebSocket ao processar o
+    // upload REST — não enviamos wsSendMessage aqui para evitar mensagem duplicada.
   }, [conversationId, currentUserName, receiverId, wsSendMessage]);
 
   return {
