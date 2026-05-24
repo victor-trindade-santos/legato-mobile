@@ -64,6 +64,7 @@ export default function ChatListScreen() {
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
                                     timeStamp={formatChatTimestamp(item.lastMessageTimestamp)}
                                     isOnline={item.isOnline}
+                                    isTyping={item.isTyping}
                                     onPress={() => {
                                         console.log('[ChatList] → navegando para chat | user=', item.otherUserName, '| isOnline=', item.isOnline, '| lastSeen=', item.lastSeen);
                                         navigation.navigate('Chat', {

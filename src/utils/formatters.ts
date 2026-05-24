@@ -50,12 +50,29 @@ export const formatLastSeen = (isoString: string | null | undefined): string => 
 };
 
 /**
+ * Parseia strings ISO e "DD/MM/YYYY HH:MM" para Date
+ */
+const parseAnyTimestamp = (value: string): Date => {
+  const iso = new Date(value);
+  if (!isNaN(iso.getTime())) return iso;
+
+  // Tenta "DD/MM/YYYY HH:MM"
+  const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/);
+  if (match) {
+    const [, day, month, year, hours, minutes] = match;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
+  }
+
+  return new Date(NaN);
+};
+
+/**
  * Formata o timestamp do último item da lista de chats.
  * Exemplos: "16:26", "ontem", "24/05"
  */
 export const formatChatTimestamp = (isoString: string | null | undefined): string => {
   if (!isoString) return '';
-  const date = new Date(isoString);
+  const date = parseAnyTimestamp(isoString);
   if (isNaN(date.getTime())) return '';
 
   if (isToday(date)) return `${pad(date.getHours())}:${pad(date.getMinutes())}`;

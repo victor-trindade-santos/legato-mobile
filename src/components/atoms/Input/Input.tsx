@@ -76,9 +76,10 @@ export function Input({
     <View
       style={[
         styles.container,
-        containerStyle,
+        !multiline && styles.containerSingleLine,
         { backgroundColor: isDisabled ? disabledBg : theme.background, borderColor: theme.border },
         multiline && styles.containerMultiline,
+        containerStyle,
         isFocused && styles.focused,
         hasError && styles.error,
       ]}
@@ -128,10 +129,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: BorderRadius.sm,
     paddingHorizontal: Spacing.inputPaddingH,
+  },
+  containerSingleLine: {
     height: Spacing.buttonHeightMd,
   },
   containerMultiline: {
-    height: 'auto',
     alignItems: 'flex-start',
     paddingVertical: Spacing.sm,
   },

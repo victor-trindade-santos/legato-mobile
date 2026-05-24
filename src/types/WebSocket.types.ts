@@ -10,6 +10,8 @@
  * (usado internamente pelo StompJS)
  */
 
+export type MediaType = 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+
 // Formato da mensagem recebida via WebSocket (STOMP)
 // Espelha o ChatMessageDTO do backend
 export interface IncomingWSMessage {
@@ -19,7 +21,7 @@ export interface IncomingWSMessage {
   senderEmail: string;
   content: string;
   timestamp: string; // "DD/MM/YYYY HH:MM"
-  typeMedia?: 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+  typeMedia?: MediaType;
   mediaUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
   repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;

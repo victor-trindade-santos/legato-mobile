@@ -36,6 +36,7 @@ export function ChatInputBar({
   onChangeText,
   onSend,
   onAttach,
+  onMic,
   onEmoji,
   placeholder = 'Digite uma mensagem...',
 }: ChatInputBarProps) {
@@ -53,21 +54,6 @@ export function ChatInputBar({
   };
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-      {onAttach && (
-        <>
-          <TouchableOpacity onPress={onAttach}>
-            <Icon
-              variant="vector"
-              name="attach"
-              family="MaterialIcons"
-              size={22}
-              color={Colors.textMuted}
-            />
-          </TouchableOpacity>
-          <Spacer horizontal size={Spacing.sm} />
-        </>
-      )}
-
       <View style={styles.inputWrapper}>
         <Input
           value={value}
@@ -76,8 +62,19 @@ export function ChatInputBar({
           multiline
           onContentSizeChange={handleContentSizeChange}
           containerStyle={[styles.inputContainer, { minHeight: inputHeight }]}
-          inputStyle={[styles.input, { height: inputHeight }]}
+          inputStyle={[styles.input, { height: inputHeight, paddingRight: onAttach ? 36 : undefined }]}
         />
+        {onAttach && (
+          <TouchableOpacity onPress={onAttach} style={styles.attachButton} hitSlop={8}>
+            <Icon
+              variant="vector"
+              name="attach-outline"
+              family="Ionicons"
+              size={26}
+              color={Colors.textMuted}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Spacer horizontal size={Spacing.sm} />
@@ -97,15 +94,27 @@ export function ChatInputBar({
         </>
       )}
 
-      <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-        <Icon
-          variant="vector"
-          name="send"
-          family="Ionicons"
-          size={20}
-          color={Colors.white}
-        />
-      </TouchableOpacity>
+      {value.trim().length === 0 ? (
+        <TouchableOpacity onPress={onMic} style={styles.sendButton}>
+          <Icon
+            variant="vector"
+            name="mic"
+            family="Ionicons"
+            size={20}
+            color={Colors.white}
+          />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+          <Icon
+            variant="vector"
+            name="send"
+            family="Ionicons"
+            size={20}
+            color={Colors.white}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -119,10 +128,16 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     flex: 1,
+    position: 'relative',
+  },
+  attachButton: {
+    position: 'absolute',
+    right: Spacing.sm,
+    bottom: Spacing.sm,
   },
   inputContainer: {
     borderRadius: BorderRadius.pill,
-    minHeight: 40,
+    minHeight: 30,
   },
   input: {
     paddingVertical: Spacing.xs,

@@ -1,5 +1,5 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
-import type { MessageHandler, PresenceHandler, TypingDTO, TypingHandler, UserPresenceDTO } from '@/types/WebSocket.types';
+import type { MediaType, MessageHandler, PresenceHandler, TypingDTO, TypingHandler, UserPresenceDTO } from '@/types/WebSocket.types';
 import { Config } from '@/constants/config';
 
 const SEND_DESTINATION = '/app/sendMessage';
@@ -129,7 +129,13 @@ export class WebSocketService {
     this.isConnected = false;
   }
 
-  sendMessage(receiverId: number, content: string, repliedMessageId?: number): void {
+  sendMessage(
+    receiverId: number,
+    content: string,
+    repliedMessageId?: number,
+    typeMedia?: MediaType,
+    mediaUrl?: string,
+  ): void {
     if (!this.isConnected) return;
 
     this.client.publish({
@@ -138,6 +144,7 @@ export class WebSocketService {
         receiverId,
         content,
         repliedMessageId: repliedMessageId ?? null,
+        ...(typeMedia && typeMedia !== 'NONE' ? { typeMedia, mediaUrl } : {}),
       }),
     });
   }

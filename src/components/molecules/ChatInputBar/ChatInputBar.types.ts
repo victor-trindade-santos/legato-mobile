@@ -3,6 +3,7 @@ export interface ChatInputBarProps {
   onChangeText: (text: string) => void;
   onSend: () => void;
   onAttach?: () => void;
+  onMic?: () => void;
   onEmoji?: () => void;
   placeholder?: string;
 }

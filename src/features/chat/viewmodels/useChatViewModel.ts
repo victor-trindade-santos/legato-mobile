@@ -1,12 +1,13 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { fetchMessages } from "../services/ChatService";
+import * as ImagePicker from 'expo-image-picker';
+import { fetchMessages, uploadMedia } from "../services/ChatService";
 import { fetchChatItemsList } from "@/features/chat_list/services/chatListService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
 import { useAuthStore } from "@/store/authStore";
 import { extractDateKey, extractDateLabel, formatNowToBackendFormat } from "@/utils/dateUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
+import type { MediaType, MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
 
 
 export type ChatListItem =
@@ -36,13 +37,14 @@ function groupMessageWithSeparators(messages: Message[]): ChatListItem[] {
 }
 
 function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message {
-
   return {
     id: String(dto.id),
     content: dto.content,
     timestamp: dto.timestamp,
     senderName: dto.senderName,
     isMine: dto.senderEmail === currentUserEmail,
+    typeMedia: dto.typeMedia,
+    mediaUrl: dto.mediaUrl,
   };
 }
 
@@ -89,7 +91,9 @@ export function useChatViewModel(
         content: message.content,
         timestamp: message.timestamp,
         senderName: message.senderName,
-        isMine: false, // Como o filtro acima garante que não é do usuário, podemos assumir isMine = false
+        isMine: false,
+        typeMedia: message.typeMedia,
+        mediaUrl: message.mediaUrl,
       };
 
       setChatItems((prev) => {
@@ -274,11 +278,92 @@ export function useChatViewModel(
     setInputText('');
   }, [inputText, receiverId, wsSendMessage, wsSendTyping, currentUserName, currentUserId, conversationId]);
 
+  const handleAttach = useCallback(async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    const typeMedia: MediaType = asset.type === 'video' ? 'VIDEO' : 'IMAGE';
+    const localId = `local-media-${Date.now()}`;
+
+    // Optimistic UI com URI local enquanto o upload acontece
+    setChatItems((prev) => {
+      const timestamp = formatNowToBackendFormat();
+      const todayKey = extractDateKey(timestamp);
+      const items = [...prev];
+      const hasTodaySeparator = prev.some(
+        (item) => item.type === 'separator' && item.key === `separator-${todayKey}`
+      );
+      if (!hasTodaySeparator) {
+        items.push({
+          type: 'separator',
+          label: extractDateLabel(timestamp),
+          key: `separator-${todayKey}`,
+        });
+      }
+      items.push({
+        type: 'message',
+        data: {
+          id: localId,
+          content: 'Arquivo de mídia',
+          timestamp,
+          senderName: currentUserName ?? '',
+          isMine: true,
+          typeMedia,
+          mediaUrl: asset.uri,
+        },
+      });
+      return items;
+    });
+
+    let savedMessage: MessageHistoryDTO | null = null;
+    try {
+      savedMessage = await uploadMedia(conversationId, asset, receiverId);
+    } catch (err) {
+      console.error('[ViewModel] ❌ Erro ao fazer upload de mídia:', err);
+      setChatItems((prev) => prev.filter(
+        (item) => !(item.type === 'message' && item.data.id === localId)
+      ));
+      setError('Erro ao enviar arquivo. Tente novamente.');
+      return;
+    }
+
+    if (!savedMessage?.mediaUrl) {
+      console.error('[ViewModel] ❌ Upload retornou sem mediaUrl:', savedMessage);
+      setChatItems((prev) => prev.filter(
+        (item) => !(item.type === 'message' && item.data.id === localId)
+      ));
+      setError('Erro ao processar arquivo. Tente novamente.');
+      return;
+    }
+
+    // Substitui a URI local pela URL do servidor na mensagem otimista
+    setChatItems((prev) =>
+      prev.map((item) =>
+        item.type === 'message' && item.data.id === localId
+          ? { ...item, data: { ...item.data, mediaUrl: savedMessage!.mediaUrl } }
+          : item
+      )
+    );
+
+    // Notifica o destinatário via WebSocket com a URL definitiva do servidor
+    console.log('[ViewModel] 📎 Enviando mídia via WS | typeMedia=', typeMedia, '| mediaUrl=', savedMessage.mediaUrl);
+    wsSendMessage(receiverId, 'Arquivo de mídia', undefined, typeMedia, savedMessage.mediaUrl);
+  }, [conversationId, currentUserName, receiverId, wsSendMessage]);
+
   return {
     chatItems,
     inputText,
     setInputText: handleInputChange,
     handleSend,
+    handleAttach,
     isLoading,
     error,
     isOtherUserTyping,

@@ -66,6 +66,7 @@ export const Endpoints = {
   chat: {
     list: '/chats',
     getById: (id: number) => `/chats/${id}/messages`,
+    uploadMedia: (id: number) => `/chats/${id}/messages/media`,
   },
 
   // Perfis de músicos (tela de perfil completo — diferente do card de discovery)

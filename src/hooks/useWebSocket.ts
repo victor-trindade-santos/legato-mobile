@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { WebSocketService } from "@/services/websocket/WebSocketService";
-import type { MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
+import type { MediaType, MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
 
 interface UseWebSocketOptions {
     token: string;
@@ -12,7 +12,7 @@ interface UseWebSocketOptions {
 }
 
 interface UseWebSocketReturn {
-    sendMessage: (receiverId: number, content: string, repliedMessageId?: number) => void;
+    sendMessage: (receiverId: number, content: string, repliedMessageId?: number, typeMedia?: MediaType, mediaUrl?: string) => void;
     sendTyping: (userId: number, isTyping: boolean) => void;
 }
 
@@ -60,8 +60,8 @@ export function useWebSocket({ token, chatId, onMessage, onTyping, otherUserId, 
         );
     }, [otherUserId]);
 
-    const sendMessage = (receiverId: number, content: string, repliedMessageId?: number) => {
-        wsRef.current?.sendMessage(receiverId, content, repliedMessageId);
+    const sendMessage = (receiverId: number, content: string, repliedMessageId?: number, typeMedia?: MediaType, mediaUrl?: string) => {
+        wsRef.current?.sendMessage(receiverId, content, repliedMessageId, typeMedia, mediaUrl);
     };
 
     const sendTyping = (userId: number, isTyping: boolean) => {

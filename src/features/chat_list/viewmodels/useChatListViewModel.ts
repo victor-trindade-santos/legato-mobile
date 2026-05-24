@@ -4,6 +4,7 @@ import { fetchChatItemsList } from '../services/chatListService';
 import { ChatItemDTO } from '../models/ChatItemDTO';
 import { useAuthStore } from '@/store/authStore';
 import { useChatListPresence } from '@/hooks/useChatListPresence';
+import { useChatListMessages } from '@/hooks/useChatListMessages';
 
 export function useChatListViewModel() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -36,16 +37,22 @@ export function useChatListViewModel() {
 
     useFocusEffect(loadChatItems);
 
+    const currentUserId = useAuthStore(state => state.user?.id ?? null);
     const userIds = useMemo(() => chatItems.map(i => i.otherUserId), [chatItems]);
+    const chatIds = useMemo(() => chatItems.map(i => i.chatId), [chatItems]);
     const presenceMap = useChatListPresence(token ?? '', userIds);
+    const { messageMap, typingMap } = useChatListMessages(token ?? '', chatIds, currentUserId);
 
     const chatItemsWithPresence = useMemo(() =>
         chatItems.map(item => ({
             ...item,
             isOnline: presenceMap[item.otherUserId]?.isOnline ?? item.isOnline,
             lastSeen: presenceMap[item.otherUserId]?.lastSeen ?? item.lastSeen,
+            lastMessageContent: messageMap[item.chatId]?.content ?? item.lastMessageContent,
+            lastMessageTimestamp: messageMap[item.chatId]?.timestamp ?? item.lastMessageTimestamp,
+            isTyping: typingMap[item.chatId] ?? false,
         })),
-        [chatItems, presenceMap],
+        [chatItems, presenceMap, messageMap, typingMap],
     );
 
     const filteredChatItems = useMemo(() => {

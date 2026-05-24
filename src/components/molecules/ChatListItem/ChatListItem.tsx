@@ -20,7 +20,7 @@ import { BorderRadius, Colors, FontFamily, FontSize, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import type { ChatListItemProps } from './ChatListItem.types';
 
-export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, isOnline, onPress }: ChatListItemProps) {
+export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, isOnline, isTyping, onPress }: ChatListItemProps) {
     const colors = useColors();
     return (
         <TouchableOpacity style={styles.chatItemContainer} onPress={onPress}>
@@ -37,17 +37,27 @@ export function ChatListItem({ userAvatar, userName, lastMessage, timeStamp, isO
                     <LegatoText style={styles.contactName}>
                         {userName}
                     </LegatoText>
-                </View>
-                <View style={styles.messageRow}>
-                    <LegatoText style={[styles.lastMessage, { color: colors.textSecondary }]}>
-                        {lastMessage}
+                    <LegatoText style={[styles.timeStamp, { color: colors.textMuted }]}>
+                        {timeStamp}
                     </LegatoText>
                 </View>
-            </View>
-            <View style={styles.timeStampContainer}>
-                <LegatoText style={[styles.timeStamp, { color: colors.textMuted }]}>
-                    {timeStamp}
-                </LegatoText>
+                <View style={styles.messageRow}>
+                    {isTyping ? (
+                        <LegatoText
+                            style={[styles.lastMessage, styles.typingText, { color: colors.textSecondary }]}
+                            numberOfLines={1}
+                        >
+                            digitando...
+                        </LegatoText>
+                    ) : (
+                        <LegatoText
+                            style={[styles.lastMessage, { color: colors.textSecondary }]}
+                            numberOfLines={1}
+                        >
+                            {lastMessage}
+                        </LegatoText>
+                    )}
+                </View>
             </View>
         </TouchableOpacity>
     );
@@ -72,13 +82,13 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     nameRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginTop: Spacing.xs,
     },
     messageRow: {
         marginBottom: Spacing.sm,
-    },
-    timeStampContainer: {
-        marginLeft: Spacing.md,
     },
     contactName: {
         color: Colors.primary,
@@ -87,6 +97,9 @@ const styles = StyleSheet.create({
     },
     lastMessage: {
         fontSize: FontSize.xs,
+    },
+    typingText: {
+        fontStyle: 'italic',
     },
     timeStamp: {
         fontSize: FontSize.xs,

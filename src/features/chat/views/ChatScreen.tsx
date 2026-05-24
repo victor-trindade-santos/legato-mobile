@@ -91,7 +91,7 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -144,6 +144,8 @@ export default function ChatScreen() {
       <MessageContent
         message={data.content}
         timestamp={formatTimestamp(data.timestamp)}
+        typeMedia={data.typeMedia}
+        mediaUrl={data.mediaUrl}
       />
     )
    
@@ -248,20 +250,22 @@ export default function ChatScreen() {
             </Text>
           </View>
         )} */}
-
-        <ChatInputBar
-          value={inputText}
-          onChangeText={setInputText}
-          onSend={handleSend}
-          placeholder="Digite uma mensagem..."
-        />
-
+        
         {/* ── Errors ────────────────────────────────────– */}
         {error && (
           <View style={styles.errorBanner}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
+        <ChatInputBar
+          value={inputText}
+          onChangeText={setInputText}
+          onSend={handleSend}
+          onAttach={handleAttach}
+          placeholder="Digite uma mensagem..."
+        />
+
+
       </View>
     </AppTemplate>
   );
