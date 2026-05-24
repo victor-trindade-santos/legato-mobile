@@ -34,6 +34,7 @@ import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIn
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { formatTimestamp } from '@/utils/dateUtils';
+import { formatLastSeen } from '@/utils/formatters';
 
 import { useChatViewModel, ChatListItem } from '../viewmodels/useChatViewModel';
 import type { Message } from '../models/MessageModel';
@@ -185,7 +186,7 @@ export default function ChatScreen() {
               presenceStatus.isOnline
                 ? 'Online'
                 : presenceStatus.lastSeen
-                  ? `Visto por último em ${presenceStatus.lastSeen}`
+                  ? `Visto por último ${formatLastSeen(presenceStatus.lastSeen)}`
                   : undefined
             }
           />

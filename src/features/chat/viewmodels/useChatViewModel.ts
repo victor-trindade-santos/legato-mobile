@@ -116,7 +116,12 @@ export function useChatViewModel(
   // ── 1c. Handler de eventos de presença recebidos ───────────
   const handlePresenceUpdate = useCallback<PresenceHandler>((dto) => {
     console.log('[ViewModel] 📡 presença recebida via WS:', dto);
-    setPresenceStatus({ isOnline: dto.isOnline, lastSeen: dto.lastSeen });
+    // Quando o WS sinaliza offline, dto.lastSeen é o lastSeen da sessão anterior (stale).
+    // Como sabemos que o usuário acabou de desconectar agora, usamos o timestamp atual.
+    setPresenceStatus({
+      isOnline: dto.isOnline,
+      lastSeen: dto.isOnline ? dto.lastSeen : new Date().toISOString(),
+    });
   }, []);
 
   // ── 1b. Handler de eventos de typing recebidos ─────────────

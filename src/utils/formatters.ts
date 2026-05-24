@@ -1,5 +1,71 @@
 /** Formatadores de dados — exibição na UI */
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const isToday = (date: Date): boolean => {
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+};
+
+const isYesterday = (date: Date): boolean => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return (
+    date.getFullYear() === yesterday.getFullYear() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getDate() === yesterday.getDate()
+  );
+};
+
+/**
+ * Formata o lastSeen para exibição após "Visto por último ".
+ * Exemplos: "há pouco", "há 5min", "às 16:26", "ontem às 16:26", "em 24/05"
+ */
+export const formatLastSeen = (isoString: string | null | undefined): string => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return '';
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const timeStr = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+  if (diffMin < 1) return 'há pouco';
+  if (diffMin < 60) return `há ${diffMin}min`;
+  if (isToday(date)) return `às ${timeStr}`;
+  if (isYesterday(date)) return `ontem às ${timeStr}`;
+
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+  const currentYear = now.getFullYear();
+  return year !== currentYear
+    ? `em ${day}/${month}/${year}`
+    : `em ${day}/${month}`;
+};
+
+/**
+ * Formata o timestamp do último item da lista de chats.
+ * Exemplos: "16:26", "ontem", "24/05"
+ */
+export const formatChatTimestamp = (isoString: string | null | undefined): string => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return '';
+
+  if (isToday(date)) return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  if (isYesterday(date)) return 'ontem';
+
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  return `${day}/${month}`;
+};
+
 export const formatTimeAgo = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();

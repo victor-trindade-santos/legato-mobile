@@ -17,6 +17,7 @@ import { ChatListItem } from '@/components/molecules/ChatListItem/ChatListItem';
 import { useChatListViewModel } from '../viewmodels/useChatListViewModel';
 import { FlatList } from 'react-native-gesture-handler';
 import { Spacing } from '@/theme';
+import { formatChatTimestamp } from '@/utils/formatters';
 
 type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
@@ -61,7 +62,7 @@ export default function ChatListScreen() {
                                     userAvatar={item.otherUserProfilePictureUrl || ''}
                                     userName={item.otherUserName}
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
-                                    timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
+                                    timeStamp={formatChatTimestamp(item.lastMessageTimestamp)}
                                     isOnline={item.isOnline}
                                     onPress={() => {
                                         console.log('[ChatList] → navegando para chat | user=', item.otherUserName, '| isOnline=', item.isOnline, '| lastSeen=', item.lastSeen);
