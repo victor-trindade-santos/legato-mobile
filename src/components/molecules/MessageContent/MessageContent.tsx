@@ -99,12 +99,12 @@ export function MessageContent({
       <View style={styles.footerRow}>
         <TimestampText>{timestamp}</TimestampText>
 
-        {/* {statusElement && (
+        {statusElement && (
           <>
             <Spacer horizontal size={6} />
             {statusElement}
           </>
-        )} */}
+        )}
       </View>
     </View>
   );

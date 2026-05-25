@@ -154,7 +154,7 @@ export default function ChatScreen() {
 
     const {data} = item;
 
-    const content = (
+    const messageContent = (
       <MessageContent
         message={data.content}
         timestamp={formatTimestamp(data.timestamp)}
@@ -171,13 +171,20 @@ export default function ChatScreen() {
           timestamp: formatTimestamp(data.timestamp),
         })}
       />
-    )
-   
-    return data.isMine ? (
-      <MyMessageBubble>{content}</MyMessageBubble>
-    ) : (
-      <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
     );
+
+    if (data.isMine) {
+      return (
+        <View style={styles.myMessageWrapper}>
+          <MyMessageBubble>{messageContent}</MyMessageBubble>
+          <View style={styles.badgeRow}>
+            <UnreadMessagesBadge status={data.status ?? 'sending'} />
+          </View>
+        </View>
+      );
+    }
+
+    return <OtherUserMessageBubble>{messageContent}</OtherUserMessageBubble>;
   };
 
   // ════════════════════════════════════════════════════════════════════
@@ -339,6 +346,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Spacing.screenPaddingH,
     paddingVertical: Spacing.sm,
+  },
+  myMessageWrapper: {},
+  badgeRow: {
+    alignItems: 'flex-end',
   },
   emptyContainer: {
     flex: 1,

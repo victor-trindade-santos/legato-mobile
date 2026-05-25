@@ -1,5 +1,5 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
-import type { MediaType, MessageHandler, PresenceHandler, TypingDTO, TypingHandler, UserPresenceDTO } from '@/types/WebSocket.types';
+import type { MediaType, MessageHandler, MessageStatusUpdateDTO, PresenceHandler, StatusUpdateHandler, TypingDTO, TypingHandler, UserPresenceDTO } from '@/types/WebSocket.types';
 import { Config } from '@/constants/config';
 
 const SEND_DESTINATION = '/app/sendMessage';
@@ -9,6 +9,7 @@ export class WebSocketService {
   private messageSubscription: StompSubscription | null = null;
   private typingSubscription: StompSubscription | null = null;
   private presenceSubscription: StompSubscription | null = null;
+  private statusSubscription: StompSubscription | null = null;
   private isConnected: boolean = false;
   private readonly chatId: number;
   private storedPresenceUserId?: number;
@@ -19,6 +20,8 @@ export class WebSocketService {
     chatId: number,
     onMessage: MessageHandler,
     onTyping?: TypingHandler,
+    myUserId?: number,
+    onStatusUpdate?: StatusUpdateHandler,
   ) {
     this.chatId = chatId;
 
@@ -54,6 +57,25 @@ export class WebSocketService {
               }
             }
           );
+        }
+
+        if (myUserId != null && onStatusUpdate) {
+          const statusTopic = `/topic/users/${myUserId}/messages/status`;
+          console.log('[WS] 🔔 Subscrevendo status updates | topic=', statusTopic);
+          this.statusSubscription = this.client.subscribe(
+            statusTopic,
+            (frame: IMessage) => {
+              try {
+                const dto: MessageStatusUpdateDTO = JSON.parse(frame.body);
+                console.log('[WS] 📬 Status update recebido:', dto);
+                onStatusUpdate(dto);
+              } catch (err) {
+                console.error('[WS] ❌ Erro ao ler status update:', err);
+              }
+            }
+          );
+        } else {
+          console.warn('[WS] ⚠️ Status subscription IGNORADA | myUserId=', myUserId, '| onStatusUpdate=', typeof onStatusUpdate);
         }
 
         if (this.storedPresenceUserId != null && this.storedPresenceHandler) {
@@ -125,8 +147,32 @@ export class WebSocketService {
       this.presenceSubscription.unsubscribe();
       this.presenceSubscription = null;
     }
+    if (this.statusSubscription) {
+      this.statusSubscription.unsubscribe();
+      this.statusSubscription = null;
+    }
     this.client.deactivate();
     this.isConnected = false;
+  }
+
+  sendDelivered(chatId: number, messageId: number): void {
+    if (!this.isConnected) return;
+    this.client.publish({
+      destination: `/app/chat/${chatId}/message/${messageId}/delivered`,
+      body: '',
+    });
+  }
+
+  sendRead(chatId: number): void {
+    if (!this.isConnected) {
+      console.warn('[WS] ⚠️ sendRead ignorado — não conectado | chatId=', chatId);
+      return;
+    }
+    console.log('[WS] 📖 Enviando sendRead | chatId=', chatId);
+    this.client.publish({
+      destination: `/app/chat/${chatId}/read`,
+      body: '',
+    });
   }
 
   sendMessage(

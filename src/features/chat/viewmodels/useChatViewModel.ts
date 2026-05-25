@@ -7,7 +7,7 @@ import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageM
 import { useAuthStore } from "@/store/authStore";
 import { extractDateKey, extractDateLabel, formatNowToBackendFormat } from "@/utils/dateUtils";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import type { MediaType, MessageHandler, PresenceHandler, TypingHandler } from "@/types/WebSocket.types";
+import type { MediaType, MessageHandler, PresenceHandler, StatusUpdateHandler, TypingHandler } from "@/types/WebSocket.types";
 
 
 export type ChatListItem =
@@ -36,6 +36,13 @@ function groupMessageWithSeparators(messages: Message[]): ChatListItem[] {
   return result;
 }
 
+function mapBackendStatus(s?: 'SENT' | 'DELIVERED' | 'READ'): Message['status'] {
+  if (s === 'READ') return 'read';
+  if (s === 'DELIVERED') return 'delivered';
+  if (s === 'SENT') return 'sent';
+  return undefined;
+}
+
 function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message {
   return {
     id: String(dto.id),
@@ -45,6 +52,7 @@ function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message
     isMine: dto.senderEmail === currentUserEmail,
     typeMedia: dto.typeMedia,
     mediaUrl: dto.mediaUrl,
+    status: mapBackendStatus(dto.status),
   };
 }
 
@@ -69,6 +77,9 @@ export function useChatViewModel(
   const typingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Timer de segurança no receptor: reseta se o "parou de digitar" nunca chegar
   const typingResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Refs estáveis — evitam dependência circular com handleIncomingMessage
+  const wsSendDeliveredRef = useRef<(chatId: number, messageId: number) => void>(() => {});
+  const wsSendReadRef = useRef<(chatId: number) => void>(() => {});
 
   const currentUserEmail = useAuthStore((state) => state.user?.email);
   const currentUserId = useAuthStore((state) => state.user?.id);
@@ -78,7 +89,28 @@ export function useChatViewModel(
   // ── 1a. Handler de mensagens recebidas ─────────────────────
   const handleIncomingMessage = useCallback<MessageHandler>((message) => {
       const isFromOtherUser = message.senderEmail !== currentUserEmail;
-      if (!isFromOtherUser) return; // Ignora eco das próprias mensagens
+
+      if (!isFromOtherUser) {
+        // Eco da própria mensagem: substitui o placeholder local pelo real do servidor
+        setChatItems((prev) => {
+          const localIdx = [...prev].reverse().findIndex(
+            (item) => item.type === 'message' && item.data.id.startsWith('local-')
+          );
+          if (localIdx === -1) return prev;
+          const realIdx = prev.length - 1 - localIdx;
+          const updated = [...prev];
+          updated[realIdx] = {
+            type: 'message',
+            data: {
+              ...(updated[realIdx] as { type: 'message'; data: Message }).data,
+              id: String(message.id),
+              status: 'sent',
+            },
+          };
+          return updated;
+        });
+        return;
+      }
 
       const newMessage: Message = {
         id: String(message.id),
@@ -88,6 +120,7 @@ export function useChatViewModel(
         isMine: false,
         typeMedia: message.typeMedia,
         mediaUrl: message.mediaUrl,
+        status: mapBackendStatus(message.status),
       };
 
       setChatItems((prev) => {
@@ -115,6 +148,13 @@ export function useChatViewModel(
         result.push({ type: 'message', data: newMessage });
         return result;
       });
+
+      // Confirma entrega e depois marca como lido com delay para evitar race condition no backend
+      console.log('[ViewModel] 📨 Mensagem recebida, disparando delivered+read | chatId=', message.chatId, '| msgId=', message.id);
+      wsSendDeliveredRef.current(message.chatId, message.id);
+      setTimeout(() => {
+        wsSendReadRef.current(message.chatId);
+      }, 400);
   }, [currentUserEmail]);
 
   // ── 1c. Handler de eventos de presença recebidos ───────────
@@ -170,15 +210,46 @@ export function useChatViewModel(
     refreshPresence();
   }, [receiverId]);
 
+  // ── 1d-bis. Handler de status update (DELIVERED / READ) ───
+  const handleStatusUpdate = useCallback<StatusUpdateHandler>((dto) => {
+    console.log('[ViewModel] 📬 status update recebido | dto=', dto, '| conversationId=', conversationId);
+    setChatItems((prev) =>
+      prev.map((item) => {
+        if (item.type !== 'message' || !item.data.isMine) return item;
+        if (dto.status === 'READ') {
+          // messageId null = todas as mensagens do chat foram lidas
+          if (dto.chatId === conversationId) {
+            console.log('[ViewModel] ✅ Marcando mensagem como READ | id=', item.data.id);
+            return { ...item, data: { ...item.data, status: 'read' as const } };
+          } else {
+            console.warn('[ViewModel] ⚠️ READ chatId mismatch | dto.chatId=', dto.chatId, '| conversationId=', conversationId);
+          }
+        } else if (dto.status === 'DELIVERED' && dto.messageId != null) {
+          if (item.data.id === String(dto.messageId)) {
+            console.log('[ViewModel] ✅ Marcando mensagem como DELIVERED | id=', item.data.id);
+            return { ...item, data: { ...item.data, status: 'delivered' as const } };
+          }
+        }
+        return item;
+      })
+    );
+  }, [conversationId]);
+
   // ── 2. Passa os handlers estáveis para o hook ──────────────
-  const { sendMessage: wsSendMessage, sendTyping: wsSendTyping } = useWebSocket({
+  const { sendMessage: wsSendMessage, sendTyping: wsSendTyping, sendDelivered: wsSendDelivered, sendRead: wsSendRead } = useWebSocket({
     token: token ?? '',
     onMessage: handleIncomingMessage,
     chatId: conversationId,
     onTyping: handleIncomingTyping,
     otherUserId: receiverId,
     onPresence: handlePresenceUpdate,
+    myUserId: currentUserId ?? undefined,
+    onStatusUpdate: handleStatusUpdate,
   });
+
+  // Mantém os refs de send* sempre atualizados
+  useEffect(() => { wsSendDeliveredRef.current = wsSendDelivered; }, [wsSendDelivered]);
+  useEffect(() => { wsSendReadRef.current = wsSendRead; }, [wsSendRead]);
     
 
   useEffect(() => {
@@ -245,6 +316,7 @@ export function useChatViewModel(
       timestamp: formatNowToBackendFormat(),
       senderName: currentUserName ?? '',
       isMine: true,
+      status: 'sending',
     };
 
     setChatItems((prev) => {
@@ -318,6 +390,7 @@ export function useChatViewModel(
           isMine: true,
           typeMedia,
           mediaUrl: asset.uri,
+          status: 'sending',
         },
       });
       return items;

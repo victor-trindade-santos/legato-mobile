@@ -15,6 +15,7 @@ export interface Message {
   isMine: boolean;
   typeMedia?: MediaType;
   mediaUrl?: string;
+  status?: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
 /**
@@ -35,6 +36,8 @@ export interface MessageHistoryDTO {
   timestamp: string; // Formato: "dd/mm/yyyy HH:mm"
   senderName: string;
   senderEmail: string;
+  senderId?: number;
   typeMedia?: MediaType;
   mediaUrl?: string;
+  status?: 'SENT' | 'DELIVERED' | 'READ';
 }

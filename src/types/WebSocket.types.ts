@@ -17,6 +17,7 @@ export type MediaType = 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
 export interface IncomingWSMessage {
   id: number;
   chatId: number;
+  senderId: number;
   senderName: string;
   senderEmail: string;
   content: string;
@@ -26,6 +27,17 @@ export interface IncomingWSMessage {
   status?: 'SENT' | 'DELIVERED' | 'READ';
   repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;
 }
+
+// Atualização de status recebida em /topic/users/{myUserId}/messages/status
+// messageId é null quando status = READ (significa "todas as msgs do chatId")
+export interface MessageStatusUpdateDTO {
+  chatId: number;
+  messageId: number | null;
+  status: 'DELIVERED' | 'READ';
+  timestamp: string;
+}
+
+export type StatusUpdateHandler = (dto: MessageStatusUpdateDTO) => void;
 
 // Callback chamado quando uma nova mensagem é recebida via WebSocket
 export type MessageHandler = (message: IncomingWSMessage) => void;
