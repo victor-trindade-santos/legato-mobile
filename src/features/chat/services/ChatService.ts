@@ -37,14 +37,19 @@ export async function uploadMedia(
   const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
   if (Platform.OS === 'web') {
-    // No browser o FormData não entende { uri, type, name } — é um formato
-    // exclusivo do React Native. Precisamos buscar a URI (data: ou blob:)
-    // e converter para um File real antes de anexar.
-    const fileResponse = await fetch(asset.uri);
-    const blob = await fileResponse.blob();
+    // expo-image-picker expõe o File nativo do browser em asset.file (web-only).
+    // Usar diretamente no FormData é o caminho correto e elimina o problema de
+    // XHR para blob: URLs de vídeo, que ficam presos no pipeline de media do Chrome.
+    const file = asset.file;
+    console.log('[ChatService] uploadMedia web | mimeType=', mimeType, '| name=', name, '| file=', file?.name, '| size=', file?.size);
+    if (!file) {
+      throw new Error('asset.file não disponível — não é possível fazer upload no browser');
+    }
+
     const formData = new FormData();
-    formData.append('file', new File([blob], name, { type: mimeType }));
+    formData.append('file', file, name);
     formData.append('receiverId', String(receiverId));
+    console.log('[ChatService] POST', url);
 
     const response = await fetch(url, {
       method: 'POST',
@@ -52,6 +57,7 @@ export async function uploadMedia(
       body: formData,
     });
 
+    console.log('[ChatService] resposta | status=', response.status);
     if (!response.ok) {
       const text = await response.text();
       throw new Error(`Upload falhou com status ${response.status}: ${text}`);
