@@ -160,6 +160,9 @@ export default function ChatScreen() {
         timestamp={formatTimestamp(data.timestamp)}
         typeMedia={data.typeMedia}
         mediaUrl={data.mediaUrl}
+        mediaWidth={data.mediaWidth}
+        mediaHeight={data.mediaHeight}
+        thumbnailUrl={data.thumbnailUrl}
         onImagePress={(url) => setSelectedImage({
           url,
           senderName: data.senderName,
@@ -244,43 +247,6 @@ export default function ChatScreen() {
             isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
           }
         />
-{/* 
-        ── Connection Status Badge ──────────────────────–
-        {connectionStatus !== 'connected' && (
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor:
-                  connectionStatus === 'connecting' ||
-                  connectionStatus === 'reconnecting'
-                    ? Colors.warning
-                    : Colors.error,
-              },
-            ]}
-          >
-            <ActivityIndicator
-              size="small"
-              color={Colors.white}
-              style={{ marginRight: 8 }}
-            />
-            <Text
-              style={{
-                color: Colors.white,
-                fontSize: FontSize.xs,
-                fontWeight: FontWeight.semiBold,
-              }}
-            >
-              {connectionStatus === 'connecting'
-                ? 'Conectando...'
-                : connectionStatus === 'reconnecting'
-                  ? 'Reconectando...'
-                  : connectionStatus === 'error'
-                    ? 'Erro de conexão'
-                    : 'Desconectado'}
-            </Text>
-          </View>
-        )} */}
         
         {/* ── Errors ────────────────────────────────────– */}
         {error && (

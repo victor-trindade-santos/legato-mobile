@@ -5,6 +5,9 @@ export interface MessageContentProps {
   timestamp: string;
   typeMedia?: MediaType;
   mediaUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  thumbnailUrl?: string;
 
   /** Chamado ao tocar em uma imagem — recebe a URL para abrir no viewer */
   onImagePress?: (url: string) => void;

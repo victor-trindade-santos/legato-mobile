@@ -15,6 +15,9 @@ export interface Message {
   isMine: boolean;
   typeMedia?: MediaType;
   mediaUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  thumbnailUrl?: string;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
@@ -39,5 +42,8 @@ export interface MessageHistoryDTO {
   senderId?: number;
   typeMedia?: MediaType;
   mediaUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  thumbnailUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
 }

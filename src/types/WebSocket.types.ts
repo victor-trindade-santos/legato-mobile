@@ -24,6 +24,9 @@ export interface IncomingWSMessage {
   timestamp: string; // "DD/MM/YYYY HH:MM"
   typeMedia?: MediaType;
   mediaUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  thumbnailUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
   repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;
 }

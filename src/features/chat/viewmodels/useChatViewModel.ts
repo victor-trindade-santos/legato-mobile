@@ -52,6 +52,9 @@ function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message
     isMine: dto.senderEmail === currentUserEmail,
     typeMedia: dto.typeMedia,
     mediaUrl: dto.mediaUrl,
+    mediaWidth: dto.mediaWidth,
+    mediaHeight: dto.mediaHeight,
+    thumbnailUrl: dto.thumbnailUrl,
     status: mapBackendStatus(dto.status),
   };
 }
@@ -120,6 +123,8 @@ export function useChatViewModel(
         isMine: false,
         typeMedia: message.typeMedia,
         mediaUrl: message.mediaUrl,
+        mediaWidth: message.mediaWidth,
+        mediaHeight: message.mediaHeight,
         status: mapBackendStatus(message.status),
       };
 
@@ -363,6 +368,8 @@ export function useChatViewModel(
 
     const asset = result.assets[0];
     const typeMedia: MediaType = asset.type === 'video' ? 'VIDEO' : 'IMAGE';
+    const mediaWidth = asset.width;
+    const mediaHeight = asset.height;
     const localId = `local-media-${Date.now()}`;
 
     // Optimistic UI com URI local enquanto o upload acontece
@@ -390,6 +397,8 @@ export function useChatViewModel(
           isMine: true,
           typeMedia,
           mediaUrl: asset.uri,
+          mediaWidth,
+          mediaHeight,
           status: 'sending',
         },
       });
