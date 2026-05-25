@@ -16,7 +16,7 @@
  * - WebSocketService (tempo real)
  */
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
@@ -32,6 +32,7 @@ import { MessageContent } from '@/components/molecules/MessageContent/MessageCon
 import { UnreadMessagesBadge } from '@/components/molecules/UnreadMessagesBadge/UnreadMessagesBadge';
 import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIndicator';
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
+import { ImageViewerModal } from '@/components/molecules/ImageViewerModal/ImageViewerModal';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { formatLastSeen } from '@/utils/formatters';
@@ -93,6 +94,12 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
 
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string;
+    senderName: string;
+    timestamp: string;
+  } | null>(null);
+
 
   // ════════════════════════════════════════════════════════════════════
   // LIFECYCLE - MARCAR COMO LIDO
@@ -146,6 +153,11 @@ export default function ChatScreen() {
         timestamp={formatTimestamp(data.timestamp)}
         typeMedia={data.typeMedia}
         mediaUrl={data.mediaUrl}
+        onImagePress={(url) => setSelectedImage({
+          url,
+          senderName: data.senderName,
+          timestamp: formatTimestamp(data.timestamp),
+        })}
       />
     )
    
@@ -264,9 +276,15 @@ export default function ChatScreen() {
           onAttach={handleAttach}
           placeholder="Digite uma mensagem..."
         />
-
-
       </View>
+
+      <ImageViewerModal
+        visible={selectedImage !== null}
+        imageUrl={selectedImage?.url ?? ''}
+        senderName={selectedImage?.senderName ?? ''}
+        timestamp={selectedImage?.timestamp ?? ''}
+        onClose={() => setSelectedImage(null)}
+      />
     </AppTemplate>
   );
 }

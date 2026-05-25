@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Spacing } from '@/theme';
 
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -27,6 +27,7 @@ export function MessageContent({
   timestamp,
   typeMedia,
   mediaUrl,
+  onImagePress,
   statusElement,
 }: MessageContentProps) {
   const isImage = typeMedia === 'IMAGE';
@@ -38,11 +39,17 @@ export function MessageContent({
     <View style={styles.container}>
 
       {isImage && mediaUrl && (
-        <Image
-          source={{ uri: mediaUrl }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => onImagePress?.(mediaUrl)}
+          disabled={!onImagePress}
+        >
+          <Image
+            source={{ uri: mediaUrl }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
       )}
 
       {isVideo && (
