@@ -33,6 +33,7 @@ import { UnreadMessagesBadge } from '@/components/molecules/UnreadMessagesBadge/
 import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIndicator';
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
 import { ImageViewerModal } from '@/components/molecules/ImageViewerModal/ImageViewerModal';
+import { VideoPlayerModal } from '@/components/molecules/VideoPlayerModal/VideoPlayerModal';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { formatLastSeen } from '@/utils/formatters';
@@ -100,6 +101,12 @@ export default function ChatScreen() {
     timestamp: string;
   } | null>(null);
 
+  const [selectedVideo, setSelectedVideo] = useState<{
+    url: string;
+    senderName: string;
+    timestamp: string;
+  } | null>(null);
+
 
   // ════════════════════════════════════════════════════════════════════
   // LIFECYCLE - MARCAR COMO LIDO
@@ -154,6 +161,11 @@ export default function ChatScreen() {
         typeMedia={data.typeMedia}
         mediaUrl={data.mediaUrl}
         onImagePress={(url) => setSelectedImage({
+          url,
+          senderName: data.senderName,
+          timestamp: formatTimestamp(data.timestamp),
+        })}
+        onVideoPress={(url) => setSelectedVideo({
           url,
           senderName: data.senderName,
           timestamp: formatTimestamp(data.timestamp),
@@ -284,6 +296,14 @@ export default function ChatScreen() {
         senderName={selectedImage?.senderName ?? ''}
         timestamp={selectedImage?.timestamp ?? ''}
         onClose={() => setSelectedImage(null)}
+      />
+
+      <VideoPlayerModal
+        visible={selectedVideo !== null}
+        mediaUrl={selectedVideo?.url ?? ''}
+        senderName={selectedVideo?.senderName ?? ''}
+        timestamp={selectedVideo?.timestamp ?? ''}
+        onClose={() => setSelectedVideo(null)}
       />
     </AppTemplate>
   );

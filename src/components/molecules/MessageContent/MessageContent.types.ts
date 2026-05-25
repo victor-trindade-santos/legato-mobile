@@ -9,6 +9,9 @@ export interface MessageContentProps {
   /** Chamado ao tocar em uma imagem — recebe a URL para abrir no viewer */
   onImagePress?: (url: string) => void;
 
+  /** Chamado ao tocar em um vídeo — recebe a URL para abrir no player */
+  onVideoPress?: (url: string) => void;
+
   /** Ex: ✓, ✓✓, ✓✓ (azul) — entra depois via MessageStatusIndicator */
   statusElement?: React.ReactNode;
 }

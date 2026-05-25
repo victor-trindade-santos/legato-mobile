@@ -28,6 +28,7 @@ export function MessageContent({
   typeMedia,
   mediaUrl,
   onImagePress,
+  onVideoPress,
   statusElement,
 }: MessageContentProps) {
   const isImage = typeMedia === 'IMAGE';
@@ -53,15 +54,21 @@ export function MessageContent({
       )}
 
       {isVideo && (
-        <View style={styles.videoPlaceholder}>
-          <Icon
-            variant="vector"
-            family="Ionicons"
-            name="play-circle"
-            size={48}
-            color={Colors.white}
-          />
-        </View>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => mediaUrl && onVideoPress?.(mediaUrl)}
+          disabled={!onVideoPress || !mediaUrl}
+        >
+          <View style={styles.videoPlaceholder}>
+            <Icon
+              variant="vector"
+              family="Ionicons"
+              name="play-circle"
+              size={48}
+              color={Colors.white}
+            />
+          </View>
+        </TouchableOpacity>
       )}
 
       {isAudio && (
