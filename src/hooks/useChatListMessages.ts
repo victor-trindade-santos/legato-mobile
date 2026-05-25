@@ -40,6 +40,13 @@ export function useChatListMessages(
                 clearTimeout(typingTimersRef.current[chatId]);
                 delete typingTimersRef.current[chatId];
               }
+
+              if (msg.senderId !== currentUserId){
+                client.publish({
+                  destination: `/app/chat/${msg.chatId}/message/${msg.id}/delivered`,
+                  body: '',
+                });
+              }
             } catch (err) {
               console.error('[ChatListMessages] ❌ Erro ao ler mensagem:', err);
             }
