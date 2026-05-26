@@ -29,6 +29,7 @@ export interface IncomingWSMessage {
   thumbnailUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
   repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;
+  audioType?: 'voice' | 'audio_file';
 }
 
 // Atualização de status recebida em /topic/users/{myUserId}/messages/status

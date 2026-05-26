@@ -19,4 +19,5 @@ export interface MessageContentProps {
   statusElement?: React.ReactNode;
   audioType?: 'voice' | 'audio_file';
   isMine?: boolean;
+  onDownloadRequest?: () => Promise<void>;
 }

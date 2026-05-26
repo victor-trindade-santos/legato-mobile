@@ -37,6 +37,26 @@ function groupMessageWithSeparators(messages: Message[]): ChatListItem[] {
   return result;
 }
 
+const AUDIO_FILE_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.ogg', '.aac', '.flac', '.wma', '.opus'];
+const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv', '.zip'];
+
+function inferAudioType(
+  typeMedia: MediaType | undefined,
+  content: string,
+): 'voice' | 'audio_file' | undefined {
+  if (typeMedia !== 'AUDIO') return undefined;
+  const lower = content.toLowerCase();
+  return AUDIO_FILE_EXTENSIONS.some((ext) => lower.endsWith(ext)) ? 'audio_file' : 'voice';
+}
+
+function inferMediaType(dto: MessageHistoryDTO): MediaType | undefined {
+  if (dto.typeMedia && dto.typeMedia !== 'NONE') return dto.typeMedia;
+  if (!dto.mediaUrl) return dto.typeMedia;
+  const lower = dto.mediaUrl.toLowerCase();
+  if (DOCUMENT_EXTENSIONS.some((ext) => lower.includes(ext))) return 'FILE';
+  return dto.typeMedia;
+}
+
 function mapBackendStatus(s?: 'SENT' | 'DELIVERED' | 'READ'): Message['status'] {
   if (s === 'READ') return 'read';
   if (s === 'DELIVERED') return 'delivered';
@@ -51,12 +71,13 @@ function mapToMessage(dto: MessageHistoryDTO, currentUserEmail: string): Message
     timestamp: dto.timestamp,
     senderName: dto.senderName,
     isMine: dto.senderEmail === currentUserEmail,
-    typeMedia: dto.typeMedia,
+    typeMedia: inferMediaType(dto),
     mediaUrl: dto.mediaUrl,
     mediaWidth: dto.mediaWidth,
     mediaHeight: dto.mediaHeight,
     thumbnailUrl: dto.thumbnailUrl,
     status: mapBackendStatus(dto.status),
+    audioType: dto.audioType ?? inferAudioType(dto.typeMedia, dto.content),
   };
 }
 
@@ -127,6 +148,7 @@ export function useChatViewModel(
         mediaWidth: message.mediaWidth,
         mediaHeight: message.mediaHeight,
         status: mapBackendStatus(message.status),
+        audioType: message.audioType ?? inferAudioType(message.typeMedia, message.content),
       };
 
       setChatItems((prev) => {
@@ -481,7 +503,7 @@ export function useChatViewModel(
     let savedMessage: MessageHistoryDTO | null = null;
     try {
       console.log('[ViewModel] iniciando uploadAudio...');
-      savedMessage = await uploadAudio(conversationId, asset, receiverId);
+      savedMessage = await uploadAudio(conversationId, asset, receiverId, options?.audioType ?? 'voice');
       console.log('[ViewModel] ✅ uploadAudio retornou:', savedMessage);
     } catch (err) {
       console.error('[ViewModel] ❌ Erro ao fazer upload de áudio:', err);
@@ -528,6 +550,73 @@ export function useChatViewModel(
     });
   }, [handleMic]);
 
+  const handleAttachDocument = useCallback(async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+      ],
+      copyToCacheDirectory: true,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+    const picked = result.assets[0];
+
+    const localId = `local-file-${Date.now()}`;
+    setChatItems((prev) => {
+      const timestamp = formatNowToBackendFormat();
+      const todayKey = extractDateKey(timestamp);
+      const items = [...prev];
+      if (!prev.some((i) => i.type === 'separator' && i.key === `separator-${todayKey}`)) {
+        items.push({ type: 'separator', label: extractDateLabel(timestamp), key: `separator-${todayKey}` });
+      }
+      items.push({
+        type: 'message',
+        data: {
+          id: localId,
+          content: picked.name ?? 'Documento',
+          timestamp,
+          senderName: currentUserName ?? '',
+          isMine: true,
+          typeMedia: 'FILE',
+          mediaUrl: picked.uri,
+          status: 'sending',
+        },
+      });
+      return items;
+    });
+
+    let savedMessage: MessageHistoryDTO | null = null;
+    try {
+      savedMessage = await uploadAudio(conversationId, {
+        uri: picked.uri,
+        mimeType: picked.mimeType ?? 'application/octet-stream',
+        fileName: picked.name ?? `file_${Date.now()}`,
+      }, receiverId);
+    } catch {
+      setChatItems((prev) => prev.filter((i) => !(i.type === 'message' && i.data.id === localId)));
+      setError('Erro ao enviar documento. Tente novamente.');
+      return;
+    }
+
+    if (!savedMessage?.mediaUrl) {
+      setChatItems((prev) => prev.filter((i) => !(i.type === 'message' && i.data.id === localId)));
+      setError('Erro ao processar documento. Tente novamente.');
+      return;
+    }
+
+    setChatItems((prev) =>
+      prev.map((i) =>
+        i.type === 'message' && i.data.id === localId
+          ? { ...i, data: { ...i.data, mediaUrl: savedMessage!.mediaUrl, status: 'sent', typeMedia: 'FILE' } }
+          : i
+      )
+    );
+  }, [conversationId, currentUserName, receiverId]);
+
   return {
     chatItems,
     inputText,
@@ -535,6 +624,7 @@ export function useChatViewModel(
     handleSend,
     handleAttach,
     handleAttachAudio,
+    handleAttachDocument,
     handleMic,
     isLoading,
     error,

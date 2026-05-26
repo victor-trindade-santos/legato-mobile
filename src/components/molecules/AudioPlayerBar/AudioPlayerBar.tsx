@@ -206,7 +206,7 @@ export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName,
             {displayName}
           </LegatoText>
         </View>
-        <View style={styles.fileBottomRow}>
+        <View style={[styles.fileBottomRow , { backgroundColor: accentBg }]}>
           {playPauseButton}
           {progressTrack}
           {timeText}

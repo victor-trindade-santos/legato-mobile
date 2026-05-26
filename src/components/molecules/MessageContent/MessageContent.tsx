@@ -40,11 +40,13 @@ export function MessageContent({
   mediaHeight,
   audioType,
   isMine,
+  onDownloadRequest,
 }: MessageContentProps) {
   const isImage = typeMedia === 'IMAGE';
   const isVideo = typeMedia === 'VIDEO';
   const isAudio = typeMedia === 'AUDIO';
-  const isMedia = isImage || isVideo || isAudio;
+  const isFile = typeMedia === 'FILE';
+  const isMedia = isImage || isVideo || isAudio || isFile;
 
   // useVideoPlayer must be called unconditionally — pass null when not a video
   const videoPlayer = useVideoPlayer(
@@ -153,6 +155,39 @@ export function MessageContent({
           <LegatoText variant="body" color={Colors.textPrimaryDark}>
             {audioType === 'audio_file' ? (message ?? 'Enviando...') : 'Enviando...'}
           </LegatoText>
+
+        </View>
+      )}
+
+      {isFile && mediaUrl && (
+        <View style={styles.fileRow}>
+          <View style={styles.fileIconCircle}>
+            <Icon variant="vector" family="Ionicons" name="document-outline" size={20} color={Colors.white} />
+          </View>
+          <Spacer horizontal size={Spacing.sm} />
+          <LegatoText variant="body" color={Colors.textPrimaryDark} numberOfLines={1} ellipsizeMode="tail" style={{ flex: 1 }}>
+            {message}
+          </LegatoText>
+          <TouchableOpacity
+            onPress={() => onDownloadRequest?.()}
+            style={styles.downloadIndicator}
+            activeOpacity={0.6}
+          >
+            <Icon
+              variant="vector"
+              family="Ionicons"
+              name="arrow-down-outline"
+              size={Spacing.lg - 8}
+              color={Colors.textSecondaryDark}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+      {isFile && !mediaUrl && (
+        <View style={styles.audioRow}>
+          <Icon variant="vector" family="Ionicons" name="document-outline" size={18} color={Colors.textPrimaryDark} />
+          <Spacer horizontal size={Spacing.xs} />
+          <LegatoText variant="body" color={Colors.textPrimaryDark}>{message ?? 'Enviando...'}</LegatoText>
         </View>
       )}
 
@@ -187,6 +222,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.xs,
   },
+  fileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.xs,
+    width: 220,
+  },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -195,5 +236,22 @@ const styles = StyleSheet.create({
   videoOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  fileIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  downloadIndicator: {
+    width: Spacing.xl,
+    height: Spacing.xl,
+    borderRadius: Spacing.xl,
+    borderColor: Colors.textSecondaryDark,
+    borderWidth: Spacing.xxs,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

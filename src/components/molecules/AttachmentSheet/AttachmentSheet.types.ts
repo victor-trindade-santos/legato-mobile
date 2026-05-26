@@ -3,4 +3,5 @@ export interface AttachmentSheetProps {
   onClose: () => void;
   onPickMedia: () => void;
   onPickAudio: () => void;
+  onPickDocument?: () => void;
 }

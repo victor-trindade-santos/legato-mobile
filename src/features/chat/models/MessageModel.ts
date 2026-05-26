@@ -47,4 +47,5 @@ export interface MessageHistoryDTO {
   mediaHeight?: number;
   thumbnailUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
+  audioType?: 'voice' | 'audio_file';
 }

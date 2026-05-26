@@ -13,10 +13,11 @@ interface Option {
   onPress: () => void;
 }
 
-export function AttachmentSheet({ visible, onClose, onPickMedia, onPickAudio }: AttachmentSheetProps) {
+export function AttachmentSheet({ visible, onClose, onPickMedia, onPickAudio, onPickDocument }: AttachmentSheetProps) {
   const options: Option[] = [
     { icon: 'images-outline', label: 'Galeria', color: '#9B59B6', onPress: onPickMedia },
     { icon: 'musical-notes-outline', label: 'Áudio', color: '#E67E22', onPress: onPickAudio },
+    ...(onPickDocument ? [{ icon: 'document-outline', label: 'Documento', color: '#3498DB', onPress: onPickDocument }] : []),
   ];
 
   return (

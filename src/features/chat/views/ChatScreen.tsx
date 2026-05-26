@@ -40,6 +40,8 @@ import { formatTimestamp } from '@/utils/dateUtils';
 import { formatLastSeen } from '@/utils/formatters';
 
 import { useChatViewModel, ChatListItem } from '../viewmodels/useChatViewModel';
+import { getChatFileDownloadParams } from '../services/ChatService';
+import { downloadFile } from '@/utils/downloadFile';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import type { Message } from '../models/MessageModel';
 
@@ -95,7 +97,7 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleAttachAudio, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleAttachAudio, handleAttachDocument, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
 
   const { isRecording, recordingDurationMs, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
 
@@ -139,6 +141,11 @@ export default function ChatScreen() {
     setAttachmentSheetVisible(false);
     setTimeout(() => handleAttachAudio(), 300);
   }, [handleAttachAudio]);
+
+  const handlePickDocument = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttachDocument(), 300);
+  }, [handleAttachDocument]);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -198,6 +205,10 @@ export default function ChatScreen() {
         thumbnailUrl={data.thumbnailUrl}
         audioType={data.audioType}
         isMine={data.isMine}
+        onDownloadRequest={data.typeMedia === 'FILE' && !data.id.startsWith('local-') ? async () => {
+          const { url, headers } = await getChatFileDownloadParams(conversationId, Number(data.id));
+          await downloadFile(url, data.content ?? 'documento', headers);
+        } : undefined}
         onImagePress={(url) => setSelectedImage({
           url,
           senderName: data.senderName,
@@ -323,6 +334,7 @@ export default function ChatScreen() {
         onClose={() => setAttachmentSheetVisible(false)}
         onPickMedia={handlePickMedia}
         onPickAudio={handlePickAudio}
+        onPickDocument={handlePickDocument}
       />
     </AppTemplate>
   );

@@ -25,6 +25,15 @@ export interface AudioUploadAsset {
   fileName: string;
 }
 
+export async function getChatFileDownloadParams(
+  chatId: number,
+  messageId: number,
+): Promise<{ url: string; headers: Record<string, string> }> {
+  const token = await storage.getItem(Config.TOKEN_KEY);
+  const url = `${Config.API_URL}${Endpoints.chat.download(chatId, messageId)}`;
+  return { url, headers: token ? { Authorization: `Bearer ${token}` } : {} };
+}
+
 export async function fetchMessages(conversationId: number): Promise<MessageHistoryDTO[]> {
   const res = await api.get<MessageHistoryDTO[]>(Endpoints.chat.getById(conversationId));
   return res.data;
@@ -105,10 +114,11 @@ export async function uploadAudio(
   chatId: number,
   asset: AudioUploadAsset,
   receiverId: number,
+  audioType: 'voice' | 'audio_file' = 'voice',
 ): Promise<MessageHistoryDTO> {
   const token = await storage.getItem(Config.TOKEN_KEY);
   const url = `${Config.API_URL}${Endpoints.chat.uploadMedia(chatId)}`;
-  console.log('[ChatService] uploadAudio | url=', url, '| asset=', asset, '| receiverId=', receiverId, '| temToken=', !!token);
+  console.log('[ChatService] uploadAudio | url=', url, '| asset=', asset, '| receiverId=', receiverId, '| audioType=', audioType, '| temToken=', !!token);
   const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
   if (Platform.OS === 'web') {
@@ -123,6 +133,7 @@ export async function uploadAudio(
     const formData = new FormData();
     formData.append('file', new File([blob], fileName, { type: mimeType }), fileName);
     formData.append('receiverId', String(receiverId));
+    formData.append('audioType', audioType);
 
     const response = await fetch(url, { method: 'POST', headers: authHeaders, body: formData });
     console.log('[ChatService] web upload resposta | status=', response.status);
@@ -137,6 +148,7 @@ export async function uploadAudio(
   const formData = new FormData();
   formData.append('file', { uri: asset.uri, type: asset.mimeType, name: asset.fileName } as any);
   formData.append('receiverId', String(receiverId));
+  formData.append('audioType', audioType);
 
   return new Promise<MessageHistoryDTO>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
