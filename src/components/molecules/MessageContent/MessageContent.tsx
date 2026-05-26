@@ -38,6 +38,8 @@ export function MessageContent({
   statusElement,
   mediaWidth,
   mediaHeight,
+  audioType,
+  isMine,
 }: MessageContentProps) {
   const isImage = typeMedia === 'IMAGE';
   const isVideo = typeMedia === 'VIDEO';
@@ -131,20 +133,25 @@ export function MessageContent({
       )}
 
       {isAudio && mediaUrl && (
-        <AudioPlayerBar uri={mediaUrl} />
+        <AudioPlayerBar
+          uri={mediaUrl}
+          audioType={audioType}
+          fileName={audioType === 'audio_file' ? message : undefined}
+          isMine={isMine}
+        />
       )}
       {isAudio && !mediaUrl && (
         <View style={styles.audioRow}>
           <Icon
             variant="vector"
             family="Ionicons"
-            name="mic"
+            name={audioType === 'audio_file' ? 'musical-note' : 'mic'}
             size={18}
             color={Colors.textPrimaryDark}
           />
           <Spacer horizontal size={Spacing.xs} />
           <LegatoText variant="body" color={Colors.textPrimaryDark}>
-            Enviando...
+            {audioType === 'audio_file' ? (message ?? 'Enviando...') : 'Enviando...'}
           </LegatoText>
         </View>
       )}

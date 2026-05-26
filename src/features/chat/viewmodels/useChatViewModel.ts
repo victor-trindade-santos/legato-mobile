@@ -1,6 +1,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { fetchMessages, uploadMedia, uploadAudio, AudioUploadAsset } from "../services/ChatService";
 import { fetchChatItemsList } from "@/features/chat_list/services/chatListService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
@@ -438,7 +439,10 @@ export function useChatViewModel(
     // upload REST — não enviamos wsSendMessage aqui para evitar mensagem duplicada.
   }, [conversationId, currentUserName, receiverId, wsSendMessage]);
 
-  const handleMic = useCallback(async (asset: AudioUploadAsset) => {
+  const handleMic = useCallback(async (
+    asset: AudioUploadAsset,
+    options?: { audioType?: 'voice' | 'audio_file'; contentOverride?: string }
+  ) => {
     console.log('[ViewModel] handleMic chamado | asset=', asset, '| conversationId=', conversationId, '| receiverId=', receiverId);
     const localId = `local-audio-${Date.now()}`;
 
@@ -460,13 +464,14 @@ export function useChatViewModel(
         type: 'message',
         data: {
           id: localId,
-          content: 'Mensagem de voz',
+          content: options?.contentOverride ?? 'Mensagem de voz',
           timestamp,
           senderName: currentUserName ?? '',
           isMine: true,
           typeMedia: 'AUDIO',
           mediaUrl: asset.uri,
           status: 'sending',
+          audioType: options?.audioType ?? 'voice',
         },
       });
       return items;
@@ -505,12 +510,31 @@ export function useChatViewModel(
     );
   }, [conversationId, currentUserName, receiverId]);
 
+  const handleAttachAudio = useCallback(async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: 'audio/*',
+      copyToCacheDirectory: true,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+    const picked = result.assets[0];
+    const asset: AudioUploadAsset = {
+      uri: picked.uri,
+      mimeType: picked.mimeType ?? 'audio/mpeg',
+      fileName: picked.name ?? `audio_${Date.now()}.mp3`,
+    };
+    await handleMic(asset, {
+      audioType: 'audio_file',
+      contentOverride: asset.fileName,
+    });
+  }, [handleMic]);
+
   return {
     chatItems,
     inputText,
     setInputText: handleInputChange,
     handleSend,
     handleAttach,
+    handleAttachAudio,
     handleMic,
     isLoading,
     error,

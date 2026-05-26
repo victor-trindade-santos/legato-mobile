@@ -19,6 +19,7 @@ export interface Message {
   mediaHeight?: number;
   thumbnailUrl?: string;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
+  audioType?: 'voice' | 'audio_file';
 }
 
 /**

@@ -17,4 +17,6 @@ export interface MessageContentProps {
 
   /** Ex: ✓, ✓✓, ✓✓ (azul) — entra depois via MessageStatusIndicator */
   statusElement?: React.ReactNode;
+  audioType?: 'voice' | 'audio_file';
+  isMine?: boolean;
 }

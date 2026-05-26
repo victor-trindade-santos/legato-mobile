@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing } from '@/theme';
+import { Colors, Spacing, BorderRadius } from '@/theme';
 import { LegatoText } from '@/components/atoms/Text/Text';
+import { Icon } from '@/components/atoms/Icon/Icon';
 import type { AudioPlayerBarProps } from './AudioPlayerBar.types';
 
 const MEDIA_WIDTH = 220;
@@ -20,7 +21,7 @@ const formatSeconds = (secs: number): string => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-export function AudioPlayerBar({ uri, durationMs }: AudioPlayerBarProps) {
+export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName, isMine = true }: AudioPlayerBarProps) {
   const soundRef = useRef<Audio.Sound | null>(null);
   const isScrubbingRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -36,7 +37,6 @@ export function AudioPlayerBar({ uri, durationMs }: AudioPlayerBarProps) {
     let mounted = true;
 
     const load = async () => {
-      // Unload previous sound if any
       if (soundRef.current) {
         try { await soundRef.current.unloadAsync(); } catch {}
         soundRef.current = null;
@@ -147,63 +147,96 @@ export function AudioPlayerBar({ uri, durationMs }: AudioPlayerBarProps) {
   }, []);
 
   const progress = totalMs > 0 ? Math.min(positionMs / totalMs, 1) : 0;
+  const accentBg = isMine ? Colors.primaryHover : Colors.grayButton;
+  const iconCircleBg = isMine ? Colors.primaryLight : Colors.grayButton;
 
-  return (
-    <View style={styles.container}>
-      {/* Play / Pause button */}
-      <TouchableOpacity
-        onPress={handlePlayPause}
-        style={styles.playButton}
-        activeOpacity={0.7}
-        hitSlop={8}
-        disabled={!isLoaded}
-      >
-        <Ionicons
-          name={isPlaying ? 'pause' : 'play'}
-          size={18}
-          color={Colors.white}
-        />
-      </TouchableOpacity>
+  const progressTrack = (
+    <View
+      style={styles.trackContainer}
+      onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
+      onStartShouldSetResponder={() => isLoaded}
+      onMoveShouldSetResponder={() => isLoaded}
+      onResponderTerminationRequest={() => false}
+      onResponderGrant={handleProgressGrant}
+      onResponderMove={handleProgressMove}
+      onResponderRelease={handleProgressRelease}
+      onResponderTerminate={handleProgressTerminate}
+    >
+      <View style={styles.track}>
+        <View style={[styles.fill, { width: `${progress * 100}%` }]} />
+        <View style={[styles.thumb, { left: `${progress * 100}%` }]} />
+      </View>
+    </View>
+  );
 
-      {/* Progress track */}
-      <View
-        style={styles.trackContainer}
-        onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
-        onStartShouldSetResponder={() => isLoaded}
-        onMoveShouldSetResponder={() => isLoaded}
-        onResponderTerminationRequest={() => false}
-        onResponderGrant={handleProgressGrant}
-        onResponderMove={handleProgressMove}
-        onResponderRelease={handleProgressRelease}
-        onResponderTerminate={handleProgressTerminate}
-      >
-        <View style={styles.track}>
-          <View style={[styles.fill, { width: `${progress * 100}%` }]} />
-          <View style={[styles.thumb, { left: `${progress * 100}%` }]} />
+  const playPauseButton = (
+    <TouchableOpacity
+      onPress={handlePlayPause}
+      style={styles.playButton}
+      activeOpacity={0.7}
+      hitSlop={8}
+      disabled={!isLoaded}
+    >
+      <Ionicons
+        name={isPlaying ? 'pause' : 'play'}
+        size={18}
+        color={Colors.primary}
+      />
+    </TouchableOpacity>
+  );
+
+  const timeText = (
+    <LegatoText variant="bodySmall" color={Colors.textSubtext}>
+      {formatSeconds(positionMs / 1000)}/{formatSeconds(totalMs / 1000)}
+    </LegatoText>
+  );
+
+  // ── Audio file variant ───────────────────────────────────────
+  if (audioType === 'audio_file') {
+    const raw = fileName ?? 'arquivo.mp3';
+    const displayName = raw.length > 20 ? raw.slice(0, 17) + '...' : raw;
+
+    return (
+      <View style={styles.fileContainer}>
+        <View style={styles.fileTopRow}>
+          <View style={[styles.musicIconCircle, { backgroundColor: iconCircleBg }]}>
+            <Icon variant="vector" family="Ionicons" name="musical-note" size={20} color={Colors.white} />
+          </View>
+          <LegatoText variant="bodySmall" color={Colors.textPrimaryDark} numberOfLines={1} style={styles.fileNameText}>
+            {displayName}
+          </LegatoText>
+        </View>
+        <View style={styles.fileBottomRow}>
+          {playPauseButton}
+          {progressTrack}
+          {timeText}
         </View>
       </View>
+    );
+  }
 
-      {/* Time display */}
-      <LegatoText variant="bodySmall" color={Colors.textSubtext}>
-        {formatSeconds(positionMs / 1000)}/{formatSeconds(totalMs / 1000)}
-      </LegatoText>
+  // ── Voice variant (default) ──────────────────────────────────
+  return (
+    <View style={styles.container}>
+      <View style={styles.micBadge}>
+        <Icon variant="vector" family="Ionicons" name="mic" size={14} color={Colors.white} />
+      </View>
+      <View style={[styles.voicePlayerRow, { backgroundColor: accentBg }]}>
+        {playPauseButton}
+        {progressTrack}
+        {timeText}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: MEDIA_WIDTH,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    paddingVertical: Spacing.xs,
-  },
+  // ── shared ────────────────────────────────────────────────────
   playButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.0)',
+    backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -211,6 +244,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 28,
     justifyContent: 'center',
+    
   },
   track: {
     height: 3,
@@ -231,5 +265,64 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: Colors.white,
     marginLeft: -6,
+  },
+  // ── voice variant ─────────────────────────────────────────────
+  container: {
+    width: MEDIA_WIDTH,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    
+  },
+  voicePlayerRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.primaryHover,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  micBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // ── audio file variant ────────────────────────────────────────
+  fileContainer: {
+    width: MEDIA_WIDTH,
+    paddingVertical: Spacing.xs,
+    gap: Spacing.xs,
+  },
+  fileTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  musicIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.pill,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fileNameText: {
+    flex: 1,
+  },
+  fileBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    backgroundColor: Colors.primaryHover,
+    borderRadius: BorderRadius.pill,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+
   },
 });

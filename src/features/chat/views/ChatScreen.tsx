@@ -34,6 +34,7 @@ import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIn
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
 import { ImageViewerModal } from '@/components/molecules/ImageViewerModal/ImageViewerModal';
 import { VideoPlayerModal } from '@/components/molecules/VideoPlayerModal/VideoPlayerModal';
+import { AttachmentSheet } from '@/components/molecules/AttachmentSheet/AttachmentSheet';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { formatLastSeen } from '@/utils/formatters';
@@ -94,7 +95,7 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleAttachAudio, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
 
   const { isRecording, recordingDurationMs, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
 
@@ -126,6 +127,18 @@ export default function ChatScreen() {
     senderName: string;
     timestamp: string;
   } | null>(null);
+
+  const [attachmentSheetVisible, setAttachmentSheetVisible] = useState(false);
+
+  const handlePickMedia = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttach(), 300);
+  }, [handleAttach]);
+
+  const handlePickAudio = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttachAudio(), 300);
+  }, [handleAttachAudio]);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -183,6 +196,8 @@ export default function ChatScreen() {
         mediaWidth={data.mediaWidth}
         mediaHeight={data.mediaHeight}
         thumbnailUrl={data.thumbnailUrl}
+        audioType={data.audioType}
+        isMine={data.isMine}
         onImagePress={(url) => setSelectedImage({
           url,
           senderName: data.senderName,
@@ -278,7 +293,7 @@ export default function ChatScreen() {
           value={inputText}
           onChangeText={setInputText}
           onSend={handleSend}
-          onAttach={handleAttach}
+          onAttach={() => setAttachmentSheetVisible(true)}
           onMic={handleMicPress}
           onCancelRecording={cancelRecording}
           isRecording={isRecording}
@@ -301,6 +316,13 @@ export default function ChatScreen() {
         senderName={selectedVideo?.senderName ?? ''}
         timestamp={selectedVideo?.timestamp ?? ''}
         onClose={() => setSelectedVideo(null)}
+      />
+
+      <AttachmentSheet
+        visible={attachmentSheetVisible}
+        onClose={() => setAttachmentSheetVisible(false)}
+        onPickMedia={handlePickMedia}
+        onPickAudio={handlePickAudio}
       />
     </AppTemplate>
   );
