@@ -73,6 +73,7 @@ export default function ChatListScreen() {
                                             userName: item.otherUserName,
                                             avatarUri: item.otherUserProfilePictureUrl,
                                             receiverId: item.otherUserId,
+                                            receiverUsername: item.otherUserUsername,
                                             isOnline: item.isOnline,
                                             lastSeen: item.lastSeen,
                                         });

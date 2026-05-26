@@ -35,6 +35,7 @@ export type ChatStackParamList = {
     userName: string;
     avatarUri?: string;
     receiverId: number;
+    receiverUsername?: string;
     isOnline: boolean;
     lastSeen: string | null;
   }
@@ -44,6 +45,8 @@ export type MusicianProfileRouteParams = {
   musicianId: number;
   displayName?: string;
   username?: string;
+  connected?: boolean;
+  conversationId?: number;
 };
 
 export type RootStackParamList = {

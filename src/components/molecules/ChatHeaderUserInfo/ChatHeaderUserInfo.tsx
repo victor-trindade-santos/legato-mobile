@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Spacing } from '@/theme';
 
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
@@ -14,18 +14,24 @@ export function ChatHeaderUserInfo({
   fallbackInitials,
   name,
   statusText,
+  onAvatarPress,
+  onNamePress,
 }: ChatHeaderUserInfoProps) {
+  const InfoWrapper = onNamePress ? TouchableOpacity : View;
+
   return (
     <View style={styles.container}>
-      <Avatar
-        uri={avatarUri}
-        fallbackInitials={fallbackInitials}
-        size="md"
-      />
+      {onAvatarPress ? (
+        <TouchableOpacity onPress={onAvatarPress} activeOpacity={0.8}>
+          <Avatar uri={avatarUri} fallbackInitials={fallbackInitials} size="md" />
+        </TouchableOpacity>
+      ) : (
+        <Avatar uri={avatarUri} fallbackInitials={fallbackInitials} size="md" />
+      )}
 
       <Spacer horizontal size={Spacing.sm} />
 
-      <View style={styles.info}>
+      <InfoWrapper style={styles.info} onPress={onNamePress} activeOpacity={0.7}>
         <LegatoText variant="subtitle" color={Colors.textPrimaryDark}>
           {name}
         </LegatoText>
@@ -42,7 +48,7 @@ export function ChatHeaderUserInfo({
             </View>
           </>
         )}
-      </View>
+      </InfoWrapper>
     </View>
   );
 }

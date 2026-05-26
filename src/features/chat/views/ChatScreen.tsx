@@ -90,6 +90,7 @@ export default function ChatScreen() {
     userName,
     avatarUri,
     receiverId,
+    receiverUsername,
     isOnline,
     lastSeen,
   } = route.params || {};
@@ -131,6 +132,7 @@ export default function ChatScreen() {
   } | null>(null);
 
   const [attachmentSheetVisible, setAttachmentSheetVisible] = useState(false);
+  const [profileImageVisible, setProfileImageVisible] = useState(false);
 
   const handlePickMedia = useCallback(() => {
     setAttachmentSheetVisible(false);
@@ -245,6 +247,12 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZAÇÃO
   // ════════════════════════════════════════════════════════════════════
+  const chatStatusText = presenceStatus.isOnline
+    ? 'Online'
+    : presenceStatus.lastSeen
+      ? `Visto por último ${formatLastSeen(presenceStatus.lastSeen)}`
+      : undefined;
+
   return (
     <AppTemplate noPadding>
       <View style={styles.container}>
@@ -264,13 +272,9 @@ export default function ChatScreen() {
               .map((n) => n[0])
               .join('')}
             avatarUri={avatarUri}
-            statusText={
-              presenceStatus.isOnline
-                ? 'Online'
-                : presenceStatus.lastSeen
-                  ? `Visto por último ${formatLastSeen(presenceStatus.lastSeen)}`
-                  : undefined
-            }
+            statusText={chatStatusText}
+            onAvatarPress={avatarUri ? () => setProfileImageVisible(true) : undefined}
+            onNamePress={receiverId ? () => (navigation as any).navigate('MusicianProfile', { musicianId: receiverId, username: receiverUsername, displayName: userName, connected: true, conversationId }) : undefined}
           />
         </View>
         {/* ── Lista de Mensagens ─────────────────────────── */}
@@ -319,6 +323,14 @@ export default function ChatScreen() {
         senderName={selectedImage?.senderName ?? ''}
         timestamp={selectedImage?.timestamp ?? ''}
         onClose={() => setSelectedImage(null)}
+      />
+
+      <ImageViewerModal
+        visible={profileImageVisible}
+        imageUrl={avatarUri ?? ''}
+        senderName={userName ?? ''}
+        statusText={chatStatusText}
+        onClose={() => setProfileImageVisible(false)}
       />
 
       <VideoPlayerModal

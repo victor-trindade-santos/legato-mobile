@@ -3,4 +3,6 @@ export interface ChatHeaderUserInfoProps {
   fallbackInitials: string;
   name: string;
   statusText?: string;
+  onAvatarPress?: () => void;
+  onNamePress?: () => void;
 }

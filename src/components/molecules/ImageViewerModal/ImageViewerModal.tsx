@@ -30,6 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/theme';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { TimestampText } from '@/components/atoms/TimestampText/TimestampText';
+import { StatusDot } from '@/components/atoms/StatusDot/StatusDot';
 import type { ImageViewerModalProps } from './ImageViewerModal.types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@ export function ImageViewerModal({
   imageUrl,
   senderName,
   timestamp,
+  statusText,
   onClose,
 }: ImageViewerModalProps) {
   // ── Shared values ──────────────────────────────────────────────────────────
@@ -224,9 +226,14 @@ export function ImageViewerModal({
             <LegatoText variant="bodyMedium" color={Colors.white}>
               {senderName}
             </LegatoText>
-            <TimestampText color={Colors.textSubtext} align="left">
-              {timestamp}
-            </TimestampText>
+            {statusText ? (
+              <View style={styles.statusRow}>
+                <StatusDot variant={statusText === 'Online' ? 'online' : 'offline'} size={8} />
+                <LegatoText variant="caption" color={Colors.textSubtext}>{statusText}</LegatoText>
+              </View>
+            ) : timestamp ? (
+              <TimestampText color={Colors.textSubtext} align="left">{timestamp}</TimestampText>
+            ) : null}
           </View>
 
           <TouchableOpacity
@@ -276,5 +283,10 @@ const styles = StyleSheet.create({
   headerInfo: {
     flex: 1,
     gap: 2,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });
