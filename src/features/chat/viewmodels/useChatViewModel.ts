@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import * as ImagePicker from 'expo-image-picker';
-import { fetchMessages, uploadMedia } from "../services/ChatService";
+import { fetchMessages, uploadMedia, uploadAudio, AudioUploadAsset } from "../services/ChatService";
 import { fetchChatItemsList } from "@/features/chat_list/services/chatListService";
 import type { Message, MessageHistoryDTO } from "@/features/chat/models/MessageModel";
 import { useAuthStore } from "@/store/authStore";
@@ -438,12 +438,80 @@ export function useChatViewModel(
     // upload REST — não enviamos wsSendMessage aqui para evitar mensagem duplicada.
   }, [conversationId, currentUserName, receiverId, wsSendMessage]);
 
+  const handleMic = useCallback(async (asset: AudioUploadAsset) => {
+    console.log('[ViewModel] handleMic chamado | asset=', asset, '| conversationId=', conversationId, '| receiverId=', receiverId);
+    const localId = `local-audio-${Date.now()}`;
+
+    setChatItems((prev) => {
+      const timestamp = formatNowToBackendFormat();
+      const todayKey = extractDateKey(timestamp);
+      const items = [...prev];
+      const hasTodaySeparator = prev.some(
+        (item) => item.type === 'separator' && item.key === `separator-${todayKey}`
+      );
+      if (!hasTodaySeparator) {
+        items.push({
+          type: 'separator',
+          label: extractDateLabel(timestamp),
+          key: `separator-${todayKey}`,
+        });
+      }
+      items.push({
+        type: 'message',
+        data: {
+          id: localId,
+          content: 'Mensagem de voz',
+          timestamp,
+          senderName: currentUserName ?? '',
+          isMine: true,
+          typeMedia: 'AUDIO',
+          mediaUrl: asset.uri,
+          status: 'sending',
+        },
+      });
+      return items;
+    });
+    console.log('[ViewModel] mensagem otimista de áudio adicionada | localId=', localId);
+
+    let savedMessage: MessageHistoryDTO | null = null;
+    try {
+      console.log('[ViewModel] iniciando uploadAudio...');
+      savedMessage = await uploadAudio(conversationId, asset, receiverId);
+      console.log('[ViewModel] ✅ uploadAudio retornou:', savedMessage);
+    } catch (err) {
+      console.error('[ViewModel] ❌ Erro ao fazer upload de áudio:', err);
+      setChatItems((prev) => prev.filter(
+        (item) => !(item.type === 'message' && item.data.id === localId)
+      ));
+      setError('Erro ao enviar áudio. Tente novamente.');
+      return;
+    }
+
+    if (!savedMessage?.mediaUrl) {
+      console.error('[ViewModel] ❌ Upload de áudio retornou sem mediaUrl:', savedMessage);
+      setChatItems((prev) => prev.filter(
+        (item) => !(item.type === 'message' && item.data.id === localId)
+      ));
+      setError('Erro ao processar áudio. Tente novamente.');
+      return;
+    }
+
+    setChatItems((prev) =>
+      prev.map((item) =>
+        item.type === 'message' && item.data.id === localId
+          ? { ...item, data: { ...item.data, mediaUrl: savedMessage!.mediaUrl } }
+          : item
+      )
+    );
+  }, [conversationId, currentUserName, receiverId]);
+
   return {
     chatItems,
     inputText,
     setInputText: handleInputChange,
     handleSend,
     handleAttach,
+    handleMic,
     isLoading,
     error,
     isOtherUserTyping,

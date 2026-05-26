@@ -31,7 +31,8 @@
     "plugins": [
       "expo-secure-store",
       "expo-font",
-      "expo-video"
+      "expo-video",
+      "expo-av"
     ],
     "extra": {
       "eas": {

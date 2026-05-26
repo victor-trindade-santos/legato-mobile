@@ -6,4 +6,7 @@ export interface ChatInputBarProps {
   onMic?: () => void;
   onEmoji?: () => void;
   placeholder?: string;
+  isRecording?: boolean;
+  recordingDurationMs?: number;
+  onCancelRecording?: () => void;
 }

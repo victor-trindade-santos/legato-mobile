@@ -21,6 +21,7 @@ import { TimestampText } from '@/components/atoms/TimestampText/TimestampText';
 import { Spacer } from '@/components/atoms/Spacer/Spacer';
 import { Icon } from '@/components/atoms/Icon/Icon';
 
+import { AudioPlayerBar } from '@/components/molecules/AudioPlayerBar/AudioPlayerBar';
 import type { MessageContentProps } from './MessageContent.types';
 
 const MEDIA_WIDTH = 220;
@@ -129,7 +130,10 @@ export function MessageContent({
         </TouchableOpacity>
       )}
 
-      {isAudio && (
+      {isAudio && mediaUrl && (
+        <AudioPlayerBar uri={mediaUrl} />
+      )}
+      {isAudio && !mediaUrl && (
         <View style={styles.audioRow}>
           <Icon
             variant="vector"
@@ -140,7 +144,7 @@ export function MessageContent({
           />
           <Spacer horizontal size={Spacing.xs} />
           <LegatoText variant="body" color={Colors.textPrimaryDark}>
-            Mensagem de voz
+            Enviando...
           </LegatoText>
         </View>
       )}

@@ -39,6 +39,7 @@ import { formatTimestamp } from '@/utils/dateUtils';
 import { formatLastSeen } from '@/utils/formatters';
 
 import { useChatViewModel, ChatListItem } from '../viewmodels/useChatViewModel';
+import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import type { Message } from '../models/MessageModel';
 
 import { ChatStackParamList } from '@/navigation/types';
@@ -93,7 +94,26 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+
+  const { isRecording, recordingDurationMs, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
+
+  const handleMicPress = useCallback(async () => {
+    console.log('[ChatScreen] handleMicPress | isRecording=', isRecording);
+    if (isRecording) {
+      const result = await stopRecording();
+      console.log('[ChatScreen] stopRecording retornou:', result);
+      if (result) {
+        console.log('[ChatScreen] chamando handleMic com asset:', result);
+        await handleMic({ uri: result.uri, mimeType: result.mimeType, fileName: result.fileName });
+      } else {
+        console.warn('[ChatScreen] ⚠️ stopRecording retornou null — áudio não enviado');
+      }
+    } else {
+      console.log('[ChatScreen] iniciando gravação...');
+      await startRecording();
+    }
+  }, [isRecording, stopRecording, startRecording, handleMic]);
 
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
@@ -259,6 +279,10 @@ export default function ChatScreen() {
           onChangeText={setInputText}
           onSend={handleSend}
           onAttach={handleAttach}
+          onMic={handleMicPress}
+          onCancelRecording={cancelRecording}
+          isRecording={isRecording}
+          recordingDurationMs={recordingDurationMs}
           placeholder="Digite uma mensagem..."
         />
       </View>
