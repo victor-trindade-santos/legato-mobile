@@ -13,17 +13,11 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import type { StackNavigationProp } from '@react-navigation/stack';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useUIStore } from '@/store/uiStore';
 import { Colors, Spacing, BorderRadius, Typography } from '@/theme';
 import { useColors } from '@/hooks/useColors';
-import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import type { AppHeaderProps } from './AppHeader.types';
-
-type MainNav = BottomTabNavigationProp<MainTabParamList>;
-type RootNav = StackNavigationProp<RootStackParamList>;
 
 export function AppHeader({
   title,
@@ -34,19 +28,28 @@ export function AppHeader({
   onSettingsPress,
   onNotificationsPress,
 }: AppHeaderProps) {
-  const navigation = useNavigation<MainNav>();
+  const navigation = useNavigation<any>();
   const { unreadCount } = useNotificationStore();
   const colors = useColors();
   const isDark = useUIStore((s) => s.theme) === 'dark';
 
   const handleNotifications = () => {
     if (onNotificationsPress) { onNotificationsPress(); return; }
-    navigation.navigate('Notifications');
+    // Se estiver no RootStack (tela empilhada), Notifications fica dentro de Main
+    if (navigation.getState().type === 'tab') {
+      navigation.navigate('Notifications');
+    } else {
+      navigation.navigate('Main', { screen: 'Notifications' });
+    }
   };
   const handleSettings = () => {
     if (onSettingsPress) { onSettingsPress(); return; }
-    // Sobe para o RootStack e navega para Settings
-    navigation.getParent<RootNav>()?.navigate('Settings');
+    // Settings está no RootStack: sobe via getParent() se estiver na tab, ou navega direto se já no stack
+    if (navigation.getState().type === 'stack') {
+      navigation.navigate('Settings');
+    } else {
+      navigation.getParent<any>()?.navigate('Settings');
+    }
   };
   const handleSearch = () => {
     if (onSearchPress) onSearchPress();

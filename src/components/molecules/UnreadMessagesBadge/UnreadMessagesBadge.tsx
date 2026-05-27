@@ -46,15 +46,9 @@ export function UnreadMessagesBadge({ status }: UnreadMessagesBadgeProps) {
         return (
           <View style={styles.row}>
             <Ionicons
-              name="checkmark"
+              name="checkmark-done-outline"
               size={Spacing.iconSm}
               color={Colors.textMuted}
-            />
-            <Ionicons
-              name="checkmark"
-              size={Spacing.iconSm}
-              color={Colors.textMuted}
-              style={styles.secondCheck}
             />
           </View>
         );
@@ -63,15 +57,9 @@ export function UnreadMessagesBadge({ status }: UnreadMessagesBadgeProps) {
         return (
           <View style={styles.row}>
             <Ionicons
-              name="checkmark"
+              name="checkmark-done-outline"
               size={Spacing.iconSm}
-              color={Colors.primary}
-            />
-            <Ionicons
-              name="checkmark"
-              size={Spacing.iconSm}
-              color={Colors.primary}
-              style={styles.secondCheck}
+              color={Colors.info}
             />
           </View>
         );

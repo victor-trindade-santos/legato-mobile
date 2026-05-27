@@ -16,10 +16,11 @@
  * - WebSocketService (tempo real)
  */
 
-import React, { useRef, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text } from 'react-native';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,10 +33,17 @@ import { MessageContent } from '@/components/molecules/MessageContent/MessageCon
 import { UnreadMessagesBadge } from '@/components/molecules/UnreadMessagesBadge/UnreadMessagesBadge';
 import { TypingIndicator } from '@/components/molecules/TypingIndicator/TypingIndicator';
 import { ChatInputBar } from '@/components/molecules/ChatInputBar/ChatInputBar';
+import { ImageViewerModal } from '@/components/molecules/ImageViewerModal/ImageViewerModal';
+import { VideoPlayerModal } from '@/components/molecules/VideoPlayerModal/VideoPlayerModal';
+import { AttachmentSheet } from '@/components/molecules/AttachmentSheet/AttachmentSheet';
 import { Spinner } from '@/components/atoms/Spinner/Spinner';
 import { formatTimestamp } from '@/utils/dateUtils';
+import { formatLastSeen } from '@/utils/formatters';
 
 import { useChatViewModel, ChatListItem } from '../viewmodels/useChatViewModel';
+import { getChatFileDownloadParams } from '../services/ChatService';
+import { downloadFile } from '@/utils/downloadFile';
+import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import type { Message } from '../models/MessageModel';
 
 import { ChatStackParamList } from '@/navigation/types';
@@ -47,9 +55,34 @@ import { ChatStackParamList } from '@/navigation/types';
 type ChatScreenRouteParams = RouteProp<ChatStackParamList, 'Chat'>;
 
 export default function ChatScreen() {
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute<ChatScreenRouteParams>();
   const flatListRef = useRef<FlatList>(null);
+  const isNearBottomRef = useRef<boolean>(true);
+  const isScrollingRef = useRef<boolean>(false);
+
+  const scrollToBottomIfNear = useCallback(() => {
+    if (!isNearBottomRef.current) return;
+    isScrollingRef.current = true;
+    flatListRef.current?.scrollToEnd({ animated: true });
+    // Fallback: if already at bottom, onMomentumScrollEnd won't fire
+    setTimeout(() => { isScrollingRef.current = false; }, 600);
+  }, []);
+
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (isScrollingRef.current) return;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+    isNearBottomRef.current = distanceFromBottom < 150;
+  }, []);
+
+  const handleMomentumScrollEnd = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    isScrollingRef.current = false;
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+    isNearBottomRef.current = distanceFromBottom < 150;
+  }, []);
 
   // ════════════════════════════════════════════════════════════════════
   // PROPS DA ROTA RECEBIDAS DE CHATLIST
@@ -59,12 +92,64 @@ export default function ChatScreen() {
     userName,
     avatarUri,
     receiverId,
+    receiverUsername,
+    isOnline,
+    lastSeen,
   } = route.params || {};
 
   // ════════════════════════════════════════════════════════════════════
   // VIEWMODEL - TODA A LÓGICA AQUI
   // ════════════════════════════════════════════════════════════════════
-  const { chatItems, isLoading, error, inputText, setInputText, handleSend, isOtherUserTyping } = useChatViewModel(conversationId, receiverId);
+  const { chatItems, isLoading, error, inputText, setInputText, handleSend, handleAttach, handleAttachAudio, handleAttachDocument, handleMic, isOtherUserTyping, presenceStatus } = useChatViewModel(conversationId, receiverId, isOnline, lastSeen);
+
+  const { isRecording, recordingDurationMs, startRecording, stopRecording, cancelRecording } = useAudioRecorder();
+
+  const handleMicPress = useCallback(async () => {
+    console.log('[ChatScreen] handleMicPress | isRecording=', isRecording);
+    if (isRecording) {
+      const result = await stopRecording();
+      console.log('[ChatScreen] stopRecording retornou:', result);
+      if (result) {
+        console.log('[ChatScreen] chamando handleMic com asset:', result);
+        await handleMic({ uri: result.uri, mimeType: result.mimeType, fileName: result.fileName });
+      } else {
+        console.warn('[ChatScreen] ⚠️ stopRecording retornou null — áudio não enviado');
+      }
+    } else {
+      console.log('[ChatScreen] iniciando gravação...');
+      await startRecording();
+    }
+  }, [isRecording, stopRecording, startRecording, handleMic]);
+
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string;
+    senderName: string;
+    timestamp: string;
+  } | null>(null);
+
+  const [selectedVideo, setSelectedVideo] = useState<{
+    url: string;
+    senderName: string;
+    timestamp: string;
+  } | null>(null);
+
+  const [attachmentSheetVisible, setAttachmentSheetVisible] = useState(false);
+  const [profileImageVisible, setProfileImageVisible] = useState(false);
+
+  const handlePickMedia = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttach(), 300);
+  }, [handleAttach]);
+
+  const handlePickAudio = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttachAudio(), 300);
+  }, [handleAttachAudio]);
+
+  const handlePickDocument = useCallback(() => {
+    setAttachmentSheetVisible(false);
+    setTimeout(() => handleAttachDocument(), 300);
+  }, [handleAttachDocument]);
 
 
   // ════════════════════════════════════════════════════════════════════
@@ -80,20 +165,28 @@ export default function ChatScreen() {
   // }, [conversationId, markAsRead]);
 
   // ════════════════════════════════════════════════════════════════════
-  // DEBUG — TYPING
+  // DEBUG — PARAMS + PRESENÇA
   // ════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    console.log('[ChatScreen] mount | receiverId=', receiverId, '| isOnline(snapshot)=', isOnline, '| lastSeen(snapshot)=', lastSeen);
+  }, []);
+
+  useEffect(() => {
+    console.log('[ChatScreen] presenceStatus →', presenceStatus);
+  }, [presenceStatus]);
+
   useEffect(() => {
     console.log('[ChatScreen] isOtherUserTyping →', isOtherUserTyping);
   }, [isOtherUserTyping]);
 
   // ════════════════════════════════════════════════════════════════════
-  // SCROLL AUTOMÁTICO
+  // SCROLL AUTOMÁTICO — typing indicator
   // ════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (chatItems.length > 0) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
-  }, [chatItems]);
+    if (!isOtherUserTyping) return;
+    const timer = setTimeout(() => scrollToBottomIfNear(), 100);
+    return () => clearTimeout(timer);
+  }, [isOtherUserTyping, scrollToBottomIfNear]);
 
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZADOR DE MENSAGENS
@@ -105,18 +198,46 @@ export default function ChatScreen() {
 
     const {data} = item;
 
-    const content = (
+    const messageContent = (
       <MessageContent
         message={data.content}
         timestamp={formatTimestamp(data.timestamp)}
+        typeMedia={data.typeMedia}
+        mediaUrl={data.mediaUrl}
+        mediaWidth={data.mediaWidth}
+        mediaHeight={data.mediaHeight}
+        thumbnailUrl={data.thumbnailUrl}
+        audioType={data.audioType}
+        isMine={data.isMine}
+        onDownloadRequest={data.typeMedia === 'FILE' && !data.id.startsWith('local-') ? async () => {
+          const { url, headers } = await getChatFileDownloadParams(conversationId, Number(data.id));
+          await downloadFile(url, data.content ?? 'documento', headers);
+        } : undefined}
+        onImagePress={(url) => setSelectedImage({
+          url,
+          senderName: data.senderName,
+          timestamp: formatTimestamp(data.timestamp),
+        })}
+        onVideoPress={(url) => setSelectedVideo({
+          url,
+          senderName: data.senderName,
+          timestamp: formatTimestamp(data.timestamp),
+        })}
       />
-    )
-   
-    return data.isMine ? (
-      <MyMessageBubble>{content}</MyMessageBubble>
-    ) : (
-      <OtherUserMessageBubble>{content}</OtherUserMessageBubble>
     );
+
+    if (data.isMine) {
+      return (
+        <View style={styles.myMessageWrapper}>
+          <MyMessageBubble>{messageContent}</MyMessageBubble>
+          <View style={styles.badgeRow}>
+            <UnreadMessagesBadge status={data.status ?? 'sending'} />
+          </View>
+        </View>
+      );
+    }
+
+    return <OtherUserMessageBubble>{messageContent}</OtherUserMessageBubble>;
   };
 
   // ════════════════════════════════════════════════════════════════════
@@ -128,16 +249,22 @@ export default function ChatScreen() {
   // ════════════════════════════════════════════════════════════════════
   // RENDERIZAÇÃO
   // ════════════════════════════════════════════════════════════════════
+  const chatStatusText = presenceStatus.isOnline
+    ? 'Online'
+    : presenceStatus.lastSeen
+      ? `Visto por último ${formatLastSeen(presenceStatus.lastSeen)}`
+      : undefined;
+
   return (
     <AppTemplate noPadding>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* ── Header ──────────────────────────────────────── */}
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
             <Ionicons
               name="arrow-back"
               size={Spacing.iconXl}
-              color={Colors.white}
+              color={colors.textPrimary}
             />
           </TouchableOpacity>
           <ChatHeaderUserInfo
@@ -147,8 +274,9 @@ export default function ChatScreen() {
               .map((n) => n[0])
               .join('')}
             avatarUri={avatarUri}
-            // statusText={statusText}
-            // statusVariant={statusVariant}
+            statusText={chatStatusText}
+            onAvatarPress={avatarUri ? () => setProfileImageVisible(true) : undefined}
+            onNamePress={receiverId ? () => (navigation as any).navigate('MusicianProfile', { musicianId: receiverId, username: receiverUsername, displayName: userName, connected: true, conversationId }) : undefined}
           />
         </View>
         {/* ── Lista de Mensagens ─────────────────────────── */}
@@ -158,67 +286,70 @@ export default function ChatScreen() {
           keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.listContent}
+          onContentSizeChange={scrollToBottomIfNear}
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          scrollEventThrottle={16}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Sem mensagens ainda</Text>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sem mensagens ainda</Text>
             </View>
           }
           ListFooterComponent={
             isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
           }
         />
-{/* 
-        ── Connection Status Badge ──────────────────────–
-        {connectionStatus !== 'connected' && (
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor:
-                  connectionStatus === 'connecting' ||
-                  connectionStatus === 'reconnecting'
-                    ? Colors.warning
-                    : Colors.error,
-              },
-            ]}
-          >
-            <ActivityIndicator
-              size="small"
-              color={Colors.white}
-              style={{ marginRight: 8 }}
-            />
-            <Text
-              style={{
-                color: Colors.white,
-                fontSize: FontSize.xs,
-                fontWeight: FontWeight.semiBold,
-              }}
-            >
-              {connectionStatus === 'connecting'
-                ? 'Conectando...'
-                : connectionStatus === 'reconnecting'
-                  ? 'Reconectando...'
-                  : connectionStatus === 'error'
-                    ? 'Erro de conexão'
-                    : 'Desconectado'}
-            </Text>
-          </View>
-        )} */}
-
-        <ChatInputBar
-          value={inputText}
-          onChangeText={setInputText}
-          onSend={handleSend}
-          placeholder="Digite uma mensagem..."
-        />
-
+        
         {/* ── Errors ────────────────────────────────────– */}
         {error && (
           <View style={styles.errorBanner}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
+        <ChatInputBar
+          value={inputText}
+          onChangeText={setInputText}
+          onSend={handleSend}
+          onAttach={() => setAttachmentSheetVisible(true)}
+          onMic={handleMicPress}
+          onCancelRecording={cancelRecording}
+          isRecording={isRecording}
+          recordingDurationMs={recordingDurationMs}
+          placeholder="Digite uma mensagem..."
+        />
       </View>
+
+      <ImageViewerModal
+        visible={selectedImage !== null}
+        imageUrl={selectedImage?.url ?? ''}
+        senderName={selectedImage?.senderName ?? ''}
+        timestamp={selectedImage?.timestamp ?? ''}
+        onClose={() => setSelectedImage(null)}
+      />
+
+      <ImageViewerModal
+        visible={profileImageVisible}
+        imageUrl={avatarUri ?? ''}
+        senderName={userName ?? ''}
+        statusText={chatStatusText}
+        onClose={() => setProfileImageVisible(false)}
+      />
+
+      <VideoPlayerModal
+        visible={selectedVideo !== null}
+        mediaUrl={selectedVideo?.url ?? ''}
+        senderName={selectedVideo?.senderName ?? ''}
+        timestamp={selectedVideo?.timestamp ?? ''}
+        onClose={() => setSelectedVideo(null)}
+      />
+
+      <AttachmentSheet
+        visible={attachmentSheetVisible}
+        onClose={() => setAttachmentSheetVisible(false)}
+        onPickMedia={handlePickMedia}
+        onPickAudio={handlePickAudio}
+        // onPickDocument={handlePickDocument}
+      />
     </AppTemplate>
   );
 }
@@ -230,7 +361,6 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
   },
   header: {
     alignItems: 'center',
@@ -239,7 +369,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.screenPaddingH,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -254,6 +383,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.screenPaddingH,
     paddingVertical: Spacing.sm,
   },
+  myMessageWrapper: {},
+  badgeRow: {
+    alignItems: 'flex-end',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -261,7 +394,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xl,
   },
   emptyText: {
-    color: Colors.textSecondaryDark,
     fontSize: FontSize.sm,
   },
   errorBanner: {

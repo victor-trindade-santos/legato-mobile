@@ -49,8 +49,9 @@ export default function MusicianProfileScreen() {
   const { user } = useAuthStore();
   const colors = useColors();
   const musicianId = route.params?.musicianId ?? user?.id ?? 0;
-  const username = route.params?.username ?? user?.username;
+  const username = route.params?.username ?? (route.params?.musicianId ? undefined : user?.username);
   const displayName = route.params?.displayName ?? user?.displayName ?? '';
+  const conversationId = route.params?.conversationId;
   const isOwnProfile = !route.params?.musicianId || musicianId === user?.id;
 
   const {
@@ -65,20 +66,17 @@ export default function MusicianProfileScreen() {
     toggleConnection,
     openFavoritesPanel,
     closeFavoritesPanel,
-  } = useMusicianProfileViewModel(musicianId, username);
+  } = useMusicianProfileViewModel(musicianId, username, route.params?.connected);
 
   if (isLoading) return <Spinner fullScreen />;
 
   if (!profile) {
     return (
-      <AppTemplate showHeader={false} noPadding>
-        {!isOwnProfile && (
-          <View style={styles.fallbackHeader}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
-              <Ionicons name="chevron-down" size={Spacing.iconXl} color={Colors.white} />
-            </TouchableOpacity>
-          </View>
-        )}
+      <AppTemplate
+        showHeader={true}
+        noPadding
+        headerProps={undefined}
+      >
         <View style={styles.fallbackContent}>
           <LegatoText variant="subtitle" color={colors.textPrimary} align="center">
             {displayName ?? 'Perfil do músico'}
@@ -92,7 +90,11 @@ export default function MusicianProfileScreen() {
   }
 
   return (
-    <AppTemplate showHeader={isOwnProfile} noPadding>
+    <AppTemplate
+      showHeader={true}
+      noPadding
+      headerProps={undefined}
+    >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         {/* ── Hero (capa + avatar) ───────────────────────── */}
@@ -163,9 +165,14 @@ export default function MusicianProfileScreen() {
                   }
                   style={styles.connectButton}
                 />
-                <TouchableOpacity style={[styles.messageButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={colors.textPrimary} />
-                </TouchableOpacity>
+                {conversationId && (
+                  <TouchableOpacity
+                    style={[styles.messageButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <Ionicons name="chatbubble-outline" size={Spacing.iconMd} color={colors.textPrimary} />
+                  </TouchableOpacity>
+                )}
               </>
             )}
           </View>
@@ -484,10 +491,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     gap: 2,
-  },
-  fallbackHeader: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
   },
   fallbackContent: {
     flex: 1,

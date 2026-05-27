@@ -30,7 +30,10 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-video",
+      "expo-av",
+      "expo-document-picker"
     ],
     "extra": {
       "eas": {

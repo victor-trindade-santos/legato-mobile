@@ -10,20 +10,38 @@
  * (usado internamente pelo StompJS)
  */
 
+export type MediaType = 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+
 // Formato da mensagem recebida via WebSocket (STOMP)
 // Espelha o ChatMessageDTO do backend
 export interface IncomingWSMessage {
   id: number;
   chatId: number;
+  senderId: number;
   senderName: string;
   senderEmail: string;
   content: string;
   timestamp: string; // "DD/MM/YYYY HH:MM"
-  typeMedia?: 'NONE' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'FILE';
+  typeMedia?: MediaType;
   mediaUrl?: string;
+  mediaWidth?: number;
+  mediaHeight?: number;
+  thumbnailUrl?: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
   repliedMessage?: Pick<IncomingWSMessage, 'id' | 'content' | 'senderName'>;
+  audioType?: 'voice' | 'audio_file';
 }
+
+// Atualização de status recebida em /topic/users/{myUserId}/messages/status
+// messageId é null quando status = READ (significa "todas as msgs do chatId")
+export interface MessageStatusUpdateDTO {
+  chatId: number;
+  messageId: number | null;
+  status: 'DELIVERED' | 'READ';
+  timestamp: string;
+}
+
+export type StatusUpdateHandler = (dto: MessageStatusUpdateDTO) => void;
 
 // Callback chamado quando uma nova mensagem é recebida via WebSocket
 export type MessageHandler = (message: IncomingWSMessage) => void;
@@ -37,3 +55,13 @@ export interface TypingDTO {
 
 // Callback chamado quando um evento de typing chega via WebSocket
 export type TypingHandler = (dto: TypingDTO) => void;
+
+// Payload de presença recebido via WebSocket quando o outro usuário conecta/desconecta
+export interface UserPresenceDTO {
+  userId: number;
+  isOnline: boolean;
+  lastSeen: string | null; // "dd/MM/yyyy HH:mm" ou null (nunca conectou)
+}
+
+// Callback chamado quando um evento de presença chega via WebSocket
+export type PresenceHandler = (dto: UserPresenceDTO) => void;
