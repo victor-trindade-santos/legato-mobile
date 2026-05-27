@@ -20,6 +20,7 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,6 +55,7 @@ import { ChatStackParamList } from '@/navigation/types';
 type ChatScreenRouteParams = RouteProp<ChatStackParamList, 'Chat'>;
 
 export default function ChatScreen() {
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute<ChatScreenRouteParams>();
   const flatListRef = useRef<FlatList>(null);
@@ -255,14 +257,14 @@ export default function ChatScreen() {
 
   return (
     <AppTemplate noPadding>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* ── Header ──────────────────────────────────────── */}
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
             <Ionicons
               name="arrow-back"
               size={Spacing.iconXl}
-              color={Colors.white}
+              color={colors.textPrimary}
             />
           </TouchableOpacity>
           <ChatHeaderUserInfo
@@ -290,7 +292,7 @@ export default function ChatScreen() {
           scrollEventThrottle={16}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Sem mensagens ainda</Text>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sem mensagens ainda</Text>
             </View>
           }
           ListFooterComponent={
@@ -359,7 +361,6 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
   },
   header: {
     alignItems: 'center',
@@ -368,7 +369,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.screenPaddingH,
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -394,7 +394,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xl,
   },
   emptyText: {
-    color: Colors.textSecondaryDark,
     fontSize: FontSize.sm,
   },
   errorBanner: {

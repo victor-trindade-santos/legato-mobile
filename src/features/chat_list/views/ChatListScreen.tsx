@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useColors } from '@/hooks/useColors';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { ChatStackParamList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +23,7 @@ import { formatChatTimestamp } from '@/utils/formatters';
 type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
 export default function ChatListScreen() {
+    const colors = useColors();
     const navigation = useNavigation<ChatListNav>();
     const {
         chatItems,
@@ -46,9 +48,9 @@ export default function ChatListScreen() {
                             onChangeText={setSearchQuery}
                             onSearchPress={handleSearch}
                             inputThemeOverride={{
-                                background: styles.searchContainer.backgroundColor,
-                                text: styles.searchContainer.color,
-                                border: styles.searchContainer.borderColor,
+                                background: Colors.transparent,
+                                text: colors.textPrimary,
+                                border: Colors.transparent,
                             }}
                         />
                     </View>
@@ -92,9 +94,6 @@ const styles = StyleSheet.create({
     searchContainer: {
         marginTop: Spacing.sm,
         marginBottom: Spacing.md,
-        backgroundColor: Colors.transparent,
-        borderColor: Colors.transparent,
-        color: Colors.textPrimaryDark,  
     },
     chatListContainer: {
         flexDirection: 'column',
@@ -104,7 +103,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    noChatsText: {
-        color: Colors.textSecondaryDark,
-    }
+    noChatsText: {},
 });

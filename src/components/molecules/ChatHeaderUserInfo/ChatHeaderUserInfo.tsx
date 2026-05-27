@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Colors, Spacing } from '@/theme';
+import { Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { Avatar } from '@/components/atoms/Avatar/Avatar';
 import { LegatoText } from '@/components/atoms/Text/Text';
@@ -17,6 +18,7 @@ export function ChatHeaderUserInfo({
   onAvatarPress,
   onNamePress,
 }: ChatHeaderUserInfoProps) {
+  const colors = useColors();
   const InfoWrapper = onNamePress ? TouchableOpacity : View;
 
   return (
@@ -32,7 +34,7 @@ export function ChatHeaderUserInfo({
       <Spacer horizontal size={Spacing.sm} />
 
       <InfoWrapper style={styles.info} onPress={onNamePress} activeOpacity={0.7}>
-        <LegatoText variant="subtitle" color={Colors.textPrimaryDark}>
+        <LegatoText variant="subtitle" color={colors.textPrimary}>
           {name}
         </LegatoText>
 
@@ -42,7 +44,7 @@ export function ChatHeaderUserInfo({
             <View style={styles.statusRow}>
               <StatusDot variant={statusText === 'Online' ? 'online' : 'offline'} size={8} />
               <Spacer horizontal size={6} />
-              <LegatoText variant="caption" color={Colors.textMuted}>
+              <LegatoText variant="caption" color={colors.textMuted}>
                 {statusText}
               </LegatoText>
             </View>

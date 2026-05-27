@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Colors, Spacing } from '@/theme';
+import { useColors } from '@/hooks/useColors';
 
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { TimestampText } from '@/components/atoms/TimestampText/TimestampText';
@@ -71,6 +72,10 @@ export function MessageContent({
     if (inferredRatio) return inferredRatio;
     return 1;
   }, [mediaWidth, mediaHeight, inferredRatio]);
+
+  const colors = useColors();
+  const textColor = isMine ? Colors.white : colors.textPrimary;
+  const secondaryColor = isMine ? Colors.textSecondaryDark : colors.textSecondary;
 
   const clampedRatio = Math.min(MAX_RATIO, Math.max(MIN_RATIO, aspectRatio));
   const clampedVideoRatio = Math.min(MAX_RATIO, Math.max(MIN_RATIO,
@@ -149,10 +154,10 @@ export function MessageContent({
             family="Ionicons"
             name={audioType === 'audio_file' ? 'musical-note' : 'mic'}
             size={18}
-            color={Colors.textPrimaryDark}
+            color={textColor}
           />
           <Spacer horizontal size={Spacing.xs} />
-          <LegatoText variant="body" color={Colors.textPrimaryDark}>
+          <LegatoText variant="body" color={textColor}>
             {audioType === 'audio_file' ? (message ?? 'Enviando...') : 'Enviando...'}
           </LegatoText>
 
@@ -165,12 +170,12 @@ export function MessageContent({
             <Icon variant="vector" family="Ionicons" name="document-outline" size={20} color={Colors.white} />
           </View>
           <Spacer horizontal size={Spacing.sm} />
-          <LegatoText variant="body" color={Colors.textPrimaryDark} numberOfLines={1} ellipsizeMode="tail" style={{ flex: 1 }}>
+          <LegatoText variant="body" color={textColor} numberOfLines={1} ellipsizeMode="tail" style={{ flex: 1 }}>
             {message}
           </LegatoText>
           <TouchableOpacity
             onPress={() => onDownloadRequest?.()}
-            style={styles.downloadIndicator}
+            style={[styles.downloadIndicator, { borderColor: secondaryColor }]}
             activeOpacity={0.6}
           >
             <Icon
@@ -178,21 +183,21 @@ export function MessageContent({
               family="Ionicons"
               name="arrow-down-outline"
               size={Spacing.lg - 8}
-              color={Colors.textSecondaryDark}
+              color={secondaryColor}
             />
           </TouchableOpacity>
         </View>
       )}
       {isFile && !mediaUrl && (
         <View style={styles.audioRow}>
-          <Icon variant="vector" family="Ionicons" name="document-outline" size={18} color={Colors.textPrimaryDark} />
+          <Icon variant="vector" family="Ionicons" name="document-outline" size={18} color={textColor} />
           <Spacer horizontal size={Spacing.xs} />
-          <LegatoText variant="body" color={Colors.textPrimaryDark}>{message ?? 'Enviando...'}</LegatoText>
+          <LegatoText variant="body" color={textColor}>{message ?? 'Enviando...'}</LegatoText>
         </View>
       )}
 
       {!isMedia && (
-        <LegatoText variant="body" color={Colors.textPrimaryDark}>
+        <LegatoText variant="body" color={textColor}>
           {message}
         </LegatoText>
       )}
@@ -249,7 +254,6 @@ const styles = StyleSheet.create({
     width: Spacing.xl,
     height: Spacing.xl,
     borderRadius: Spacing.xl,
-    borderColor: Colors.textSecondaryDark,
     borderWidth: Spacing.xxs,
     justifyContent: 'center',
     alignItems: 'center',

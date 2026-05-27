@@ -8,6 +8,8 @@ import {
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '@/theme';
+import { useColors } from '@/hooks/useColors';
+import { useUIStore } from '@/store/uiStore';
 import { LegatoText } from '@/components/atoms/Text/Text';
 import { Icon } from '@/components/atoms/Icon/Icon';
 import type { AudioPlayerBarProps } from './AudioPlayerBar.types';
@@ -146,9 +148,17 @@ export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName,
     isScrubbingRef.current = false;
   }, []);
 
+  const colors = useColors();
+  const theme = useUIStore((s) => s.theme);
+  const textColor = isMine ? Colors.white : colors.textPrimary;
+  const grayBg = theme === 'dark' ? Colors.grayButton : Colors.grayButtonLight;
+
   const progress = totalMs > 0 ? Math.min(positionMs / totalMs, 1) : 0;
-  const accentBg = isMine ? Colors.primaryHover : Colors.grayButton;
-  const iconCircleBg = isMine ? Colors.primaryLight : Colors.grayButton;
+  const accentBg = isMine ? Colors.primaryHover : grayBg;
+  const iconCircleBg = isMine ? Colors.primaryLight : grayBg;
+  const lightPill = !isMine && theme === 'light';
+  const trackBg = lightPill ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)';
+  const fillThumbColor = lightPill ? Colors.primary : Colors.white;
 
   const progressTrack = (
     <View
@@ -162,9 +172,9 @@ export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName,
       onResponderRelease={handleProgressRelease}
       onResponderTerminate={handleProgressTerminate}
     >
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${progress * 100}%` }]} />
-        <View style={[styles.thumb, { left: `${progress * 100}%` }]} />
+      <View style={[styles.track, { backgroundColor: trackBg }]}>
+        <View style={[styles.fill, { width: `${progress * 100}%`, backgroundColor: fillThumbColor }]} />
+        <View style={[styles.thumb, { left: `${progress * 100}%`, backgroundColor: fillThumbColor }]} />
       </View>
     </View>
   );
@@ -186,7 +196,7 @@ export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName,
   );
 
   const timeText = (
-    <LegatoText variant="bodySmall" color={Colors.textSubtext}>
+    <LegatoText variant="bodySmall" color={textColor}>
       {formatSeconds(positionMs / 1000)}/{formatSeconds(totalMs / 1000)}
     </LegatoText>
   );
@@ -200,9 +210,9 @@ export function AudioPlayerBar({ uri, durationMs, audioType = 'voice', fileName,
       <View style={styles.fileContainer}>
         <View style={styles.fileTopRow}>
           <View style={[styles.musicIconCircle, { backgroundColor: iconCircleBg }]}>
-            <Icon variant="vector" family="Ionicons" name="musical-note" size={20} color={Colors.white} />
+            <Icon variant="vector" family="Ionicons" name="musical-note" size={20} color={textColor} />
           </View>
-          <LegatoText variant="bodySmall" color={Colors.textPrimaryDark} numberOfLines={1} style={styles.fileNameText}>
+          <LegatoText variant="bodySmall" color={textColor} numberOfLines={1} style={styles.fileNameText}>
             {displayName}
           </LegatoText>
         </View>
