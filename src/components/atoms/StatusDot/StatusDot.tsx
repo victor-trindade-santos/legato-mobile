@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { Colors } from '@/theme';
 import type { StatusDotProps, StatusDotVariant } from './StatusDot.types';
 
@@ -17,7 +17,6 @@ export function StatusDot({
   return (
     <View
       style={[
-        styles.dot,
         {
           width: size,
           height: size,
@@ -28,9 +27,3 @@ export function StatusDot({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  dot: {
-    alignSelf: 'flex-start',
-  },
-});

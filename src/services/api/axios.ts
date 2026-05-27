@@ -20,6 +20,12 @@ const PUBLIC_ROUTES = ['/auth/login', '/auth/register', '/auth/forgot-password']
 
 // Interceptor de Request — injeta token JWT
 api.interceptors.request.use(async (config) => {
+  // FormData precisa que o XHR nativo defina o Content-Type com boundary.
+  // O default 'application/json' da instância quebra isso, então removemos aqui.
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   const isPublic = PUBLIC_ROUTES.some(route => config.url?.includes(route));
   if (!isPublic) {
     const token = await storage.getItem(Config.TOKEN_KEY);

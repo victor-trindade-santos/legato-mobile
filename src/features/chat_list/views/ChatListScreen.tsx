@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useColors } from '@/hooks/useColors';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { ChatStackParamList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
@@ -17,10 +18,12 @@ import { ChatListItem } from '@/components/molecules/ChatListItem/ChatListItem';
 import { useChatListViewModel } from '../viewmodels/useChatListViewModel';
 import { FlatList } from 'react-native-gesture-handler';
 import { Spacing } from '@/theme';
+import { formatChatTimestamp } from '@/utils/formatters';
 
 type ChatListNav = StackNavigationProp<ChatStackParamList>;
 
 export default function ChatListScreen() {
+    const colors = useColors();
     const navigation = useNavigation<ChatListNav>();
     const {
         chatItems,
@@ -45,9 +48,9 @@ export default function ChatListScreen() {
                             onChangeText={setSearchQuery}
                             onSearchPress={handleSearch}
                             inputThemeOverride={{
-                                background: styles.searchContainer.backgroundColor,
-                                text: styles.searchContainer.color,
-                                border: styles.searchContainer.borderColor,
+                                background: Colors.transparent,
+                                text: colors.textPrimary,
+                                border: Colors.transparent,
                             }}
                         />
                     </View>
@@ -61,13 +64,20 @@ export default function ChatListScreen() {
                                     userAvatar={item.otherUserProfilePictureUrl || ''}
                                     userName={item.otherUserName}
                                     lastMessage={item.lastMessageContent || 'Sem mensagens'}
-                                    timeStamp={item.lastMessageTimestamp || new Date().toISOString()}
+                                    lastMessageType={item.lastMessageTypeMedia}
+                                    timeStamp={formatChatTimestamp(item.lastMessageTimestamp)}
+                                    isOnline={item.isOnline}
+                                    isTyping={item.isTyping}
                                     onPress={() => {
+                                        console.log('[ChatList] → navegando para chat | user=', item.otherUserName, '| isOnline=', item.isOnline, '| lastSeen=', item.lastSeen);
                                         navigation.navigate('Chat', {
                                             conversationId: item.chatId,
                                             userName: item.otherUserName,
                                             avatarUri: item.otherUserProfilePictureUrl,
                                             receiverId: item.otherUserId,
+                                            receiverUsername: item.otherUserUsername,
+                                            isOnline: item.isOnline,
+                                            lastSeen: item.lastSeen,
                                         });
                                     }}
                                 />
@@ -84,9 +94,6 @@ const styles = StyleSheet.create({
     searchContainer: {
         marginTop: Spacing.sm,
         marginBottom: Spacing.md,
-        backgroundColor: Colors.transparent,
-        borderColor: Colors.transparent,
-        color: Colors.textPrimaryDark,  
     },
     chatListContainer: {
         flexDirection: 'column',
@@ -96,7 +103,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    noChatsText: {
-        color: Colors.textSecondaryDark,
-    }
+    noChatsText: {},
 });

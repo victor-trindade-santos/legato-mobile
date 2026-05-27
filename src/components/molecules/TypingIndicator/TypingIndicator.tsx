@@ -26,8 +26,10 @@ import { Spacer } from '@/components/atoms/Spacer/Spacer';
 
 import type { TypingIndicatorProps } from './TypingIndicator.types';
 import { MessageBubbleContainer } from '@/components/atoms/MessageBubbleContainer/MessageBubbleContainer';
+import { useColors } from '@/hooks/useColors';
 
 export function TypingIndicator({ userName, showUserName = true }: TypingIndicatorProps) {
+    const colors = useColors();
   const opacity1 = useRef(new Animated.Value(0.3)).current;
   const opacity2 = useRef(new Animated.Value(0.3)).current;
   const opacity3 = useRef(new Animated.Value(0.3)).current;
@@ -57,7 +59,7 @@ export function TypingIndicator({ userName, showUserName = true }: TypingIndicat
 
   return (
     <View style={styles.wrapper}>
-      <MessageBubbleContainer backgroundColor={Colors.textSecondaryLight}>
+      <MessageBubbleContainer backgroundColor={colors.surfaceAlt}>
         <View style={styles.container}>
           {showUserName && (
             <>

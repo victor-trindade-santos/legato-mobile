@@ -101,6 +101,36 @@ export async function getMyProfile(): Promise<MusicianProfileDTO | null> {
   }
 }
 
+/** Busca o perfil público de outro usuário via GET /musicians/{id} */
+export async function getMusicianById(id: number): Promise<MusicianProfileDTO | null> {
+  if (Config.DEV_USE_MOCK) {
+    const mock = MOCK_MUSICIANS.find((m) => m.id === id) ?? null;
+    if (!mock) return null;
+    return {
+      id: mock.id,
+      username: mock.username,
+      displayName: mock.displayName,
+      avatarUrl: mock.avatarUrl,
+      bio: mock.bio,
+      location: mock.location,
+      skills: mock.skills,
+      musicGenres: normalizeMusicGenres(mock.musicGenres),
+      photos: mock.photos,
+      connectionsCount: 0,
+      followersCount: 0,
+      postsCount: 0,
+    };
+  }
+
+  try {
+    const res = await api.get<BackendEnvelope<BackendUserDTO>>(Endpoints.musicians.getById(id));
+    if (!res.data.data) return null;
+    return mapBackendUser(res.data.data);
+  } catch {
+    return null;
+  }
+}
+
 /** Busca o perfil público de outro usuário via GET /users/{username} */
 export async function getMusicianByUsername(username: string): Promise<MusicianProfileDTO | null> {
   if (Config.DEV_USE_MOCK) {

@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Spacing } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 import { normalizeMusicGenres } from '@/constants/genres';
-import { getMyProfile, getMusicianByUsername, getFavoriteArtists } from '../services/musicianProfileService';
+import { getMyProfile, getMusicianByUsername, getMusicianById, getFavoriteArtists } from '../services/musicianProfileService';
 import type { PublicMusicianProfile, ProfileTab } from '../models/MusicianProfile';
 
 export type { ProfileTab } from '../models/MusicianProfile';
@@ -28,11 +28,11 @@ const PROFILE_TABS: Array<{ key: ProfileTab; label: string }> = [
   // { key: 'collaborations', label: 'Colaborações' },
 ];
 
-export function useMusicianProfileViewModel(musicianId: number, username?: string) {
+export function useMusicianProfileViewModel(musicianId: number, username?: string, initialConnected?: boolean) {
   const { width: screenWidth } = useWindowDimensions();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<ProfileTab>('overview');
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(initialConnected ?? false);
   const [isFavoritesPanelOpen, setIsFavoritesPanelOpen] = useState(false);
 
   const isOwnProfile = musicianId === user?.id;
@@ -47,7 +47,7 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
   });
 
   // Perfil de outro usuário → GET /users/{username}
-  const targetUsername = username ?? user?.username ?? '';
+  const targetUsername = username ?? '';
   const { data: otherProfile, isLoading: isLoadingOther } = useQuery({
     queryKey: ['musician-profile', targetUsername],
     queryFn: () => getMusicianByUsername(targetUsername),
@@ -56,13 +56,22 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
     staleTime: 60 * 1000,
   });
 
-  const musician = isOwnProfile ? ownProfile : otherProfile;
-  const isLoading = isOwnProfile ? isLoadingOwn : isLoadingOther;
+  // Perfil de outro usuário por ID quando username não está disponível → GET /musicians/{id}
+  const { data: otherProfileById, isLoading: isLoadingOtherById } = useQuery({
+    queryKey: ['musician-profile-id', musicianId],
+    queryFn: () => getMusicianById(musicianId),
+    enabled: !isOwnProfile && !targetUsername && musicianId > 0,
+    retry: false,
+    staleTime: 60 * 1000,
+  });
+
+  const musician = isOwnProfile ? ownProfile : (otherProfile ?? otherProfileById);
+  const isLoading = isOwnProfile ? isLoadingOwn : (isLoadingOther || isLoadingOtherById);
 
   const { data: favoriteArtistsData = [] } = useQuery({
     queryKey: ['musician-profile', musicianId, 'favorite-artists'],
     queryFn: () => getFavoriteArtists(musicianId),
-    enabled: !!musician,
+    enabled: !!musician && isOwnProfile,
     retry: false,
   });
 

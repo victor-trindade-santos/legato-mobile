@@ -13,9 +13,13 @@ function mapBackendResponse(item: any): ChatItemDTO {
     chatId: item.chatId,
     otherUserId: item.otherUserId,
     otherUserName: item.otherUserName,
+    otherUserUsername: item.otherUserUsername ?? item.otherUsername,
     otherUserProfilePictureUrl: item.otherUserProfilePictureUrl || item.otherUserProfilePicture,
     lastMessageContent: item.lastMessageContent,
-    lastMessageTimestamp: item.lastMessageTimestamp
+    lastMessageTimestamp: item.lastMessageTimestamp,
+    lastMessageTypeMedia: item.lastMessageTypeMedia,
+    isOnline: item.isOnline ?? false,
+    lastSeen: item.lastSeen ?? null,
   };
 }
 
