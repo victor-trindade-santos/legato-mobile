@@ -346,7 +346,7 @@ export default function ChatScreen() {
         onClose={() => setAttachmentSheetVisible(false)}
         onPickMedia={handlePickMedia}
         onPickAudio={handlePickAudio}
-        onPickDocument={handlePickDocument}
+        // onPickDocument={handlePickDocument}
       />
     </AppTemplate>
   );
