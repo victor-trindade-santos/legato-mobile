@@ -10,6 +10,7 @@ import type { ChatStackParamList } from './types';
 import ChatListScreen from '@/features/chat_list/views/ChatListScreen';
 import ChatScreen from '@/features/chat/views/ChatScreen';
 
+
 const Stack = createStackNavigator<ChatStackParamList>();
 
 export default function ChatNavigator() {
@@ -19,14 +20,14 @@ export default function ChatNavigator() {
         headerShown: false,
       }}
     >
-      <Stack.Screen
-        name="ChatList"
-        component={ChatListScreen}
-      />
-      <Stack.Screen
-        name="Chat"
-        component={ChatScreen}
-      />
+        <Stack.Screen
+          name="ChatList"
+          component={ChatListScreen}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={ChatScreen}
+        />
     </Stack.Navigator>
   );
 }

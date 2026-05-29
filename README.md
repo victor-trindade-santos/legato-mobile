@@ -80,7 +80,7 @@ npm install -g eas-cli
 eas login
 ```
 
-### Gerar APK para testes
+### EM SEGUIDA EXECUTE ISSO -> Gerar APK para testes
 
 ```bash
 npm run build:preview
