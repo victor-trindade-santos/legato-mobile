@@ -280,7 +280,10 @@ export default function ChatScreen() {
           />
         </View>
         {/* ── Lista de Mensagens ─────────────────────────── */}
-        <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.fill}
+        >
           <FlatList
             ref={flatListRef}
             data={chatItems}

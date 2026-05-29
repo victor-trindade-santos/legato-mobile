@@ -3,7 +3,7 @@
     "name": "legato-mobile",
     "slug": "legato-mobile",
     "scheme": "legato-mobile",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -23,8 +23,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.victor20021110.legatomobile",
-       "softwareKeyboardLayoutMode": "resize"
+      "package": "com.victor20021110.legatomobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
