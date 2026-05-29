@@ -17,7 +17,7 @@
  */
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent, KeyboardAvoidingView, Platform, } from 'react-native';
 import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
@@ -196,7 +196,7 @@ export default function ChatScreen() {
       return <DaySeparator label={item.label} />;
     }
 
-    const {data} = item;
+    const { data } = item;
 
     const messageContent = (
       <MessageContent
@@ -280,43 +280,44 @@ export default function ChatScreen() {
           />
         </View>
         {/* ── Lista de Mensagens ─────────────────────────── */}
-        <FlatList
-          ref={flatListRef}
-          data={chatItems}
-          keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
-          renderItem={renderMessage}
-          contentContainerStyle={styles.listContent}
-          onContentSizeChange={scrollToBottomIfNear}
-          onScroll={handleScroll}
-          onMomentumScrollEnd={handleMomentumScrollEnd}
-          scrollEventThrottle={16}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sem mensagens ainda</Text>
+        <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+          <FlatList
+            ref={flatListRef}
+            data={chatItems}
+            keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.listContent}
+            onContentSizeChange={scrollToBottomIfNear}
+            onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+            scrollEventThrottle={16}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Sem mensagens ainda</Text>
+              </View>
+            }
+            ListFooterComponent={
+              isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
+            }
+          />
+          {/* ── Errors ────────────────────────────────────– */}
+          {error && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{error}</Text>
             </View>
-          }
-          ListFooterComponent={
-            isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
-          }
-        />
-        
-        {/* ── Errors ────────────────────────────────────– */}
-        {error && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-        <ChatInputBar
-          value={inputText}
-          onChangeText={setInputText}
-          onSend={handleSend}
-          onAttach={() => setAttachmentSheetVisible(true)}
-          onMic={handleMicPress}
-          onCancelRecording={cancelRecording}
-          isRecording={isRecording}
-          recordingDurationMs={recordingDurationMs}
-          placeholder="Digite uma mensagem..."
-        />
+          )}
+          <ChatInputBar
+            value={inputText}
+            onChangeText={setInputText}
+            onSend={handleSend}
+            onAttach={() => setAttachmentSheetVisible(true)}
+            onMic={handleMicPress}
+            onCancelRecording={cancelRecording}
+            isRecording={isRecording}
+            recordingDurationMs={recordingDurationMs}
+            placeholder="Digite uma mensagem..."
+          />
+        </KeyboardAvoidingView>
       </View>
 
       <ImageViewerModal
@@ -348,7 +349,7 @@ export default function ChatScreen() {
         onClose={() => setAttachmentSheetVisible(false)}
         onPickMedia={handlePickMedia}
         onPickAudio={handlePickAudio}
-        // onPickDocument={handlePickDocument}
+      // onPickDocument={handlePickDocument}
       />
     </AppTemplate>
   );
@@ -359,6 +360,9 @@ export default function ChatScreen() {
 // ════════════════════════════════════════════════════════════════════
 
 const styles = StyleSheet.create({
+  fill: {
+    flex: 1
+  },
   container: {
     flex: 1,
   },
