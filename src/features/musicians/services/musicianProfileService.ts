@@ -46,6 +46,40 @@ interface BackendUserDTO {
   postsIds?: unknown[];
 }
 
+interface SpotifyArtistImageDTO {
+  url?: string;
+}
+
+interface SpotifyTopArtistDTO {
+  name?: string;
+  genres?: string[];
+  images?: SpotifyArtistImageDTO[];
+}
+
+interface SpotifyTopArtistsResponseDTO {
+  items?: SpotifyTopArtistDTO[];
+}
+
+function slugifyArtistName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function mapSpotifyTopArtists(raw: SpotifyTopArtistDTO[]): FavoriteArtist[] {
+  return raw
+    .filter((artist) => !!artist?.name)
+    .map((artist, index) => ({
+      id: index + 1,
+      displayName: artist.name as string,
+      username: slugifyArtistName(artist.name as string),
+      avatarUrl: artist.images?.[0]?.url,
+    }));
+}
+
 /** Converte o DTO bruto do backend para o modelo interno */
 function mapBackendUser(raw: BackendUserDTO): MusicianProfileDTO {
   const { city, state } = raw.location ?? {};
@@ -159,6 +193,28 @@ export async function getFavoriteArtists(musicianId: number): Promise<FavoriteAr
       }));
     }
     return raw as FavoriteArtist[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getSpotifyTopArtists(): Promise<FavoriteArtist[]> {
+  if (Config.DEV_USE_MOCK) {
+    return [
+      { id: 1, displayName: 'Tame Impala', username: 'tame_impala', avatarUrl: undefined },
+      { id: 2, displayName: 'Vulfpeck', username: 'vulfpeck', avatarUrl: undefined },
+      { id: 3, displayName: 'Khruangbin', username: 'khruangbin', avatarUrl: undefined },
+      { id: 4, displayName: 'BADBADNOTGOOD', username: 'badbadnotgood', avatarUrl: undefined },
+    ];
+  }
+
+  try {
+    const res = await api.get<{ success: boolean; data: SpotifyTopArtistsResponseDTO }>(
+      Endpoints.spotify.topArtists,
+    );
+    const rawArtists = res.data.data?.items ?? [];
+    if (!Array.isArray(rawArtists) || rawArtists.length === 0) return [];
+    return mapSpotifyTopArtists(rawArtists);
   } catch {
     return [];
   }

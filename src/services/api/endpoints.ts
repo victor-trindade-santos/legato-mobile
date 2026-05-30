@@ -73,6 +73,11 @@ export const Endpoints = {
     updateProfile: '/musicians/me',
   },
 
+  // Spotify
+  spotify: {
+    topArtists: '/spotify/top-artists',
+  },
+
   // Busca
   search: {
     query: '/search',

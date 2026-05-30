@@ -16,7 +16,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Spacing } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 import { normalizeMusicGenres } from '@/constants/genres';
-import { getMyProfile, getMusicianByUsername, getFavoriteArtists } from '../services/musicianProfileService';
+import {
+  getMyProfile,
+  getMusicianByUsername,
+  getFavoriteArtists,
+  getSpotifyTopArtists,
+} from '../services/musicianProfileService';
 import type { PublicMusicianProfile, ProfileTab } from '../models/MusicianProfile';
 
 export type { ProfileTab } from '../models/MusicianProfile';
@@ -60,8 +65,8 @@ export function useMusicianProfileViewModel(musicianId: number, username?: strin
   const isLoading = isOwnProfile ? isLoadingOwn : isLoadingOther;
 
   const { data: favoriteArtistsData = [] } = useQuery({
-    queryKey: ['musician-profile', musicianId, 'favorite-artists'],
-    queryFn: () => getFavoriteArtists(musicianId),
+    queryKey: ['musician-profile', musicianId, isOwnProfile ? 'spotify-top-artists' : 'favorite-artists'],
+    queryFn: isOwnProfile ? getSpotifyTopArtists : () => getFavoriteArtists(musicianId),
     enabled: !!musician,
     retry: false,
   });

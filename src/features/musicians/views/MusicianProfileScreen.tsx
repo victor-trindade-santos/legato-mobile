@@ -52,6 +52,7 @@ export default function MusicianProfileScreen() {
   const username = route.params?.username ?? user?.username;
   const displayName = route.params?.displayName ?? user?.displayName ?? '';
   const isOwnProfile = !route.params?.musicianId || musicianId === user?.id;
+  const artistsSectionTitle = isOwnProfile ? 'Top artistas do Spotify' : 'Artistas Favoritos';
 
   const {
     profile,
@@ -243,7 +244,7 @@ export default function MusicianProfileScreen() {
               {/* Artistas favoritos */}
               <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.sectionHeaderRow}>
-                  <LegatoText variant="sectionTitle" color={colors.textPrimary}>Artistas Favoritos</LegatoText>
+                  <LegatoText variant="sectionTitle" color={colors.textPrimary}>{artistsSectionTitle}</LegatoText>
                   <TouchableOpacity onPress={openFavoritesPanel}>
                     <LegatoText variant="caption" color={Colors.primary}>Ver tudo</LegatoText>
                   </TouchableOpacity>
@@ -283,7 +284,7 @@ export default function MusicianProfileScreen() {
         <Pressable style={styles.panelBackdrop} onPress={closeFavoritesPanel}>
           <Pressable style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => {}}>
             <View style={styles.panelHeader}>
-              <LegatoText variant="sectionTitle" color={colors.textPrimary}>Artistas Favoritos</LegatoText>
+              <LegatoText variant="sectionTitle" color={colors.textPrimary}>{artistsSectionTitle}</LegatoText>
               <TouchableOpacity style={[styles.panelCloseBtn, { backgroundColor: colors.background }]} onPress={closeFavoritesPanel}>
                 <Ionicons name="close" size={Spacing.iconMd} color={colors.textPrimary} />
               </TouchableOpacity>
