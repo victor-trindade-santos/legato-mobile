@@ -113,13 +113,7 @@ export function useDiscoveryViewModel() {
     }
   }, [filters]);
 
-  // Dispara fetchMore quando a fila zera e ainda há cards no servidor
-  useEffect(() => {
-    if (!hasLoadedOnceRef.current || isLoading || !hasMore || isFetchingMoreRef.current || isResettingRef.current) return;
-    if (cards.length === 0) {
-      fetchMore();
-    }
-  }, [cards.length, isLoading, hasMore, fetchMore]);
+
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
 
