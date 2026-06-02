@@ -17,8 +17,8 @@
  */
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, Text, NativeSyntheticEvent, NativeScrollEvent, KeyboardAvoidingView, Platform, } from 'react-native';
-import { AppTemplate } from '@/components/templates/AppTemplate/AppTemplate';
+import { View, StyleSheet, FlatList, Text, NativeSyntheticEvent, NativeScrollEvent, KeyboardAvoidingView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BorderRadius, Colors, FontSize, FontWeight, Spacing } from '@/theme';
 import { useColors } from '@/hooks/useColors';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -256,32 +256,36 @@ export default function ChatScreen() {
       : undefined;
 
   return (
-    <AppTemplate noPadding>
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* ── Header ──────────────────────────────────────── */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
-            <Ionicons
-              name="arrow-back"
-              size={Spacing.iconXl}
-              color={colors.textPrimary}
+    <>
+      <KeyboardAvoidingView
+        style={[styles.fill, { backgroundColor: colors.background }]}
+        behavior="padding"
+      >
+        <SafeAreaView style={styles.fill} edges={['top']}>
+          {/* ── Header ──────────────────────────────────────── */}
+          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={8}>
+              <Ionicons
+                name="arrow-back"
+                size={Spacing.iconXl}
+                color={colors.textPrimary}
+              />
+            </TouchableOpacity>
+            <ChatHeaderUserInfo
+              name={userName}
+              fallbackInitials={userName
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')}
+              avatarUri={avatarUri}
+              statusText={chatStatusText}
+              onAvatarPress={avatarUri ? () => setProfileImageVisible(true) : undefined}
+              onNamePress={receiverId ? () => (navigation as any).navigate('MusicianProfile', { musicianId: receiverId, username: receiverUsername, displayName: userName, connected: true, conversationId }) : undefined}
             />
-          </TouchableOpacity>
-          <ChatHeaderUserInfo
-            name={userName}
-            fallbackInitials={userName
-              ?.split(' ')
-              .map((n) => n[0])
-              .join('')}
-            avatarUri={avatarUri}
-            statusText={chatStatusText}
-            onAvatarPress={avatarUri ? () => setProfileImageVisible(true) : undefined}
-            onNamePress={receiverId ? () => (navigation as any).navigate('MusicianProfile', { musicianId: receiverId, username: receiverUsername, displayName: userName, connected: true, conversationId }) : undefined}
-          />
-        </View>
-        {/* ── Lista de Mensagens ─────────────────────────── */}
-        <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+          </View>
+          {/* ── Lista de Mensagens ─────────────────────────── */}
           <FlatList
+            style={styles.fill}
             ref={flatListRef}
             data={chatItems}
             keyExtractor={(item) => item.type === 'separator' ? item.key : item.data.id}
@@ -300,12 +304,13 @@ export default function ChatScreen() {
               isOtherUserTyping ? <TypingIndicator userName={userName} showUserName={false} /> : null
             }
           />
-          {/* ── Errors ────────────────────────────────────– */}
+          {/* ── Errors ────────────────────────────────────── */}
           {error && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
+          {/* ── Input ───────────────────────────────────────── */}
           <ChatInputBar
             value={inputText}
             onChangeText={setInputText}
@@ -317,8 +322,8 @@ export default function ChatScreen() {
             recordingDurationMs={recordingDurationMs}
             placeholder="Digite uma mensagem..."
           />
-        </KeyboardAvoidingView>
-      </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
 
       <ImageViewerModal
         visible={selectedImage !== null}
@@ -351,7 +356,7 @@ export default function ChatScreen() {
         onPickAudio={handlePickAudio}
       // onPickDocument={handlePickDocument}
       />
-    </AppTemplate>
+    </>
   );
 }
 

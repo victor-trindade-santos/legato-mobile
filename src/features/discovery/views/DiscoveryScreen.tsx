@@ -50,6 +50,7 @@ export default function DiscoveryScreen() {
   if (isLoading) return <Spinner fullScreen />;
 
   const renderCardArea = () => {
+    
     if (cards.length === 0 && hasMore) {
       return <Spinner fullScreen />;
     }

@@ -86,7 +86,10 @@ export function AuthTemplate({ children, variant = 'form', header, scrollOverHea
            * ficaria em conflito (double-handle). No iOS o KAV calcula o overlap correto
            * em coordenadas de tela quando está dentro do SafeAreaView.
            */}
-          <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.fill}
+          >
             <View style={styles.fill}>
               {header && <View style={styles.headerCenteredArea}>{header}</View>}
               {children}
@@ -110,7 +113,10 @@ export function AuthTemplate({ children, variant = 'form', header, scrollOverHea
               {header}
             </View>
           )}
-          <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.fill}
+          >
             <ScrollView
               contentContainerStyle={[styles.scrollContent, { paddingTop: headerH }]}
               keyboardShouldPersistTaps="handled"
@@ -136,7 +142,10 @@ export function AuthTemplate({ children, variant = 'form', header, scrollOverHea
             {header}
           </View>
         )}
-        <KeyboardAvoidingView behavior="padding" style={styles.fill} enabled={Platform.OS === 'ios'}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.fill}
+        >
           <ScrollView
             style={styles.fill}
             contentContainerStyle={styles.scrollContentBottom}
