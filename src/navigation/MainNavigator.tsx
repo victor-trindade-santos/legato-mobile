@@ -43,9 +43,9 @@ export default function MainNavigator() {
 
     return (
       <Tab.Navigator
-        sceneContainerStyle={{ backgroundColor: bgColor }}
         screenOptions={({ route }) => ({
           headerShown: false,
+          sceneStyle: { backgroundColor: bgColor },
           tabBarStyle: {
             backgroundColor: bgColor,
             borderTopWidth: 0,
